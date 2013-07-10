@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "SkewEvaluator.h"
 
@@ -27,8 +28,14 @@ int main( int argc, char **argv )
 	}
 
 	cv::Mat sourceImage = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+	cv::Mat transformed;
+
+	cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
+
+	cv::warpAffine(sourceImage, transformed, affineTransform, cv::Size(sourceImage.cols, sourceImage.rows));
 
 	imshow("Test", sourceImage);
+	imshow("TestTransformed", transformed);
 	cv::waitKey(0);
 
 
