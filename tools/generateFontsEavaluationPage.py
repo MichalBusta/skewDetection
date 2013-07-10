@@ -10,6 +10,8 @@ class FontTestWriter:
     fonts = []
     capitals = []
     
+    
+ 
     def __init__(self):
         
         self.getFonts('/usr/share/fonts/truetype')
