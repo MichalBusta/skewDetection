@@ -31,7 +31,7 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
  *
  * @param sourceImage
  */
-void SkewEvaluator::evaluateMat(cv::Mat sourceImage)
+void SkewEvaluator::evaluateMat(cv::Mat& sourceImage)
 {
 
 }

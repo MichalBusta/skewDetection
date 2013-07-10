@@ -1,4 +1,5 @@
 /*
+
  * SkewEvaluator.h
  *
  *  Created on: Jul 10, 2013
@@ -7,6 +8,8 @@
 
 #ifndef SKEWEVALUATOR_H_
 #define SKEWEVALUATOR_H_
+
+#include <opencv2/core/core.hpp>
 
 #include <string>
 
@@ -29,7 +32,7 @@ public:
 
 	void evaluate( const std::string& evalDir );
 
-	void evaluateMat( cv::Mat sourceImage );
+	void evaluateMat( cv::Mat& sourceImage );
 
 private:
 

@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include <opencv2/highgui/highgui.hpp>
+
 #include "SkewEvaluator.h"
 
 using namespace cmp;
@@ -23,8 +25,18 @@ int main( int argc, char **argv )
 		help();
 		return -1;
 	}
+
+	cv::Mat sourceImage = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+
+	imshow("Test", sourceImage);
+	cv::waitKey(0);
+
+
+	//TODO implement!!!
+	/*
 	SkewEvaluator evaluator;
 	evaluator.evaluate( argv[1] );
+	*/
 
 	return 0;
 }
