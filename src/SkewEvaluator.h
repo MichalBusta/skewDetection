@@ -16,6 +16,16 @@
 namespace cmp
 {
 
+struct SkewDef
+{
+	/** the ground-truth skew angle */
+	double skewAngle;
+	/** the skewed image */
+	cv::Mat image;
+
+	SkewDef(double skewAngle, const cv::Mat& image) : skewAngle(skewAngle), image(image) { }
+};
+
 /**
  * @class cmp::SkewEvaluator
  * 
@@ -35,6 +45,8 @@ public:
 	void evaluateMat( cv::Mat& sourceImage );
 
 private:
+
+	void generateDistortions( cv::Mat& source,  std::vector<SkewDef>& distortions );
 
 };
 
