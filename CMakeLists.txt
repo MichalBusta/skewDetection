@@ -9,16 +9,24 @@ find_package( OpenCV REQUIRED )
 
 file(GLOB lib_srcs "src/*.cpp")
 LIST(REMOVE_ITEM lib_srcs "src/run_evaluation.cpp")
+LIST(REMOVE_ITEM lib_srcs "src/detect_skew.cpp")
 
 add_library(skewDetection
     ${lib_srcs}
 )
 
-#----------------Main program -------------------------------------------------
+#----------------Main programs -------------------------------------------------
 
 add_executable(run_evaluation "src/run_evaluation.cpp")
 
 target_link_libraries (run_evaluation     
+    skewDetection
+    ${OpenCV_LIBS}
+)
+
+add_executable(detect_skew "src/detect_skew.cpp")
+
+target_link_libraries (detect_skew     
     skewDetection
     ${OpenCV_LIBS}
 )

@@ -5,6 +5,9 @@
 
 #pragma once
 
+#ifdef _WIN32
+#	include "windows.h"
+#endif
 // OpenCV
 #include <opencv2/opencv.hpp>
 //for android on windows with trunk opencv
