@@ -37,14 +37,14 @@ SkewEvaluator::~SkewEvaluator()
 void SkewEvaluator::evaluate( const std::string& evalDir )
 {
 
-	std::vector<std::string> facesDir = IOUtils::GetDirectoriesInDirectory(evalDir, "*", true);
+	std::vector<std::string> alphabetDir = IOUtils::GetDirectoriesInDirectory(evalDir, "*", true);
 	//for all alphabets
-	for( size_t i = 0; i < facesDir.size(); i++ )
+	for( size_t i = 0; i < alphabetDir.size(); i++ )
 	{
 		//process all defined letter
-		std::string alphabet = IOUtils::Basename( facesDir[i] );
+		std::string alphabet = IOUtils::Basename( alphabetDir[i] );
 
-		std::vector<std::string> letterDirs = IOUtils::GetDirectoriesInDirectory(facesDir[i], "*", true);
+		std::vector<std::string> letterDirs = IOUtils::GetDirectoriesInDirectory(alphabetDir[i], "*", true);
 		for(size_t j = 0; j < letterDirs.size(); j++)
 		{
 			const std::string& letterFile = letterDirs[j];
