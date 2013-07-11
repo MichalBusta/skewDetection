@@ -26,6 +26,7 @@ public:
 	SkewDetector();
 	virtual ~SkewDetector();
 
+
 	virtual double detectSkew( cv::Mat mask, double lineK ) = 0;
 
 };
