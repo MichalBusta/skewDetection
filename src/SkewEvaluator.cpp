@@ -4,6 +4,8 @@
  *  Created on: Jul 10, 2013
  *      Author: Michal Busta
  */
+#include <opencv2/highgui/highgui.hpp>
+
 
 #include "SkewEvaluator.h"
 #include "IOUtils.h"

@@ -25,6 +25,7 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 		cv::Mat* debugImage)
 {
 	//TODO implement
+	return 0;
 }
 
 } /* namespace cmp */

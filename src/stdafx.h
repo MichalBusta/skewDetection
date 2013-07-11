@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "windows.h"
 // OpenCV
 #include <opencv2/opencv.hpp>
 //for android on windows with trunk opencv

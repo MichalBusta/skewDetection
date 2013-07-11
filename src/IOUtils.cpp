@@ -207,35 +207,6 @@ namespace cmp
 
 	}
 
-
-	/**
-	 * Creates new directory
-	 *
-	 * No sanity checks!
-	 * @param dirName
-	 */
-	void IOUtils::CreateDirectory(const string& dirName)
-	{
-#if defined(ANDROID)
-		cvError(CV_StsError, "Utils::CreateDirectory", "Not implemented!", __FILE__, __LINE__);
-#else
-		//TODO check results
-		mkdir(dirName.c_str(), ALLPERMS);
-#endif
-	}
-
-	string IOUtils::GetCurrentDirectory()
-	{
-		char cCurrentPath[FILENAME_MAX];
-		if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath) / sizeof(char)))
-		{
-			cvError(CV_StsError, "Utils::GetCurrentDirectory", "Unknown error!", __FILE__, __LINE__);
-		}
-
-		string ret = cCurrentPath;
-		return ret;
-	}
-
 	bool IOUtils::IsDirectory(const string& path)
 	{
 		bool test = false;
