@@ -1,4 +1,4 @@
-import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 import os
 from xml.dom.minidom import Document
 
@@ -14,14 +14,15 @@ class FontTestWriter:
  
     def __init__(self):
         
-        self.getFonts('/usr/share/fonts/truetype')
-        self.getFonts('/home/busta/data/cvut/textspotter/fonts')
+        #self.getFonts('/usr/share/fonts/truetype')
+        #self.getFonts('/home/busta/data/cvut/textspotter/fonts')
+        self.getFonts('C:/SkewDetection/fonts')
         
     
     def getFonts(self, startDir):
         for dirname, dirnames, filenames in os.walk(startDir):
             for filename in filenames:
-                print os.path.join(dirname, filename)
+                print (os.path.join(dirname, filename))
         
                 bad = False
                 for  f in self.forbidden:
@@ -48,7 +49,7 @@ class FontTestWriter:
                 self.capitals.append(capitals)
                 
 
-    def writeSentence(self, text, outputDir, font, outDoc, tagset, capital):
+    def writeSentence(self, text, outputDir, chrName, font, capital):
     
         im = Image.new("RGB", (20, 20))
         draw = ImageDraw.Draw(im)
@@ -59,8 +60,15 @@ class FontTestWriter:
         draw.text((20, 20), text, font=font, fill="#000000")
   
         imageDir = outputDir
+        
+        if 'italic' in font.getname()[1].lower():
+        	imageDir = imageDir + '/_italic/' + chrName
+        else:
+        	imageDir = imageDir + '/' + chrName
+        
         if not os.path.exists(imageDir):
-            os.mkdir( imageDir, 0777 )
+            os.mkdir( imageDir )
+        
         imageName = font.getname()[0] + "-" + font.getname()[1] + ".png"
         
         imageName = imageName.replace("&", "")
@@ -71,9 +79,48 @@ class FontTestWriter:
             return 
         if im.size[1] < 2:
             return 
+            
+        im2 = Image.new("RGB", (w+30, h+40),  (0,)*3)
+        draw2 = ImageDraw.Draw(im2)
+        draw2.fontmode = "1"
+        draw2.text((0, 0), text, font=font, fill="#FFFFFF")
+        bbox2 = im2.getbbox()
+        if bbox2 == None:
+            return
+        else: 
+        	if text != 0 or text != 'o' or text != 'O':
+        		left, upper, right, lower = bbox2
+        		#left = left + 1
+        		#upper = upper + 1
+        		right = right - 1
+        		lower = lower - 1
+        		pix = im2.load()
+        		frame = True
+        		for x in range(left, right): 
+        			if pix[x, upper] != (255,)*3:
+        				frame = False
+        		for x in range(left, right): 
+        			if pix[x, lower] != (255,)*3:
+        				frame = False
+        		for y in range(upper, lower): 
+        			if pix[left, y] != (255,)*3:
+        				frame = False
+        		for y in range(upper, lower): 
+        			if pix[right, y] != (255,)*3:
+        				frame = False
+        		
+				hide = True
+						
+        		for count, color in im2.getcolors():
+        			if color == (255,)*3 and count >= ((right-left)*(lower-upper)):
+        				hide = False
+        				
+        		if frame and hide:
+        			return
+        		
         im.save(imageFile)
         
-        imageTag = outDoc.createElement("image")
+        '''imageTag = outDoc.createElement("image") SFAtarianSystem-Regular
         tagset.appendChild(imageTag)
         imageNameTag = outDoc.createElement("imageName")
         imageNameTag.appendChild(outDoc.createTextNode(imageName))
@@ -123,38 +170,84 @@ class FontTestWriter:
             
             startx = bbox3[2] + ws
             taggedRectangles.appendChild(taggedRectangle)
-            totals += " ";
+            totals += " ";'''
         
-    def process(self, text, outputDir):
+    def process(self, text, outputDir, chrName, allowed = False, specific_fonts = None):
         
-        outDoc = Document()
-        tagset = outDoc.createElement("tagset")
-        outDoc.appendChild(tagset)
+        #outDoc = Document()
+        #tagset = outDoc.createElement("tagset")
+        #outDoc.appendChild(tagset)
         
         if not os.path.exists(outputDir):
-            os.mkdir( outputDir, 0777 )
+            os.mkdir( outputDir )
+        
+        if not os.path.exists(outputDir+'/_italic'):
+            os.mkdir( outputDir+'/_italic' )
         
         for i in range(len(self.fonts)):
             font = self.fonts[i]
+            if specific_fonts != None:
+                bad = allowed
+                for  f in specific_fonts:
+                    if font.getname()[0].startswith(f):
+                        bad = not allowed
+                if bad:
+                    continue
             capital = self.capitals[i]
-            self.writeSentence(text, outputDir, font, outDoc, tagset, capital)
+            self.writeSentence(text, outputDir, chrName, font, capital)
         
-        annotedFile = outputDir + os.sep + "gt.xml"
-        f = open(annotedFile, 'w')
-        outDoc.writexml(f)
+        #annotedFile = outputDir + os.sep + "gt.xml"
+        #f = open(annotedFile, 'w')
+    	#outDoc.writexml(f)
         
-text = "Grumpy wizards make toxic brew for the evil Queen and Jack" 
-        
+
 writer = FontTestWriter()
-writer.process(text, "/tmp/ocr")
+
+#DIGIT
+for i in range(0x0030, 0x0039):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
+
+#LATIN CAPITAL
+for i in range(0x0041, 0x005A):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
+
+#LATIN SMALL
+specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
+for i in range(0x0061, 0x007A):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+
+#GREEK
+specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
+for i in range(0x0370, 0x03FF):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+
+#CYRIL
+specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
+for i in range(0x0400, 0x04FF):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+
+#GEORGIAN
+specific_fonts = ['Sylfaen', 'FreeSerif']
+for i in range(0x10A0, 0x10FA):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)      
+
+#RUNIC
+specific_fonts = ['Segoe UI Symbol']
+for i in range(0x16A0, 0x16F0):
+	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)
+
 
 'write modifications'
 
-if not os.path.exists("/tmp/ocr/modifications"):
+
+'''if not os.path.exists("/tmp/ocr/modifications"):
     os.mkdir( "/tmp/ocr/modifications", 0777 )
 if not os.path.exists("/tmp/ocr/modifications/TextLenth"):
     os.mkdir( "/tmp/ocr/modifications/TextLenth", 0777 )
     
 for i in range(4, len(text)):  
-    writer.process(text[0:i], "/tmp/ocr/modifications/TextLenth/{0}".format(i))
-        
+    writer.process(text[0:i], "C:/SkewDetection/{0}".format(i))'''
+'''    
+writer = FontTestWriter()  
+for i in range(0, 9): 
+'''	
