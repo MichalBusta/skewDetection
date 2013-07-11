@@ -26,8 +26,14 @@ public:
 	SkewDetector();
 	virtual ~SkewDetector();
 
-
-	virtual double detectSkew( cv::Mat mask, double lineK ) = 0;
+	/**
+	 *
+	 * @param mask the character mask - ink is white
+	 * @param lineK
+	 * @param debugImage
+	 * @return the skew angle in radians
+	 */
+	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
 
 };
 

@@ -30,7 +30,8 @@ int main( int argc, char **argv)
 	int x;
 	float y;
 	for(x=-60;x<=60;x=x+10)
-		{y=tan (x*PI/180);
+	{
+		y=tan (x*PI/180);
 		cv::Mat sourceImage = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
 		cv::Mat transformed;
 		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
@@ -39,11 +40,7 @@ int main( int argc, char **argv)
 		imshow("Test", sourceImage);
 		imshow("TestTransformed", transformed);
 		cv::waitKey(0);
-		}
-
-
-
-
+	}
 
 	//TODO implement!!!
 	/*
