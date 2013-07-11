@@ -8,9 +8,19 @@ option (BUILD_TEST "Build test cases" OFF)
 find_package( OpenCV REQUIRED )
 
 file(GLOB lib_srcs "src/*.cpp")
+LIST(REMOVE_ITEM lib_srcs "src/run_evaluation.cpp")
 
 add_library(skewDetection
     ${lib_srcs}
+)
+
+#----------------Main program -------------------------------------------------
+
+add_executable(run_evaluation "src/run_evaluation.cpp")
+
+target_link_libraries (run_evaluation     
+    skewDetection
+    ${OpenCV_LIBS}
 )
 
 #----------------GTest---------------------------------------------------------
