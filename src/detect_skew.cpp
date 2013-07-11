@@ -59,7 +59,7 @@ int main( int argc, char **argv)
 		//invert image, so ink is white
 		cv::Mat imgRec = ~img;
 		cv::Mat debugImage;
-		double skew = detectors[i]->detectSkew( imgRec,  0, &debugImage );
+		double skew = detectors[detector]->detectSkew( imgRec,  0, &debugImage );
 
 		std::cout << "Detected skew is: " << skew << std::endl;
 
