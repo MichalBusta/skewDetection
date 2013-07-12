@@ -20,7 +20,9 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 }
 
 double VerticalDomSkDet::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage) {
+		cv::Mat* debugImage) 
+{
+	return 0;
 }
 
 }//namespace cmp
