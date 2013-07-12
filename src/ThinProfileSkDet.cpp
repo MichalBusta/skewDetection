@@ -37,7 +37,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_LINK_RUNS, Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
 
 	vector<Point> hull;
 	convexHull( contours[0], hull );
@@ -130,11 +130,12 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 			if(angle_a < angle_b) ang = atan2(horizont_poz.y, horizont_poz.x);
 			else ang = atan2(horizont_neg.y, horizont_neg.x);
 
+			/*
 			if(
 				(ang >= M_PI/3 && ang <= M_PI-M_PI/3) ||
 				(ang >= M_PI+M_PI/3 && ang <= 2*M_PI-M_PI/3)
 			)
-			{
+			{*/
 				ang = ang + M_PI/2;
 				while (ang > M_PI/2) ang = ang - M_PI;
 				while (ang < -M_PI/2) ang = ang + M_PI;
@@ -144,8 +145,8 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 				resVector = tmpVector;
 				resPoint = tmpPoint;
 				resPoint2 = tmpPoint2;
-			}
-
+			/*}
+			*/
 		}
 		/*printf("%6.3f   %6.3f", width, ang);
 		printf("\n");/**/
