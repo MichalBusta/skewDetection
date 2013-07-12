@@ -236,18 +236,23 @@ if len(fontDirs) == 0:
 
 writer = FontTestWriter(fontDirs)
 
+if not os.path.exists(outputDir):
+    os.mkdir( outputDir )
+       
+outputDirAlphabet = "{0}/Latin".format(outputDir)
+
 #DIGIT
 for i in range(0x0030, 0x0039):
-	writer.process(unichr(i), outputDir, str(i))
+	writer.process(unichr(i), outputDirAlphabet, str(i))
 
 #LATIN CAPITAL
-#for i in range(0x0041, 0x005A):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
+for i in range(0x0041, 0x005A):
+	writer.process(unichr(i), outputDirAlphabet, str(i))
 
 #LATIN SMALL
 specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
-#for i in range(0x0061, 0x007A):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+for i in range(0x0061, 0x007A):
+	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #GREEK
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
