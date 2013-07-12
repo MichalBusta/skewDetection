@@ -5,7 +5,8 @@
  *      Author: Michal Busta
  */
 #include <opencv2/highgui/highgui.hpp>
-
+#include <opencv2/imgproc/imgproc.hpp>
+#include <math.h>
 
 #include "SkewEvaluator.h"
 #include "IOUtils.h"
@@ -67,8 +68,19 @@ void SkewEvaluator::evaluateMat(cv::Mat& sourceImage)
 void SkewEvaluator::generateDistortions(cv::Mat& source,
 		std::vector<SkewDef>& distortions)
 {
-	distortions.push_back( SkewDef(0, source) );
-	//TODO implement!
+	int x;
+	float y;
+	for(x=-60;x<=60;x=x+10)
+	{
+		double angleRad = x * M_PI / 180;
+		y= tan (angleRad);
+		cv::Mat transformed;
+		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
+		affineTransform.at<float>(0, 1) = y;
+		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
+
+		distortions.push_back( SkewDef(angleRad, transformed) );
+	}
 }
 
 } /* namespace cmp */
