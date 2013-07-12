@@ -12,6 +12,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "ThinProfileSkDet.h"
+#include "SkewDetector.h"
 
 using namespace std;
 using namespace cv;
@@ -37,11 +38,13 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_LINK_RUNS, Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
 
 	vector<Point> hull;
 	convexHull( contours[0], hull );
 	
+	//
+
 	int topMost = 0;
 	int bottomMost = 0;
 	for(int i=0;i<hull.size();i++)
@@ -158,6 +161,14 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 		
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+		
+		cmp::filterContour(contours[0]);
+
+		for(int i=0;i<contours[0].size();i++)
+		{
+			cv::circle(drawing, contours[0][i], 2, Scalar( 255, 0, 0 ), 2);
+		}
+
 		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 1);
 		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 255 ), 1);
 		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
