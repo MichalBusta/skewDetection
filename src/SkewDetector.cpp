@@ -22,3 +22,19 @@ SkewDetector::~SkewDetector()
 }
 
 } /* namespace cmp */
+
+void cmp::filterContour(std::vector<cv::Point>& vector)
+{
+	bool remove = false;
+	for(std::vector<cv::Point>::iterator it = vector.begin(); it < vector.end(); )
+	{
+		//TODO implement
+		if(remove)
+		{
+			it = vector.erase(it);
+		}else{
+			it++;
+		}
+
+	}
+}

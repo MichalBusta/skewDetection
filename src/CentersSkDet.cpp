@@ -43,7 +43,7 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
 
 	std::vector<cv::Point> drawContour;
 	if(debugImage != NULL)
@@ -100,6 +100,12 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 		contours[0] = drawContour;
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+
+		for(size_t j = 0; j < drawContour.size(); j++)
+		{
+			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 2);
+		}
+
 		cv::line(drawing, TL, TR, cv::Scalar(0, 255, 0), 2 );
 		cv::line(drawing, BL, BR, cv::Scalar(0, 255, 0), 2 );
 		cv::circle(drawing, TM, 4, cv::Scalar(0, 0, 255), 2);
