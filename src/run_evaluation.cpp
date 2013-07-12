@@ -28,12 +28,8 @@ int main( int argc, char **argv)
 		return -1;
 	}
 
-
-	//TODO implement!!!
-	/*
 	SkewEvaluator evaluator;
 	evaluator.evaluate( argv[1] );
-	*/
 
 	return 0;
 }
