@@ -1,8 +1,9 @@
 
 
-Tomas: vystupni aderear jako parametr 
+Jakub: Centers Sk Detector - ? robustnost - body v pasu? 
 
-Jakub: Centers Sk Detector
+Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
-Tomas: Thin Profile Detector
+Jakub: Nejdelsi hranu 
 
+Tomas: Vertikalni smer dominantni 
