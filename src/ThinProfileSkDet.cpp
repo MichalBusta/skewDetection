@@ -37,7 +37,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_LINK_RUNS, Point(0, 0) );
 
 	vector<Point> hull;
 	convexHull( contours[0], hull );
@@ -68,6 +68,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	Point2f horizont_poz(1,0);
 	Point2f horizont_neg(-1,0);
 	double angle = 0;
+	Point2f resVector, resPoint, resPoint2;
 	while(rotated_angle < M_PI)
 	{
 		int p_a_1 = p_a + 1;
@@ -92,6 +93,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 		horizont_neg.x = x2*cos(min(angle_a, angle_b))-y2*sin(min(angle_a, angle_b));
 		horizont_neg.y = x2*sin(min(angle_a, angle_b))+y2*cos(min(angle_a, angle_b));
 		float b,a;
+		Point2f tmpVector, tmpPoint, tmpPoint2;
 		if(angle_a < angle_b)
 		{
 			p_a++;
@@ -101,6 +103,9 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 			b = sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y);
 			width = abs(horizont_poz.y*hull[p_b].x-horizont_poz.x*hull[p_b].y-horizont_poz.y*hull[p_a].x+horizont_poz.x*hull[p_a].y)/sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y);
 			//width = caliper_a.distance(points[p_b]);
+			tmpVector = horizont_poz;
+			tmpPoint = hull[p_a];
+			tmpPoint2 = hull[p_b];
 		}
 		else
 		{
@@ -111,6 +116,9 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 			b = sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y);
 			width = abs(horizont_neg.y*hull[p_a].x-horizont_neg.x*hull[p_a].y-horizont_neg.y*hull[p_b].x+horizont_neg.x*hull[p_b].y)/sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y);
 			//width = caliper_b.distance(points[p_a]);
+			tmpVector = horizont_neg;
+			tmpPoint = hull[p_b];
+			tmpPoint2 = hull[p_a];
 		}
 
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
@@ -132,6 +140,9 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 
 				angle = ang;
 				min_width = width;
+				resVector = tmpVector;
+				resPoint = tmpPoint;
+				resPoint2 = tmpPoint2;
 			}
 
 		}
@@ -143,11 +154,12 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	{
 		Mat& drawing =  *debugImage;
 		drawing =  Mat::zeros( mask.size(), CV_8UC3 );
-
+		
 		Scalar color = Scalar( 255, 255, 255 );
-		drawContours( drawing, contours, 0, color, 2, 8, hierarchy, 0, Point() );
-
-		imshow( "Contours", drawing );
+		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+		cv::line(drawing, resPoint-resVector*50, resPoint+resVector*50, Scalar( 0, 0, 255 ), 1);
+		cv::line(drawing, resPoint2-resVector*50, resPoint2+resVector*50, Scalar( 0, 255, 255 ), 1);
+		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 	}
 
 	return angle;
