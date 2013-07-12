@@ -1,5 +1,6 @@
 from PIL import Image, ImageFont, ImageDraw
 import os
+import sys, getopt
 from xml.dom.minidom import Document
 
 class FontTestWriter:
@@ -12,11 +13,13 @@ class FontTestWriter:
     
     
  
-    def __init__(self):
+    def __init__(self, fontDirs):
         
         #self.getFonts('/usr/share/fonts/truetype')
         #self.getFonts('/home/busta/data/cvut/textspotter/fonts')
-        self.getFonts('C:/SkewDetection/fonts')
+        #self.getFonts('C:/SkewDetection/fonts')
+        for fDir in fontDirs:
+        	self.getFonts(fDir)
         
     
     def getFonts(self, startDir):
@@ -200,41 +203,71 @@ class FontTestWriter:
         #f = open(annotedFile, 'w')
     	#outDoc.writexml(f)
         
+outputDir = ''
+fontDirs = []
+try:
+	opts, args = getopt.getopt(sys.argv[1:],"hf:o:",["fontDir=","outputDir="])
+except getopt.GetoptError:
+	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+	sys.exit(2)
+for opt, arg in opts:
+	if opt == '-h':
+		print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+		sys.exit()
+	elif opt in ("-f", "--fontDir"):
+		if arg[-1:] == "\\" or arg[-1:] == "/":
+			fontDirs.append(arg[:-1])
+		else:
+			fontDirs.append(arg)
+	elif opt in ("-o", "--outputDir"):
+		if arg[-1:] == "\\" or arg[-1:] == "/":
+			outputDir = arg[:-1]
+		else:
+			outputDir = arg
 
-writer = FontTestWriter()
+if outputDir == '':
+	print 'No output folder set! \n'
+	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+	sys.exit(2)
+if len(fontDirs) == 0:
+	print 'No font folder set! \n'
+	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+	sys.exit(2)
+
+writer = FontTestWriter(fontDirs)
 
 #DIGIT
 for i in range(0x0030, 0x0039):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
+	writer.process(unichr(i), outputDir, str(i))
 
 #LATIN CAPITAL
-for i in range(0x0041, 0x005A):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
+#for i in range(0x0041, 0x005A):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i))
 
 #LATIN SMALL
 specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
-for i in range(0x0061, 0x007A):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+#for i in range(0x0061, 0x007A):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
 
 #GREEK
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
-for i in range(0x0370, 0x03FF):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+#for i in range(0x0370, 0x03FF):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
 
 #CYRIL
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
-for i in range(0x0400, 0x04FF):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+#for i in range(0x0400, 0x04FF):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
 
 #GEORGIAN
 specific_fonts = ['Sylfaen', 'FreeSerif']
-for i in range(0x10A0, 0x10FA):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)      
+#for i in range(0x10A0, 0x10FA):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)      
 
 #RUNIC
 specific_fonts = ['Segoe UI Symbol']
-for i in range(0x16A0, 0x16F0):
-	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)
+#for i in range(0x16A0, 0x16F0):
+#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)
 
 
 'write modifications'
