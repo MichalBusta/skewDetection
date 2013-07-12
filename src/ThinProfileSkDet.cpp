@@ -115,29 +115,29 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
 
-		if(width < min_width)
+		double ang = 0;
+		if(width <= min_width)
 		{
-			min_width = width;
-			//angle = atan2(horizont_poz.y, horizont_poz.x);
-			if(angle_a < angle_b) angle = atan2(horizont_poz.y, horizont_poz.x);
-			else angle = atan2(horizont_neg.y, horizont_neg.x);
+			if(angle_a < angle_b) ang = atan2(horizont_poz.y, horizont_poz.x);
+			else ang = atan2(horizont_neg.y, horizont_neg.x);
 
-			/*if(
-				(angle >= -M_PI/3 && angle <= M_PI/3) ||
-				(angle >= -M_PI/3 && angle <= M_PI/3)
-			)*/
+			if(
+				(ang >= M_PI/3 && ang <= M_PI-M_PI/3) ||
+				(ang >= M_PI+M_PI/3 && ang <= 2*M_PI-M_PI/3)
+			)
+			{
+				ang = ang + M_PI/2;
+				while (ang > M_PI/2) ang = ang - M_PI;
+				while (ang < -M_PI/2) ang = ang + M_PI;
+
+				angle = ang;
+				min_width = width;
+			}
+
 		}
-		else if(width = min_width)
-		{
-			//min_width = width;
-		}
-		printf("%6.3f", width);
-		printf("\n");
+		/*printf("%6.3f   %6.3f", width, ang);
+		printf("\n");/**/
 	}
-	angle = angle + M_PI/2;
-
-
-	//Rect bbox = boundingRect(contours[0]);
 
 	if(debugImage != NULL)
 	{
@@ -149,8 +149,6 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 
 		imshow( "Contours", drawing );
 	}
-	while (angle > M_PI/2) angle = angle - M_PI;
-	while (angle < -M_PI/2) angle = angle + M_PI;
 
 	return angle;
 }
