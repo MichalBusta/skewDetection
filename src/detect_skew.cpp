@@ -68,7 +68,7 @@ int main( int argc, char **argv)
 
 		cv::Mat draw;
 		cv::cvtColor( img, draw, cv::COLOR_GRAY2BGR);
-		cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 2 );
+		cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
 
 		cv::imshow("Original & Skew", draw);
 
