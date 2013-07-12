@@ -7,6 +7,8 @@
 #define _USE_MATH_DEFINES
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include <iostream>
 #include <math.h>
 
 #include "SkewEvaluator.h"
@@ -57,6 +59,8 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 			for(size_t k = 0; k < letterImages.size(); k++)
 			{
 				const std::string& letterFile = letterImages[k];
+				std::cout << "Processing image: " << letterFile << std::endl;
+
 				cv::Mat tmp = cv::imread(letterFile, cv::IMREAD_GRAYSCALE);
 				cv::Mat img;
 				copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
@@ -146,7 +150,11 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			}
 		}
 
-		cv::waitKey(0);
+		int key = cv::waitKey(0);
+		if(key == 'w')
+		{
+			imwrite("/tmp/debugImage.png", def.image);
+		}
 	}
 
 }
