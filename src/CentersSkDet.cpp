@@ -38,7 +38,6 @@ bool sortPointY (const Point& i,const Point& j)
 double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 		cv::Mat* debugImage)
 {
-	//TODO implement
 
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
