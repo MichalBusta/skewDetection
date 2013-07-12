@@ -58,6 +58,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 	}
 	/**
 	 * Rotating calipers method by Godfsried Toussaint
+	 * http://en.wikipedia.org/wiki/Rotating_calipers
 	 */
 	int p_a = topMost;
 	int p_b = bottomMost;
@@ -157,8 +158,8 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 		
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
-		cv::line(drawing, resPoint-resVector*50, resPoint+resVector*50, Scalar( 0, 0, 255 ), 1);
-		cv::line(drawing, resPoint2-resVector*50, resPoint2+resVector*50, Scalar( 0, 255, 255 ), 1);
+		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 1);
+		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 255 ), 1);
 		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 	}
 
