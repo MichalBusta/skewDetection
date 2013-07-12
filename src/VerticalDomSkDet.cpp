@@ -51,10 +51,10 @@ double VerticalDomSkDet::detectSkew(cv::Mat& mask, double lineK,
 		}
 		
 		cv::Point vector = (*it) - prev;
-		double angle = atan2(double (vector.x), double (vector.y));
+		double angle = atan2(double (vector.x), double (vector.y))*180/M_PI;
 		double size = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
-		printf("%6.3f   %6.3f", angle, size);
+		printf("%10.6f   %10.6f \n", angle, size);
 
 		prev = (*it);
 		it++;
