@@ -23,10 +23,14 @@ namespace cmp
 class CentersSkDet : public SkewDetector
 {
 public:
-	CentersSkDet();
+	CentersSkDet(float precision = 0.1);
+
 	virtual ~CentersSkDet();
 
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+
+	//precision urcuje cast pismene v desetinem tvaru, ktere tvori "horni hranici pismene"
+	float precision;
 };
 
 } /* namespace cmp */

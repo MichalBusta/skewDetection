@@ -17,9 +17,8 @@ using namespace cv;
 namespace cmp
 {
 
-CentersSkDet::CentersSkDet()
+CentersSkDet::CentersSkDet(float precision) : precision(precision)
 {
-	// TODO Auto-generated constructor stub
 
 }
 
@@ -42,7 +41,7 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
 
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
 
 	std::vector<cv::Point> drawContour;
 	if(debugImage != NULL)
@@ -50,47 +49,70 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 		drawContour = contours[0];
 	}
 
-	std::vector<cv::Point>& outerCountour = contours[0];
-	std::sort (outerCountour.begin(), outerCountour.end(), &sortPointY );
+	std::vector<cv::Point>& outerContour = contours[0];
+	std::sort (outerContour.begin(), outerContour.end(), &sortPointY );
 
-	//definice 4 krajnich bodu
-	Point TL=outerCountour[0], TR, BL, BR=outerCountour[outerCountour.size()-1] ;
-
-	//cykly na nalezeni zbylych dvou bodu (TR a BL)
-	for (int c = 0; c < outerCountour.size();c++)
+	//ziskani souradnic Y
+	int topPoint = mask.rows;
+	int bottomPoint = 0;
+	for (int c = 0; c < outerContour.size();c++)
 	{
-		if(outerCountour[c].y > TL.y)
+		if(outerContour[c].y < topPoint)
 		{
-			TR = outerCountour[c-1];
-			break;
-
+			topPoint = outerContour[c].y;
+		}
+		if(outerContour[c].y > bottomPoint)
+		{
+			bottomPoint = outerContour[c].y;
 		}
 	}
-	for (int c = outerCountour.size()-1; c > 0;c--)
+
+	//vypocet velikosti pisma a zadani presnosti
+	int letterSize = 0;
+	letterSize = bottomPoint - topPoint;
+	int addEdgeThickness = 0;
+	addEdgeThickness = letterSize * precision;
+
+	//ziskani souradnic X
+	int TLX = mask.cols;
+	int TRX = 0;
+	int BLX = mask.cols;
+	int BRX = 0;
+	for (int c = 0; c < outerContour.size();c++)
 	{
-		if(outerCountour[c].y < BR.y)
+		if(outerContour[c].y < (topPoint + addEdgeThickness))
 		{
-			BL = outerCountour[c+1];
-			break;
+			TLX = MIN(TLX, outerContour[c].x);
+			TRX = MAX(TRX, outerContour[c].x);
+		}
+		if(outerContour[c].y > (bottomPoint - addEdgeThickness))
+		{
+			BLX = MIN(BLX, outerContour[c].x);
+			BRX = MAX(BRX, outerContour[c].x);
 		}
 	}
+	//konstrukce krajnich bodu ze souradic X a Y
+	Point TL(TLX, topPoint);
+	Point TR(TRX, topPoint);
+	Point BL(BLX, bottomPoint);
+	Point BR(BRX, bottomPoint);
+
+	//pomocne body pro vztvareni usecek
+	Point P1(0, topPoint + 100*precision);
+	Point P2(mask.rows, topPoint + 100*precision);
+	Point P3(0, bottomPoint - 100*precision);
+	Point P4(mask.rows, bottomPoint - 100*precision);
+
 	//ziskani prostrednich bodu
-	Point TM, BM;
-	TM.y = TL.y;
-	TM.x = (TL.x + TR.x)/2.0;
-	BM.y = BR.y;
-	BM.x = (BL.x + BR.x)/2.0;
+	Point TM((TL.x + TR.x)/2.0,TL.y);
+	Point BM((BL.x + BR.x)/2.0,BR.y);
 
-
-
+	//vypocet uhlu zkoseni
 	float angle=0, deltaX=0, deltaY=0;
 	deltaX = TM.x - BM.x;
 	deltaY = BM.y - TM.y;
-	angle = atan( deltaX/deltaY);
+	angle = atan((deltaX)*1.0/(deltaY));
 	//uhel promenne angle je v radianech
-
-	std::cout << "Top Center: " << TM.x << ", " << TM.y << std::endl;
-	std::cout << "Bottom Center: " << BM.x << ", " << BM.y << std::endl;
 
 	if(debugImage != NULL)
 	{
@@ -105,6 +127,8 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 2);
 		}
 
+		cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
+		cv::line(drawing, P3, P4, cv::Scalar(255, 255, 0), 1 );
 		cv::line(drawing, TL, TR, cv::Scalar(0, 255, 0), 2 );
 		cv::line(drawing, BL, BR, cv::Scalar(0, 255, 0), 2 );
 		cv::circle(drawing, TM, 4, cv::Scalar(0, 0, 255), 2);
