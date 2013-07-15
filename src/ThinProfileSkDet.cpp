@@ -131,7 +131,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 			tmpVector = horizont_neg;
 			tmpPoint = hull[p_b];
 			tmpPoint2 = hull[p_a];
-			ang = atan2(horizont_neg.y, horizont_neg.x);/
+			ang = atan2(horizont_neg.y, horizont_neg.x);
 		}
 
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
