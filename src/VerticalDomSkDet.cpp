@@ -7,6 +7,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
 #include <iostream>
 #include <stdio.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -40,26 +41,43 @@ double VerticalDomSkDet::detectSkew(cv::Mat& mask, double lineK,
 
 	std::vector<cv::Point> contour = contours[0];
 	filterContour(contour);
-	
-	cv::Point prev;
+
+	float hist [72] = {0};
+	int highestCol = 0;
+	cv::Point prev = contour.back();
+	std::cout << contour.size() << endl;
 	for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
 	{
-		if(it == contour.begin()) 
-		{
-			prev = (*it);
-			it++;
-		}
-		
-		cv::Point vector = (*it) - prev;
+		cv::Point pt = *it;
+		cv::Point vector = pt - prev;
 		double angle = atan2(double (vector.x), double (vector.y))*180/M_PI;
-		double size = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
+		if (angle < 0) angle = angle + 360;
+		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
-		printf("%10.6f   %10.6f \n", angle, size);
+		int ang = angle/5;
 
-		prev = (*it);
+		hist[ang] = hist[ang] + length;
+
+		if (hist[ang] > hist[highestCol]) highestCol = ang;
+
+		printf("%10.6f   %10.6f \n", angle, length);
+
+		prev = pt;
 		it++;
-
 	}
+
+	int height = hist[highestCol]*2+20;
+
+	cv::Mat histogram = Mat::zeros(height, 450, CV_8UC3);
+
+	for(int i=0;i<72;i++)
+	{
+		int rectH = 2*hist[i];
+		cv::rectangle(histogram, Rect(9+6*i, height-rectH+10, 6, rectH), Scalar(0,0,255), CV_FILLED);
+	}
+
+	cv::imshow("Histogram", histogram);
+
 
 	if(debugImage != NULL)
 	{
