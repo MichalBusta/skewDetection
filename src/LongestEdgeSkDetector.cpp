@@ -40,7 +40,7 @@ double LongestEdgeSkDetector::detectSkew(cv::Mat& mask, double lineK,
 
 	std::vector<cv::Point>& outerCountour = contours[0];
 
-	double angle = 0;
+	double angle = 0, atanAngle = 0;
 	float actLength=0, QactLength=0, maxLength=0;
 	int c=0, deltaX =0, deltaY=0, longNumber=0;
 	for(c=0;c<outerCountour.size()-1;c++)
@@ -53,7 +53,8 @@ double LongestEdgeSkDetector::detectSkew(cv::Mat& mask, double lineK,
 		if(actLength>maxLength)
 		{
 			maxLength=actLength;
-			angle = atan( deltaX/deltaY);
+			atanAngle=(deltaX)*1.0/(deltaY);
+			angle = atan(atanAngle);
 		}
 		//srovnani prvniho a posledniho bodu
 		deltaX = outerCountour[outerCountour.size()].x - outerCountour[0].x;
@@ -63,11 +64,12 @@ double LongestEdgeSkDetector::detectSkew(cv::Mat& mask, double lineK,
 		if(actLength>maxLength)
 		{
 			maxLength=actLength;
-
+			atanAngle=(deltaX)*1.0/(deltaY);
+			angle = atan(atanAngle);
 		}
 	}
-	cout << maxLength << "\n";
-	cout << angle << "\n";
+	cout << "maxLength is: " << maxLength << "\n";
+	cout << "angle is: " << angle << "\n";
 
 	if(debugImage != NULL)
 	{
