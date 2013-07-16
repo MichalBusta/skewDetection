@@ -50,7 +50,7 @@ struct EvaluationResult
 class SkewEvaluator
 {
 public:
-	SkewEvaluator();
+	SkewEvaluator( bool debug = false );
 
 	virtual ~SkewEvaluator();
 
@@ -69,6 +69,9 @@ private:
 	std::vector<cv::Ptr<SkewDetector> > detectors;
 	/** the names of detector */
 	std::vector<std::string> detectorNames;
+
+	/** if true, results are show during the processing */
+	bool debug;
 
 };
 
