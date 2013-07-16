@@ -137,7 +137,6 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			cv::Mat workImage = def.image.clone();
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter) );
 
 			if( debug )
 			{
@@ -183,7 +182,7 @@ void SkewEvaluator::registerDetector(cv::Ptr<SkewDetector> detector,
 	detectorNames.push_back(detectorName);
 }
 
-bool sortResultsByCorrectClsCount(AcumResult& o1, AcumResult& o2)
+bool sortResultsByCorrectClsCount(const AcumResult& o1, const AcumResult& o2)
 {
 	return o1.correctClassCont > o2.correctClassCont;
 }
