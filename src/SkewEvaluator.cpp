@@ -184,7 +184,7 @@ void SkewEvaluator::registerDetector(cv::Ptr<SkewDetector> detector,
 	detectorNames.push_back(detectorName);
 }
 
-bool sortResultsByCorrectClsCount(AcumResult& o1, AcumResult& o2)
+bool sortResultsByCorrectClsCount(const AcumResult& o1, const AcumResult& o2)
 {
 	return o1.correctClassCont > o2.correctClassCont;
 }
