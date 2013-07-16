@@ -47,7 +47,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 
 
 	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
-	
+
 	//cmp::filterContour(contours[0]);
 
 	vector<Point> hull;
@@ -91,7 +91,7 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 		
 		double angleACos = (edge_a.x*horizont_poz.x + edge_a.y*horizont_poz.y)/(sqrt(edge_a.x*edge_a.x+edge_a.y*edge_a.y)*sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y));
 		double angleBCos = (edge_b.x*horizont_neg.x + edge_b.y*horizont_neg.y)/(sqrt(edge_b.x*edge_b.x+edge_b.y*edge_b.y)*sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y));
-		
+
 		angleACos = MAX(MIN(angleACos, 1.0), -1.0);
 		angleBCos = MAX(MIN(angleBCos, 1.0), -1.0);
 
