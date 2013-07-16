@@ -53,7 +53,7 @@ double LongestEdgeSkDetector::detectSkew(cv::Mat& mask, double lineK,
 		if(actLength>maxLength)
 		{
 			maxLength=actLength;
-			angle = atan( deltaX/deltaY);
+			angle = atan(double(deltaX/deltaY));
 		}
 		//srovnani prvniho a posledniho bodu
 		deltaX = outerCountour[outerCountour.size()].x - outerCountour[0].x;
