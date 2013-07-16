@@ -11,6 +11,7 @@
 #include <iostream>
 #include <math.h>
 #include <map>
+#include <fstream>
 
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
@@ -137,7 +138,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			cv::Mat workImage = def.image.clone();
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i) );
 
 			if( debug )
 			{
@@ -192,18 +193,133 @@ void SkewEvaluator::writeResults()
 {
 	std::vector<AcumResult> classMap;
 	classMap.resize(detectors.size());
+	std::map<int, std::map<std::string, std::map<std::string, AcumResult>>> resMap;
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
 		classMap[ results[i].classificator ].count++;
 		classMap[ results[i].classificator ].classIndex = results[i].classificator;
+		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].classIndex = results[i].classificator;
+		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].count++;
+		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff = resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff + results[i].angleDiff*results[i].angleDiff;
 		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
 			classMap[ results[i].classificator ].correctClassCont++;
+			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 		}
 	}
 
+	std::string outputDir = "C:\\SkewDetection\\reports";
+	std::string htmlHeader1 = "<!DOCTYPE HTML>\n<html>\n<head>\n\t<title>";
+	std::string htmlHeader2 = "</title>\n</head>\n<body>\n\t<table>\n";
+	std::string htmlFooter = "\t</table>\n</body>\n</html>";
+
+	std::ofstream report_overview, json_data;
+	report_overview.open (outputDir+"\\report_overview.html");
+	json_data.open (outputDir+"\\json_data.js");
+	report_overview << htmlHeader1 << "Report - Overview" << htmlHeader2;
+	report_overview << "\t\t<tr>\n";
+	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
+
+	bool foo = report_overview.is_open();
+
+	std::string subtitle = "";
+
+	for(std::map<std::string, std::map<std::string, AcumResult>>::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
+	{
+		report_overview << "\t\t\t<th colspan=\"3\">" << it->first << "</th>\n";
+		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>Variance</th>\n";
+	}
+
+	report_overview << "\t\t\t<th colspan=\"3\">Sum</th>\n";
+	report_overview << "\t\t</tr>\n";
+	
+	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t</tr>\n";
+
+
 	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
+
+	/*
+
+var json = {
+	"children": [
+		{
+			"children":[],
+			"data": {
+				
+			}
+		},
+		{
+			
+		}
+	], 
+    "data": {
+		"$type": "none"
+	}, 
+	"id": "Source", 
+	"name": "Source"
+}
+
+
+*/
+
+	json_data << "var json = {\n" << "\t\"children\": [\n";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		report_overview << "\t\t<tr>\n";
+		
+		report_overview << "\t\t\t<td>" << detectorNames[classMap[i].classIndex] << "</td>\n";
+
+		json_data << "\t\t{\n" << "\t\t\t\"children\": [\n";
+
+		int total = 0;
+		int correct = 0;
+		double variance = 0.0;
+
+		for(std::map<std::string, std::map<std::string, AcumResult>>::iterator it = resMap[i].begin(); it != resMap[i].end(); it++)
+		{
+			json_data << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
+			int alphabetTotal = 0;
+			int alphabetCorrect = 0;
+			double alphabetVariance = 0.0;
+
+			for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
+			{
+				json_data << "\t\t\t\t\t\t{\n" << "\t\t\t\t\t\t\t\"children\": [\n";
+				alphabetTotal = alphabetTotal + iterator->second.count;
+				alphabetCorrect = alphabetCorrect + iterator->second.correctClassCont;
+				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
+				json_data << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
+				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << iterator->second.correctClassCont << "\n"; 
+				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+			}
+			total = total + alphabetTotal;
+			correct = correct + alphabetCorrect;
+			variance = variance + alphabetVariance;
+
+			report_overview << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n";
+			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
+			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << alphabetCorrect << ",\n";
+			json_data << "\t\t\t\t\t\t\"$color\": \"#0000FF\"\n";
+			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+		}
+		json_data << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
+		json_data << "\t\t\t\t\"$angularWidth\": " << correct << ",\n";
+		json_data << "\t\t\t\t\"$color\": \"#00FF00\"\n";
+		json_data << "\t\t\t},\n" << "\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "\",\n" << "\t\t\t\"name\": \"" << detectorNames[classMap[i].classIndex] << "\"\n" << "\t\t},\n";
+		report_overview << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t</tr>\n";
+	}
+	
+	json_data << "\t],\n" << "\t\"data\": {\n";
+	json_data << "\t\t\"$type\": \"none\"\n";
+	json_data << "\t},\n" << "\t\"id\": \"Detectors\",\n" << "\t\"name\": \"Detectors\"\n}";
+	json_data.close();
+
+	report_overview << htmlFooter;
+	report_overview.close();
+
+
 
 }
 

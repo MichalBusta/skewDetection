@@ -28,7 +28,7 @@ int main( int argc, char **argv)
 		return -1;
 	}
 
-	SkewEvaluator evaluator( true );
+	SkewEvaluator evaluator( false );
 	evaluator.evaluate( argv[1] );
 
 	return 0;
