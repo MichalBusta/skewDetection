@@ -59,7 +59,9 @@ int main( int argc, char **argv)
 
 	for(size_t i = 0; i < files.size(); i++)
 	{
-		cv::Mat img = cv::imread( files[i], cv::IMREAD_GRAYSCALE );
+		cv::Mat tmp = cv::imread( files[i], cv::IMREAD_GRAYSCALE );
+		cv::Mat img;
+		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
 		//invert image, so ink is white
 		cv::Mat imgRec = ~img;
 		cv::Mat debugImage;

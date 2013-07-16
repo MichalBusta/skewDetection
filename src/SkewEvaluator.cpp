@@ -7,17 +7,22 @@
 #define _USE_MATH_DEFINES
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include <iostream>
 #include <math.h>
+#include <map>
 
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
 
+#define ANGLE_TOLERANCE M_PI / 60.0
+
 
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( )
+SkewEvaluator::SkewEvaluator( bool debug ) : debug( debug )
 {
 	registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	registerDetector(new CentersSkDet(), "TopBottomCenters" );
@@ -57,6 +62,8 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 			for(size_t k = 0; k < letterImages.size(); k++)
 			{
 				const std::string& letterFile = letterImages[k];
+				std::cout << "Processing image: " << letterFile << std::endl;
+
 				cv::Mat tmp = cv::imread(letterFile, cv::IMREAD_GRAYSCALE);
 				cv::Mat img;
 				copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
@@ -64,6 +71,8 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 			}
 		}
 	}
+
+	writeResults();
 }
 
 /**
@@ -130,7 +139,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter) );
 
-			if(true)
+			if( debug )
 			{
 				cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
 				cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
@@ -138,6 +147,9 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 				cv::Mat draw;
 				cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
 				cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
+
+				end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
+				cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
 				std::vector<cv::Mat> toMerge;
 				toMerge.push_back(draw);
 				toMerge.push_back(debugImage);
@@ -146,7 +158,14 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			}
 		}
 
-		cv::waitKey(0);
+		if( debug )
+		{
+			int key = cv::waitKey(0);
+			if(key == 'w')
+			{
+				imwrite("/tmp/debugImage.png", def.image);
+			}
+		}
 	}
 
 }
@@ -162,6 +181,30 @@ void SkewEvaluator::registerDetector(cv::Ptr<SkewDetector> detector,
 {
 	detectors.push_back(detector);
 	detectorNames.push_back(detectorName);
+}
+
+bool sortResultsByCorrectClsCount(AcumResult& o1, AcumResult& o2)
+{
+	return o1.correctClassCont > o2.correctClassCont;
+}
+
+void SkewEvaluator::writeResults()
+{
+	std::vector<AcumResult> classMap;
+	classMap.resize(detectors.size());
+
+	for(size_t i = 0; i < results.size(); i++)
+	{
+		classMap[ results[i].classificator ].count++;
+		classMap[ results[i].classificator ].classIndex = results[i].classificator;
+		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
+		{
+			classMap[ results[i].classificator ].correctClassCont++;
+		}
+	}
+
+	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
+
 }
 
 /**
@@ -187,7 +230,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		affineTransform.at<float>(0, 1) = y;
 		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
-		distortions.push_back( SkewDef(angleRad, transformed) );
+		distortions.push_back( SkewDef( - angleRad, transformed) );
 	}
 }
 
