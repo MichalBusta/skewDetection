@@ -67,7 +67,7 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 		}
 	}
 
-	//vypocet velikosti pisma a zadani presnosti
+	//vypocet velikosti pisma
 	int letterSize = 0;
 	letterSize = bottomPoint - topPoint;
 	int addEdgeThickness = 0;
