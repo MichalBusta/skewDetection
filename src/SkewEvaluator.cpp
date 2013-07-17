@@ -209,14 +209,14 @@ void SkewEvaluator::writeResults()
 		}
 	}
 
-	std::string outputDir = "C:\\SkewDetection\\reports";
+	std::string outputDir = "/tmp";
 	std::string htmlHeader1 = "<!DOCTYPE HTML>\n<html>\n<head>\n\t<title>";
 	std::string htmlHeader2 = "</title>\n</head>\n<body>\n\t<table>\n";
 	std::string htmlFooter = "\t</table>\n</body>\n</html>";
 
 	std::ofstream report_overview, json_data;
-	report_overview.open ( (outputDir+ "\\report_overview.html").c_str() );
-	json_data.open ( (outputDir+"\\json_data.js" ).c_str() );
+	report_overview.open ( (outputDir+ "/report_overview.html").c_str() );
+	json_data.open ( (outputDir+"/json_data.js" ).c_str() );
 	report_overview << htmlHeader1 << "Report - Overview" << htmlHeader2;
 	report_overview << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
@@ -292,7 +292,7 @@ var json = {
 				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
 				json_data << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
 				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << iterator->second.correctClassCont << "\n"; 
-				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
 			}
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
@@ -302,7 +302,7 @@ var json = {
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
 			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << alphabetCorrect << ",\n";
 			json_data << "\t\t\t\t\t\t\"$color\": \"#0000FF\"\n";
-			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
 		}
 		json_data << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
 		json_data << "\t\t\t\t\"$angularWidth\": " << correct << ",\n";
