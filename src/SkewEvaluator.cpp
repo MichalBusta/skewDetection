@@ -209,14 +209,14 @@ void SkewEvaluator::writeResults()
 		}
 	}
 
-	std::string outputDir = "C:\\SkewDetection\\reports";
+	std::string outputDir = "/tmp";
 	std::string htmlHeader1 = "<!DOCTYPE HTML>\n<html>\n<head>\n\t<title>";
 	std::string htmlHeader2 = "</title>\n</head>\n<body>\n\t<table>\n";
 	std::string htmlFooter = "\t</table>\n</body>\n</html>";
 
 	std::ofstream report_overview, json_data;
-	report_overview.open ( (outputDir+ "\\report_overview.html").c_str() );
-	json_data.open ( (outputDir+"\\json_data.js" ).c_str() );
+	report_overview.open ( (outputDir+ "/report_overview.html").c_str() );
+	json_data.open ( (outputDir+"/json_data.js" ).c_str() );
 	report_overview << htmlHeader1 << "Report - Overview" << htmlHeader2;
 	report_overview << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
