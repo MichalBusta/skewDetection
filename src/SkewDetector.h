@@ -40,6 +40,13 @@ public:
 	 */
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
 
+	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours );
+};
+
+class ContourSkewDetector : public SkewDetector
+{
+public:
+	virtual double detectSkew( std::vector<std::vector<cv::Point> >& contours, double lineK, const cv::Mat& mask, cv::Mat* debugImage = NULL );
 };
 
 /**
