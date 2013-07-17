@@ -58,7 +58,7 @@ class FontTestWriter:
         draw = ImageDraw.Draw(im)
     
         w, h = draw.textsize(text, font=font)
-        im = Image.new("RGB", (w+30, h+40),  (255,)*3)
+        im = Image.new("RGB", (w+40, h+50),  (255,)*3)
         draw = ImageDraw.Draw(im)
         draw.text((20, 20), text, font=font, fill="#000000")
   
@@ -111,8 +111,8 @@ class FontTestWriter:
         		for y in range(upper, lower): 
         			if pix[right, y] != (255,)*3:
         				frame = False
-        		
-				hide = True
+                        
+        		hide = True
 						
         		for count, color in im2.getcolors():
         			if color == (255,)*3 and count >= ((right-left)*(lower-upper)):
@@ -238,7 +238,8 @@ writer = FontTestWriter(fontDirs)
 
 if not os.path.exists(outputDir):
     os.mkdir( outputDir )
-  
+
+'''  
 #LATIN     
 outputDirAlphabet = "{0}/Latin".format(outputDir)
 
@@ -255,6 +256,7 @@ specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt',
 for i in range(0x0061, 0x007B):
 	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
+'''
 #GREEK
 outputDirAlphabet = "{0}/Greek".format(outputDir)
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
@@ -271,13 +273,13 @@ for i in range(0x0400, 0x0500):
 outputDirAlphabet = "{0}/Georgian".format(outputDir)
 specific_fonts = ['Sylfaen', 'FreeSerif']
 for i in range(0x10A0, 0x10FB):
-	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)      
+	writer.process(unichr(i), outputDirAlphabet, str(i), False, [])      
 
 #RUNIC
 outputDirAlphabet = "{0}/Runic".format(outputDir)
 specific_fonts = ['Segoe UI Symbol']
 for i in range(0x16A0, 0x16F1):
-	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
+	writer.process(unichr(i), outputDirAlphabet, str(i), False, [])
 
 
 'write modifications'

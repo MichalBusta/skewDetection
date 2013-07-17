@@ -128,6 +128,10 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 {
 	//generate modifications
 	std::vector<SkewDef> distortions;
+
+	ImageFilter imageFilter;
+	sourceImage = imageFilter.filterImage( sourceImage );
+
 	cv::Mat negative = ~sourceImage;
 	generateDistortions(negative, distortions);
 
