@@ -2,9 +2,9 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<title>Highcharts Example</title>
+		<title>The Skew Dectors Evaluation</title>
 
-		<script type="text/javascript" src="jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script src="object_data.js"></script>
 		<script type="text/javascript">
 $(function () {
@@ -13,10 +13,10 @@ $(function () {
                 zoomType: 'xy'
             },
             title: {
-                text: 'The Skew Dectors Evaluation'
+                text: 'Skew Dectors Overview'
             },
             subtitle: {
-                text: 'CMP'
+                text: 'The Skew Dectors Evaluation'
             },
             xAxis: [{
                 categories: categories
@@ -27,13 +27,13 @@ $(function () {
                         return this.value +'%';
                     },
                     style: {
-                        color: '#89A54E'
+                        color: '#4572A7'
                     }
                 },
                 title: {
                     text: 'Correct Classifications',
                     style: {
-                        color: '#89A54E'
+                        color: '#4572A7'
                     }
                 }
     
@@ -55,23 +55,6 @@ $(function () {
                 },
 		opposite: true
     
-            }, { // Tertiary yAxis
-                gridLineWidth: 0,
-                title: {
-                    text: 'Sea-Level Pressure',
-                    style: {
-                        color: '#AA4643'
-                    }
-                },
-                labels: {
-                    formatter: function() {
-                        return this.value +' mb';
-                    },
-                    style: {
-                        color: '#AA4643'
-                    }
-                },
-                opposite: true
             }],
             tooltip: {
                 shared: true
