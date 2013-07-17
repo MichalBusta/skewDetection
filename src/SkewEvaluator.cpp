@@ -292,7 +292,7 @@ var json = {
 				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
 				json_data << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
 				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << iterator->second.correctClassCont << "\n"; 
-				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
 			}
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
@@ -302,7 +302,7 @@ var json = {
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
 			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << alphabetCorrect << ",\n";
 			json_data << "\t\t\t\t\t\t\"$color\": \"#0000FF\"\n";
-			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
 		}
 		json_data << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
 		json_data << "\t\t\t\t\"$angularWidth\": " << correct << ",\n";
