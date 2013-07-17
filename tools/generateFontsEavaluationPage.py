@@ -123,58 +123,6 @@ class FontTestWriter:
         		
         im.save(imageFile)
         
-        '''imageTag = outDoc.createElement("image") SFAtarianSystem-Regular
-        tagset.appendChild(imageTag)
-        imageNameTag = outDoc.createElement("imageName")
-        imageNameTag.appendChild(outDoc.createTextNode(imageName))
-        imageTag.appendChild(imageNameTag)
-        taggedRectangles = outDoc.createElement("taggedRectangles")
-        imageTag.appendChild(taggedRectangles)
-        split = text.split(" ")
-        startx = 20
-        starty = 20
-        ws, hs = draw.textsize(" ", font=font)
-        
-        totals = "";
-        for  s in split:
-            w, h = draw.textsize(s, font=font)
-            im2 = Image.new("RGB", (w+30, h+40),  (0,)*3)
-            draw2 = ImageDraw.Draw(im2)
-            draw2.text((0, 0), s, font=font, fill="#FFFFFF")
-            bbox2 = im2.getbbox()
-            if bbox2 == None:
-                continue
-            
-            h = bbox2[3] - bbox2[1]
-            w = bbox2[2] - bbox2[0]
-            
-            totals += s;
-            w2, h2 = draw.textsize(totals, font=font)
-            im2 = Image.new("RGB", (w2+30, h2+40),  (0,)*3)
-            draw2 = ImageDraw.Draw(im2)
-            draw2.text((20, 10), totals, font=font, fill="#FFFFFF")
-            bbox3 = im2.getbbox()
-            
-            startx = bbox3[2] - w 
-            
-            taggedRectangle = outDoc.createElement("taggedRectangle")
-            taggedRectangle.setAttribute("x", str(startx))
-            taggedRectangle.setAttribute("y", str(starty + bbox2[1]))
-            taggedRectangle.setAttribute("width", str(w))
-            taggedRectangle.setAttribute("height", str(h))
-            taggedRectangle.setAttribute("modelType", "1")
-            
-            tagg = outDoc.createElement("tag")
-            nodeText = s
-            if capital: 
-                nodeText = nodeText.upper()
-            tagg.appendChild(outDoc.createTextNode(nodeText))
-            taggedRectangle.appendChild(tagg)
-            
-            startx = bbox3[2] + ws
-            taggedRectangles.appendChild(taggedRectangle)
-            totals += " ";'''
-        
     def process(self, text, outputDir, chrName, allowed = False, specific_fonts = None):
         
         #outDoc = Document()
@@ -259,13 +207,13 @@ for i in range(0x0061, 0x007B):
 '''
 #GREEK
 outputDirAlphabet = "{0}/Greek".format(outputDir)
-specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
+specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps-Regular', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree']
 for i in range(0x0370, 0x0400):
 	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #CYRILIC
 outputDirAlphabet = "{0}/Cyrilic".format(outputDir)
-specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
+specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps-Regular', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree']
 for i in range(0x0400, 0x0500):
 	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 

@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>The Skew Dectors Evaluation</title>
+
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script src="object_data.js"></script>
+		<script type="text/javascript">
+$(function () {
+        $('#container').highcharts({
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Skew Dectors Overview'
+            },
+            subtitle: {
+                text: 'The Skew Dectors Evaluation'
+            },
+            xAxis: [{
+                categories: categories
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    formatter: function() {
+                        return this.value +'%';
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                title: {
+                    text: 'Correct Classifications',
+                    style: {
+                        color: '#4572A7'
+                    }
+                }
+    
+            }, { // Secondary yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: 'Standard Deviation',
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value;
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+		opposite: true
+    
+            }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                x: 120,
+                verticalAlign: 'top',
+                y: 80,
+                floating: true,
+                backgroundColor: '#FFFFFF'
+            },
+            series: series
+        });
+    });
+    
+
+		</script>
+	</head>
+	<body>
+<script src="js/highcharts.js"></script>
+
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
+	</body>
+</html>

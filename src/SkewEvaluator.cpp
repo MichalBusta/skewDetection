@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "ImageFilter.h"
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
@@ -26,10 +27,15 @@
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( bool debug ) : debug( debug )
+SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug )
 {
 	registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	registerDetector(new CentersSkDet(), "TopBottomCenters" );
+
+	if(!IOUtils::PathExist(outputDirectory))
+	{
+		IOUtils::CreateDirectory( outputDirectory );
+	}
 }
 
 SkewEvaluator::~SkewEvaluator()
@@ -147,23 +153,42 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i) );
 
+			//write image to output directory structure
+			std::string detectorDir = this->outputDirectory;
+			detectorDir += "/" + this->detectorNames[i];
+			IOUtils::CreateDirectory( detectorDir );
+			std::string alphabetDir = detectorDir;
+			alphabetDir += "/" + alphabet;
+			IOUtils::CreateDirectory( alphabetDir );
+			std::string letterDir = alphabetDir;
+			letterDir += "/" + letter;
+			IOUtils::CreateDirectory( letterDir );
+
+			std::ostringstream os;
+			os << letterDir << "/" << def.step << ".png";
+
+			//create display image
+			cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
+			cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
+
+			cv::Mat draw;
+			cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
+			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
+
+			end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
+			cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
+			std::vector<cv::Mat> toMerge;
+			toMerge.push_back(draw);
+			toMerge.push_back(debugImage);
+			cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
+
+			cv::imwrite( os.str(), dispImage );
+
 			if( debug )
 			{
-				cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
-				cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
-
-				cv::Mat draw;
-				cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
-				cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
-
-				end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
-				cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
-				std::vector<cv::Mat> toMerge;
-				toMerge.push_back(draw);
-				toMerge.push_back(debugImage);
-				cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
 				cv::imshow(detectorNames[i], dispImage);
 			}
+
 		}
 
 		if( debug )
@@ -379,6 +404,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 {
 	int x;
 	float y;
+	int i = 0;
 	for(x=-40;x<=40;x=x+10)
 	{
 		double angleRad = x * M_PI / 180;
@@ -388,7 +414,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		affineTransform.at<float>(0, 1) = y;
 		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
-		distortions.push_back( SkewDef( - angleRad, transformed) );
+		distortions.push_back( SkewDef( - angleRad, transformed, i++) );
 	}
 }
 
