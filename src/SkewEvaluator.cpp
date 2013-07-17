@@ -12,6 +12,8 @@
 #include <math.h>
 #include <map>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
@@ -208,15 +210,15 @@ void SkewEvaluator::writeResults()
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 		}
 	}
-
-	std::string outputDir = "/tmp";
+	
+	//std::string outputDir = "/tmp";
+	std::string outputDir = "C:/SkewDetection/reports";
 	std::string htmlHeader1 = "<!DOCTYPE HTML>\n<html>\n<head>\n\t<title>";
 	std::string htmlHeader2 = "</title>\n</head>\n<body>\n\t<table>\n";
 	std::string htmlFooter = "\t</table>\n</body>\n</html>";
 
-	std::ofstream report_overview, json_data;
+	std::ofstream report_overview;
 	report_overview.open ( (outputDir+ "/report_overview.html").c_str() );
-	json_data.open ( (outputDir+"/json_data.js" ).c_str() );
 	report_overview << htmlHeader1 << "Report - Overview" << htmlHeader2;
 	report_overview << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
@@ -239,60 +241,59 @@ void SkewEvaluator::writeResults()
 
 	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
 
-	/*
-
-var json = {
-	"children": [
-		{
-			"children":[],
-			"data": {
-				
-			}
-		},
-		{
-			
-		}
-	], 
-    "data": {
-		"$type": "none"
-	}, 
-	"id": "Source", 
-	"name": "Source"
-}
-
-
-*/
-
-	json_data << "var json = {\n" << "\t\"children\": [\n";
-
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
+		std::ofstream json_data;
+		std::stringstream json_incorrect;
+
+		json_data.open ( (outputDir+"/"+detectorNames[classMap[i].classIndex]+"/json_data.js" ).c_str() );// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		json_data << "var json = {\n" << "\t\"children\": [\n";
+		
 		report_overview << "\t\t<tr>\n";
 		
 		report_overview << "\t\t\t<td>" << detectorNames[classMap[i].classIndex] << "</td>\n";
-
+		
 		json_data << "\t\t{\n" << "\t\t\t\"children\": [\n";
+		json_incorrect << "\t\t{\n" << "\t\t\t\"children\": [\n";
 
 		int total = 0;
 		int correct = 0;
 		double variance = 0.0;
+		int alphabetIndex = 0;
 
 		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[i].begin(); it != resMap[i].end(); it++)
 		{
 			json_data << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
+			json_incorrect << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
 			int alphabetTotal = 0;
 			int alphabetCorrect = 0;
 			double alphabetVariance = 0.0;
-
+			int letterIndex = 0;
 			for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
 			{
 				json_data << "\t\t\t\t\t\t{\n" << "\t\t\t\t\t\t\t\"children\": [\n";
+				json_incorrect << "\t\t\t\t\t\t{\n" << "\t\t\t\t\t\t\t\"children\": [\n";
 				alphabetTotal = alphabetTotal + iterator->second.count;
 				alphabetCorrect = alphabetCorrect + iterator->second.correctClassCont;
 				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
 				json_data << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
-				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << iterator->second.correctClassCont << "\n"; 
-				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << double(iterator->second.correctClassCont)/double(iterator->second.count)*100 << ",\n";
+				json_data << "\t\t\t\t\t\t\t\t\"index\": " << letterIndex << ",\n";
+				json_data << "\t\t\t\t\t\t\t\t\"correct\": " << iterator->second.correctClassCont << ",\n";
+				json_data << "\t\t\t\t\t\t\t\t\"count\": " << iterator->second.count << ",\n";
+				json_data << "\t\t\t\t\t\t\t\t\"variance\": " << iterator->second.sumDiff << ",\n"; 
+				json_data << "\t\t\t\t\t\t\t\t\"$color\": \"#00FF55\"\n"; 
+				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"Correct_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+
+				json_incorrect << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
+				json_incorrect << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << 100.0-(double(iterator->second.correctClassCont)/double(iterator->second.count)*100) << ",\n"; 
+				json_incorrect << "\t\t\t\t\t\t\t\t\"index\": " << letterIndex << ",\n";
+				json_incorrect << "\t\t\t\t\t\t\t\t\"correct\": " << iterator->second.correctClassCont << ",\n";
+				json_incorrect << "\t\t\t\t\t\t\t\t\"count\": " << iterator->second.count << ",\n";
+				json_incorrect << "\t\t\t\t\t\t\t\t\"variance\": " << iterator->second.sumDiff << ",\n"; 
+				json_incorrect << "\t\t\t\t\t\t\t\t\"$color\": \"#FF0055\"\n"; 
+				json_incorrect << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"Incorrect_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
+				letterIndex++;
 			}
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
@@ -300,21 +301,45 @@ var json = {
 
 			report_overview << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n";
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
-			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << alphabetCorrect << ",\n";
-			json_data << "\t\t\t\t\t\t\"$color\": \"#0000FF\"\n";
-			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << double(alphabetCorrect)/double(alphabetTotal)*100 << ",\n";
+			json_data << "\t\t\t\t\t\t\"index\": " << alphabetIndex << ",\n";
+			json_data << "\t\t\t\t\t\t\"correct\": " << alphabetCorrect << ",\n";
+			json_data << "\t\t\t\t\t\t\"count\": " << alphabetTotal << ",\n";
+			json_data << "\t\t\t\t\t\t\"variance\": " << alphabetVariance << ",\n";
+			json_data << "\t\t\t\t\t\t\"$color\": \"#00FF55\"\n";
+			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"Correct_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+
+			json_incorrect << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
+			json_incorrect << "\t\t\t\t\t\t\"$angularWidth\": " << 100.0-(double(alphabetCorrect)/double(alphabetTotal)*100) << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"index\": " << alphabetIndex << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"correct\": " << alphabetCorrect << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"count\": " << alphabetTotal << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"variance\": " << alphabetVariance << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"$color\": \"#FF0055\"\n";
+			json_incorrect << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"Incorrect_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
+			alphabetIndex++;
 		}
 		json_data << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
-		json_data << "\t\t\t\t\"$angularWidth\": " << correct << ",\n";
+		json_data << "\t\t\t\t\"$angularWidth\": " << double(correct)/double(total)*100 << ",\n";
 		json_data << "\t\t\t\t\"$color\": \"#00FF00\"\n";
-		json_data << "\t\t\t},\n" << "\t\t\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "\",\n" << "\t\t\t\"name\": \"" << detectorNames[classMap[i].classIndex] << "\"\n" << "\t\t},\n";
+		json_data << "\t\t\t},\n" << "\t\t\t\"id\": \"Correct\",\n" << "\t\t\t\"name\": \"Correct\"\n" << "\t\t},\n";
+
+		json_incorrect << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
+		json_incorrect << "\t\t\t\t\"$angularWidth\": " << 100.0-(double(correct)/double(total)*100) << ",\n";
+		json_incorrect << "\t\t\t\t\"$color\": \"#FF0000\"\n";
+		json_incorrect << "\t\t\t},\n" << "\t\t\t\"id\": \"Incorrect\",\n" << "\t\t\t\"name\": \"Incorrect\"\n" << "\t\t}\n";
+
+		
+		json_data << json_incorrect.str();
+
+		json_data << "\t],\n" << "\t\"data\": {\n";
+		json_data << "\t\t\"$type\": \"none\"\n";
+		json_data << "\t},\n" << "\t\"id\": \"" << detectorNames[classMap[i].classIndex] << "\",\n" << "\t\"name\": \"" << detectorNames[classMap[i].classIndex] << "\"\n}";
+
+		json_data.close();
+
 		report_overview << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t</tr>\n";
 	}
-	
-	json_data << "\t],\n" << "\t\"data\": {\n";
-	json_data << "\t\t\"$type\": \"none\"\n";
-	json_data << "\t},\n" << "\t\"id\": \"Detectors\",\n" << "\t\"name\": \"Detectors\"\n}";
-	json_data.close();
 
 	report_overview << htmlFooter;
 	report_overview.close();
