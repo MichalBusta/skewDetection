@@ -193,7 +193,7 @@ void SkewEvaluator::writeResults()
 {
 	std::vector<AcumResult> classMap;
 	classMap.resize(detectors.size());
-	std::map<int, std::map<std::string, std::map<std::string, AcumResult>>> resMap;
+	std::map<int, std::map<std::string, std::map<std::string, AcumResult> > > resMap;
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
@@ -209,14 +209,14 @@ void SkewEvaluator::writeResults()
 		}
 	}
 
-	std::string outputDir = "C:\\SkewDetection\\reports";
+	std::string outputDir = "/tmp";
 	std::string htmlHeader1 = "<!DOCTYPE HTML>\n<html>\n<head>\n\t<title>";
 	std::string htmlHeader2 = "</title>\n</head>\n<body>\n\t<table>\n";
 	std::string htmlFooter = "\t</table>\n</body>\n</html>";
 
 	std::ofstream report_overview, json_data;
-	report_overview.open (outputDir+"\\report_overview.html");
-	json_data.open (outputDir+"\\json_data.js");
+	report_overview.open ( (outputDir+ "/report_overview.html").c_str() );
+	json_data.open ( (outputDir+"/json_data.js" ).c_str() );
 	report_overview << htmlHeader1 << "Report - Overview" << htmlHeader2;
 	report_overview << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
@@ -225,7 +225,7 @@ void SkewEvaluator::writeResults()
 
 	std::string subtitle = "";
 
-	for(std::map<std::string, std::map<std::string, AcumResult>>::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
+	for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
 	{
 		report_overview << "\t\t\t<th colspan=\"3\">" << it->first << "</th>\n";
 		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>Variance</th>\n";
@@ -277,7 +277,7 @@ var json = {
 		int correct = 0;
 		double variance = 0.0;
 
-		for(std::map<std::string, std::map<std::string, AcumResult>>::iterator it = resMap[i].begin(); it != resMap[i].end(); it++)
+		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[i].begin(); it != resMap[i].end(); it++)
 		{
 			json_data << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
 			int alphabetTotal = 0;
