@@ -1,8 +1,17 @@
 
 
-Jakub: Centers Sk Detector - ? robustnost - body v pasu? 
+
+Filtrovani pismenek: 
+    - pokud tvori vic jak 1 connected componentu
+    - pokud znak neni naimplentovan (rucni verifikace)
+
+     
 
 Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
+
+DONE:
+
+Jakub: Centers Sk Detector - ? robustnost - body v pasu? 
 
 Jakub: Nejdelsi hranu 
 
