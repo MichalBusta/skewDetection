@@ -27,8 +27,8 @@ SkewDetector::~SkewDetector()
 
 void cmp::filterContour(std::vector<cv::Point>& vector)
 {
-	double maxAllowedDivergence = 5; // úhel ve stupních !!!
-	maxAllowedDivergence = maxAllowedDivergence/180*M_PI; // pøevod na radiány
+	double maxAllowedDivergence = 5; // uhel ve stupnich !!!
+	maxAllowedDivergence = maxAllowedDivergence/180*M_PI; // prevod na radiany
 	cv::Point prev;
 	int del = 0;
 	int notdel = 0;
@@ -64,4 +64,32 @@ void cmp::filterContour(std::vector<cv::Point>& vector)
 		}
 
 	}
+}
+
+void cmp::SkewDetector::getBigestContour(
+		std::vector<std::vector<cv::Point> >& contours)
+{
+	std::vector<std::vector<cv::Point> > contours2;
+	int maxArea=0;
+	double y=0;
+	int numberOfContour=0;
+	if(contours.size() == 1)
+		return;
+
+	for(int c = 0; c < contours.size(); c++)
+	{
+		cv::Rect rect=boundingRect(contours[c]);
+		y=rect.height*rect.width;
+		if(y > maxArea)	//contour[numberOfContour] je nejvetsi contoura(na plochu)
+		{
+			maxArea = y;
+			numberOfContour=c;
+		}
+
+
+	}
+
+	contours2.push_back( contours[numberOfContour] );
+	contours = contours2;
+
 }

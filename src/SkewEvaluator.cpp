@@ -12,7 +12,7 @@
 #include <math.h>
 #include <map>
 #include <fstream>
-
+#include "ImageFilter.h"
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
