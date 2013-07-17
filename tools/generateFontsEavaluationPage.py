@@ -191,7 +191,7 @@ class FontTestWriter:
             font = self.fonts[i]
             if specific_fonts != None:
                 bad = allowed
-                for  f in specific_fonts:
+                for f in specific_fonts:
                     if font.getname()[0].startswith(f):
                         bad = not allowed
                 if bad:
@@ -238,41 +238,46 @@ writer = FontTestWriter(fontDirs)
 
 if not os.path.exists(outputDir):
     os.mkdir( outputDir )
-       
+  
+#LATIN     
 outputDirAlphabet = "{0}/Latin".format(outputDir)
 
-#DIGIT
-for i in range(0x0030, 0x0039):
+##DIGIT
+for i in range(0x0030, 0x003A):
 	writer.process(unichr(i), outputDirAlphabet, str(i))
 
-#LATIN CAPITAL
-for i in range(0x0041, 0x005A):
+##LATIN CAPITAL
+for i in range(0x0041, 0x005B):
 	writer.process(unichr(i), outputDirAlphabet, str(i))
 
-#LATIN SMALL
+##LATIN SMALL
 specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
-for i in range(0x0061, 0x007A):
+for i in range(0x0061, 0x007B):
 	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #GREEK
+outputDirAlphabet = "{0}/Greek".format(outputDir)
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
-#for i in range(0x0370, 0x03FF):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+for i in range(0x0370, 0x0400):
+	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
-#CYRIL
+#CYRILIC
+outputDirAlphabet = "{0}/Cyrilic".format(outputDir)
 specific_fonts = ['Alpha Beta', 'Dark Side', 'El Wonko', 'Hack & Slash', 'Kinnari', 'Microsoft PhagsPa', 'Plantagenet Cherokee']
-#for i in range(0x0400, 0x04FF):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), False, specific_fonts)
+for i in range(0x0400, 0x0500):
+	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #GEORGIAN
+outputDirAlphabet = "{0}/Georgian".format(outputDir)
 specific_fonts = ['Sylfaen', 'FreeSerif']
-#for i in range(0x10A0, 0x10FA):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)      
+for i in range(0x10A0, 0x10FB):
+	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)      
 
 #RUNIC
+outputDirAlphabet = "{0}/Runic".format(outputDir)
 specific_fonts = ['Segoe UI Symbol']
-#for i in range(0x16A0, 0x16F0):
-#	writer.process(unichr(i), "C:/SkewDetection/out", str(i), True, specific_fonts)
+for i in range(0x16A0, 0x16F1):
+	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
 
 
 'write modifications'
