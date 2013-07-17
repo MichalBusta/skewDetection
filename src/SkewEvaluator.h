@@ -23,10 +23,12 @@ struct SkewDef
 {
 	/** the ground-truth skew angle */
 	double skewAngle;
+	/** the skew step */
+	int step;
 	/** the skewed image */
 	cv::Mat image;
 
-	SkewDef(double skewAngle, const cv::Mat& image) : skewAngle(skewAngle), image(image) { }
+	SkewDef(double skewAngle, const cv::Mat& image, int step) : skewAngle(skewAngle), image(image), step(step) { }
 };
 
 struct EvaluationResult
@@ -68,7 +70,7 @@ struct AcumResult
 class SkewEvaluator
 {
 public:
-	SkewEvaluator( bool debug = false );
+	SkewEvaluator( std::string outputDirectory, bool debug = false );
 
 	virtual ~SkewEvaluator();
 
@@ -92,6 +94,8 @@ private:
 
 	/** if true, results are show during the processing */
 	bool debug;
+	/** the output directory */
+	std::string outputDirectory;
 
 };
 

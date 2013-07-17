@@ -23,7 +23,7 @@ ImageFilter::~ImageFilter()
 
 cv::Mat ImageFilter::filterImage(cv::Mat source)
 {
-
+	return source;
 }
 
 } /* namespace cmp */
