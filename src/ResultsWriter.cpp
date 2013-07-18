@@ -50,7 +50,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	//nejhorsi vsledky
 	outStream << "<table border=\"1\">\n";
 	outStream << "<th colspan=\"4\"><font color=\"red\">nejhorsi vysledky</font></th>\n";
-	outStream << "<tr><td align=\"center\" width=\"150px\">Angle difference</td><td align=\"center\" width=\"150px\">Alphabet</td><td align=\"center\" width=\"150px\">Letter</td><td>picture</td></tr>\n";
+	outStream << "<tr><td align=\"center\" width=\"150px\">Angle difference</td><td align=\"center\" width=\"150px\">Alphabet</td><td align=\"center\" width=\"150px\">Letter</td><td align=\"center\">picture</td></tr>\n";
 	for(int i = (int) work.size() -1; i >= 0; i--)
 	{
 		std::ostringstream picture;
@@ -70,7 +70,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	//nejlepsi vysledky
 	outStream << "<table border=\"1\">\n";
 	outStream << "<th colspan=\"4\"><font color=\"green\">nejlepsi vysledky</font></th>\n";
-	outStream << "<tr><td align=\"center\" width=\"150px\">Angle difference</td><td align=\"center\" width=\"150px\">Alphabet</td><td align=\"center\" width=\"150px\">Letter</td><td>picture</td></tr>\n";
+	outStream << "<tr><td align=\"center\" width=\"150px\">Angle difference</td><td align=\"center\" width=\"150px\">Alphabet</td><td align=\"center\" width=\"150px\">Letter</td><td align=\"center\">picture</td></tr>\n";
 	for(size_t i = 0; i < work.size(); i++)
 	{
 		std::ostringstream picture;

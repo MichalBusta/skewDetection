@@ -35,7 +35,7 @@ public:
 	 *
 	 * @param mask the character mask - ink is white
 	 * @param lineK
-	 * @param debugImage
+	 * @param debugImage the debug image will be created in same size as mask image
 	 * @return the skew angle in radians
 	 */
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
