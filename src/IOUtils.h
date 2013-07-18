@@ -36,7 +36,7 @@ namespace cmp
 		static std::string GetTempPath();
 
 		static bool DeleteFile(const char* fileName);
-		static void CreateDirectory(const std::string& dirName);
+		static void CreateDir(const std::string& dirName);
 
 		static std::string GetCurrentDirectory();
 		static bool IsDirectory(const std::string& path);
