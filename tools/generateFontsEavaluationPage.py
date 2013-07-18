@@ -19,7 +19,7 @@ class FontTestWriter:
         #self.getFonts('/home/busta/data/cvut/textspotter/fonts')
         #self.getFonts('C:/SkewDetection/fonts')
         for fDir in fontDirs:
-        	self.getFonts(fDir)
+            self.getFonts(fDir)
         
     
     def getFonts(self, startDir):
@@ -65,9 +65,11 @@ class FontTestWriter:
         imageDir = outputDir
         
         if 'italic' in font.getname()[1].lower():
-        	imageDir = imageDir + '/_italic/' + chrName
+            imageDir = imageDir + '/_italic/' + chrName
+        elif 'oblique' in font.getname()[1].lower():
+            imageDir = imageDir + '/_obligue/' + chrName
         else:
-        	imageDir = imageDir + '/' + chrName
+            imageDir = imageDir + '/' + chrName
         
         if not os.path.exists(imageDir):
             os.mkdir( imageDir )
@@ -91,36 +93,36 @@ class FontTestWriter:
         if bbox2 == None:
             return
         else: 
-        	if text != 0 or text != 'o' or text != 'O':
-        		left, upper, right, lower = bbox2
-        		#left = left + 1
-        		#upper = upper + 1
-        		right = right - 1
-        		lower = lower - 1
-        		pix = im2.load()
-        		frame = True
-        		for x in range(left, right): 
-        			if pix[x, upper] != (255,)*3:
-        				frame = False
-        		for x in range(left, right): 
-        			if pix[x, lower] != (255,)*3:
-        				frame = False
-        		for y in range(upper, lower): 
-        			if pix[left, y] != (255,)*3:
-        				frame = False
-        		for y in range(upper, lower): 
-        			if pix[right, y] != (255,)*3:
-        				frame = False
-        		
-				hide = True
-						
-        		for count, color in im2.getcolors():
-        			if color == (255,)*3 and count >= ((right-left)*(lower-upper)):
-        				hide = False
-        				
-        		if frame and hide:
-        			return
-        		
+            if text != 0 or text != 'o' or text != 'O':
+                left, upper, right, lower = bbox2
+                #left = left + 1
+                #upper = upper + 1
+                right = right - 1
+                lower = lower - 1
+                pix = im2.load()
+                frame = True
+                for x in range(left, right): 
+                    if pix[x, upper] != (255,)*3:
+                        frame = False
+                for x in range(left, right): 
+                    if pix[x, lower] != (255,)*3:
+                        frame = False
+                for y in range(upper, lower): 
+                    if pix[left, y] != (255,)*3:
+                        frame = False
+                for y in range(upper, lower): 
+                    if pix[right, y] != (255,)*3:
+                        frame = False
+                
+                hide = True
+                        
+                for count, color in im2.getcolors():
+                    if color == (255,)*3 and count >= ((right-left)*(lower-upper)):
+                        hide = False
+                        
+                if frame and hide:
+                    return
+                
         im.save(imageFile)
         
     def process(self, text, outputDir, chrName, allowed = False, specific_fonts = None):
@@ -134,13 +136,17 @@ class FontTestWriter:
         
         if not os.path.exists(outputDir+'/_italic'):
             os.mkdir( outputDir+'/_italic' )
+            
+        if not os.path.exists(outputDir+'/_obligue'):
+            os.mkdir( outputDir+'/_obligue' )
         
         for i in range(len(self.fonts)):
             font = self.fonts[i]
+            fontFull = font.getname()[0] + "-" + font.getname()[1]
             if specific_fonts != None:
                 bad = allowed
                 for f in specific_fonts:
-                    if font.getname()[0].startswith(f):
+                    if fontFull.startswith(f):
                         bad = not allowed
                 if bad:
                     continue
@@ -149,38 +155,38 @@ class FontTestWriter:
         
         #annotedFile = outputDir + os.sep + "gt.xml"
         #f = open(annotedFile, 'w')
-    	#outDoc.writexml(f)
+        #outDoc.writexml(f)
         
 outputDir = ''
 fontDirs = []
 try:
-	opts, args = getopt.getopt(sys.argv[1:],"hf:o:",["fontDir=","outputDir="])
+    opts, args = getopt.getopt(sys.argv[1:],"hf:o:",["fontDir=","outputDir="])
 except getopt.GetoptError:
-	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
-	sys.exit(2)
+    print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+    sys.exit(2)
 for opt, arg in opts:
-	if opt == '-h':
-		print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
-		sys.exit()
-	elif opt in ("-f", "--fontDir"):
-		if arg[-1:] == "\\" or arg[-1:] == "/":
-			fontDirs.append(arg[:-1])
-		else:
-			fontDirs.append(arg)
-	elif opt in ("-o", "--outputDir"):
-		if arg[-1:] == "\\" or arg[-1:] == "/":
-			outputDir = arg[:-1]
-		else:
-			outputDir = arg
+    if opt == '-h':
+        print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+        sys.exit()
+    elif opt in ("-f", "--fontDir"):
+        if arg[-1:] == "\\" or arg[-1:] == "/":
+            fontDirs.append(arg[:-1])
+        else:
+            fontDirs.append(arg)
+    elif opt in ("-o", "--outputDir"):
+        if arg[-1:] == "\\" or arg[-1:] == "/":
+            outputDir = arg[:-1]
+        else:
+            outputDir = arg
 
 if outputDir == '':
-	print 'No output folder set! \n'
-	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
-	sys.exit(2)
+    print 'No output folder set! \n'
+    print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+    sys.exit(2)
 if len(fontDirs) == 0:
-	print 'No font folder set! \n'
-	print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
-	sys.exit(2)
+    print 'No font folder set! \n'
+    print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
+    sys.exit(2)
 
 writer = FontTestWriter(fontDirs)
 
@@ -192,40 +198,40 @@ outputDirAlphabet = "{0}/Latin".format(outputDir)
 
 ##DIGIT
 for i in range(0x0030, 0x003A):
-	writer.process(unichr(i), outputDirAlphabet, str(i))
+    writer.process(unichr(i), outputDirAlphabet, str(i))
 
 ##LATIN CAPITAL
 for i in range(0x0041, 0x005B):
-	writer.process(unichr(i), outputDirAlphabet, str(i))
+    writer.process(unichr(i), outputDirAlphabet, str(i))
 
 ##LATIN SMALL
 specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
 for i in range(0x0061, 0x007B):
-	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
+    writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #GREEK
 outputDirAlphabet = "{0}/Greek".format(outputDir)
-specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps-Regular', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree']
+specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree', 'AlphaFlightSolidSmallCaps-Regular', 'Cardo', 'Hnias', 'PalatinoLinotype',  ]
 for i in range(0x0370, 0x0400):
-	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
+    writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #CYRILIC
 outputDirAlphabet = "{0}/Cyrilic".format(outputDir)
-specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps-Regular', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree']
+specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree', 'Cardo']
 for i in range(0x0400, 0x0500):
-	writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
+    writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
 
 #GEORGIAN
 outputDirAlphabet = "{0}/Georgian".format(outputDir)
-specific_fonts = ['Sylfaen', 'FreeSerif']
+specific_fonts = ['Sylfaen', 'FreeSerif', 'DejaVuSans', 'FreeSans', 'FreeSerif', 'Code2000', 'EversonMonoUnicode', 'Quivira']
 for i in range(0x10A0, 0x10FB):
-	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)      
+    writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)      
 
 #RUNIC
 outputDirAlphabet = "{0}/Runic".format(outputDir)
-specific_fonts = ['Segoe UI Symbol']
+specific_fonts = ['Segoe UI Symbol', 'FreeMono-Medium', 'Hnias', 'Code2000', 'EversonMonoUnicode', 'Junicode', 'Quivira']
 for i in range(0x16A0, 0x16F1):
-	writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
+    writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
 
 
 'write modifications'
@@ -241,4 +247,4 @@ for i in range(4, len(text)):
 '''    
 writer = FontTestWriter()  
 for i in range(0, 9): 
-'''	
+'''    

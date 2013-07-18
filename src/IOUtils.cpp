@@ -318,7 +318,7 @@ bool IOUtils::DeleteFile(const char* fileName)
  * No sanity checks!
  * @param dirName
  */
-void IOUtils::CreateDirectory(const string& dirName)
+void IOUtils::CreateDir(const std::string& dirName)
 {
 #if defined(ANDROID)
 	cvError(CV_StsError, "Utils::CreateDirectory", "Not implemented!", __FILE__, __LINE__);
@@ -521,8 +521,16 @@ std::string IOUtils::GetTempPath(void)
 #endif
 }
 
+void IOUtils::CopyFile(const std::string& source, const std::string& dst)
+{
+	std::ifstream src( source.c_str(), ios::binary );
+	ofstream dest( dst.c_str(), ios::binary);
+
+	dest << src.rdbuf();
+
+	src.close();
+	dest.close();
 }
 
-
-
+}//namespace cmp
 
