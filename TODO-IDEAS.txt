@@ -1,5 +1,13 @@
 
 
+Vizualizace: oriznout pismenko - obrazek je zbytecne velky 
+
+Vsechny detektory: 
+    - pokud pouzivaji konturu - prevest na spolecny interface ContourSkewDetector (definovany v SkewDetector.h)
+
+Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedImages
+    - odstranit "nepouzitelne znaky": jako : .,; atd. 
+
 
 Filtrovani pismenek: 
     - pokud tvori vic jak 1 connected componentu

@@ -98,7 +98,7 @@ void ContourSkewDetector::getBigestContour(
  * @param approximatioMethod the approximation method
  * @param epsilon if value > 0, the polygon
  */
-ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon ) : approximatioMethod( approximatioMethod ), epsilon(epsilon)
+ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon ) : SkewDetector(), approximatioMethod( approximatioMethod ), epsilon(epsilon)
 {
 
 }
