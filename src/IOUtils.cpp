@@ -521,8 +521,16 @@ std::string IOUtils::GetTempPath(void)
 #endif
 }
 
+void IOUtils::CopyFile(const std::string& source, const std::string& dst)
+{
+	std::ifstream src( source.c_str(), ios::binary );
+	ofstream dest( dst.c_str(), ios::binary);
+
+	dest << src.rdbuf();
+
+	src.close();
+	dest.close();
 }
 
-
-
+}//namespace cmp
 

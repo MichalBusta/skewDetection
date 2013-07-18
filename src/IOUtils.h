@@ -46,7 +46,9 @@ namespace cmp
 		static int StartProcess(std::string executable, std::string commandLine);
 
 		static void ShowImageInWindow(cv::Mat img, int flags = 1, const char* windowName = "Image");
-                 static std::string SaveTempImage(cv::Mat img, std::string windowName, const bool forceWrite=false);
+        static std::string SaveTempImage(cv::Mat img, std::string windowName, const bool forceWrite=false);
+
+        static void CopyFile( const std::string& source, const std::string& dst );
 	};
 
 }
