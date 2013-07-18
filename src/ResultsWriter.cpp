@@ -74,6 +74,10 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	for(size_t i = 0; i < work.size(); i++)
 	{
+		//skip the almost correct angles ...
+		if( fabs(work[i].angleDiff) < ANGLE_MIN)
+			continue;
+
 		std::ostringstream picture;
 		picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
 

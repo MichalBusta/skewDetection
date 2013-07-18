@@ -20,8 +20,6 @@
 #include "TemplateUtils.h"
 #include "ResultsWriter.h"
 
-#define ANGLE_TOLERANCE M_PI / 60.0
-
 
 namespace cmp
 {
@@ -151,6 +149,10 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
+
+			//for correct angles, do not write image
+			if( fabs(angleDiff) < ANGLE_MIN)
+				continue;
 
 			//write image to output directory structure
 			std::string detectorDir = this->outputDirectory;
