@@ -60,7 +60,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 		std::string pictureLink = picture.str();
 
-		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		if( ( work.size() - i) > maxCount)
 			break;
