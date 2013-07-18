@@ -21,7 +21,7 @@ using namespace cv;
 namespace cmp
 {
 
-ThinProfileSkDet::ThinProfileSkDet()
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
 {
 	// TODO Auto-generated constructor stub
 
@@ -32,21 +32,8 @@ ThinProfileSkDet::~ThinProfileSkDet()
 	// TODO Auto-generated destructor stub
 }
 
-double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage)
+double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {
-	std::vector<std::vector<cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-/*	cv::Mat mask2;
-	int x = -40;
-	double angleRad = x * M_PI / 180;
-		float y= tan (angleRad);
-		cv::Mat transformed;
-		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
-		affineTransform.at<float>(0, 1) = y;
-		cv::warpAffine(mask, mask2, affineTransform, cv::Size(mask.cols * 2, mask.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));*/
-
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
 	if (contours[0].size() < 3) return 0;
 	//cmp::filterContour(contours[0]);
 	vector<Point> hull;
