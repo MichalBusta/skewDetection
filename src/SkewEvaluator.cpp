@@ -35,7 +35,7 @@ SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : output
 
 	if(!IOUtils::PathExist(outputDirectory))
 	{
-		IOUtils::CreateDirectory( outputDirectory );
+		IOUtils::CreateDir( outputDirectory );
 	}
 	TemplateUtils::CopyIndexTemplates( ".", outputDirectory );
 }
@@ -158,13 +158,13 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			//write image to output directory structure
 			std::string detectorDir = this->outputDirectory;
 			detectorDir += "/" + this->detectorNames[i];
-			IOUtils::CreateDirectory( detectorDir );
+			IOUtils::CreateDir( detectorDir );
 			std::string alphabetDir = detectorDir;
 			alphabetDir += "/" + alphabet;
-			IOUtils::CreateDirectory( alphabetDir );
+			IOUtils::CreateDir( alphabetDir );
 			std::string letterDir = alphabetDir;
 			letterDir += "/" + letter;
-			IOUtils::CreateDirectory( letterDir );
+			IOUtils::CreateDir( letterDir );
 
 			std::ostringstream os;
 			os << letterDir << "/" << def.step << ".png";
@@ -267,14 +267,14 @@ void SkewEvaluator::writeResults()
 
 	for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
 	{
-		report_overview << "\t\t\t<th colspan=\"3\">" << it->first << "</th>\n";
-		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>Variance</th>\n";
+		report_overview << "\t\t\t<th colspan=\"5\">" << it->first << "</th>\n";
+		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>Variance</th>\n" + "\t\t\t<th>avg % Correct</th>\n";
 	}
 
-	report_overview << "\t\t\t<th colspan=\"3\">Sum</th>\n";
+	report_overview << "\t\t\t<th colspan=\"6\">Sum</th>\n";
 	report_overview << "\t\t</tr>\n";
 	
-	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t</tr>\n";
+	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t\t<th>avg % Correct Letters</th>\n" << "\t\t\t<th>avg % Correct Alphabet</th>\n" << "\t\t</tr>\n";
 
 
 	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
@@ -298,6 +298,9 @@ void SkewEvaluator::writeResults()
 		int correct = 0;
 		double variance = 0.0;
 		int alphabetIndex = 0;
+		double sumSumCorrectPercent = 0.0;
+		double sumCorrectAlphabetPercent = 0.0;
+		int letterTotal = 0;
 
 		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[classMap[i].classIndex].begin(); it != resMap[classMap[i].classIndex].end(); it++)
 		{
@@ -306,6 +309,7 @@ void SkewEvaluator::writeResults()
 			int alphabetTotal = 0;
 			int alphabetCorrect = 0;
 			double alphabetVariance = 0.0;
+			double sumCorrectPercent = 0.0;
 			int letterIndex = 0;
 			for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
 			{
@@ -334,12 +338,16 @@ void SkewEvaluator::writeResults()
 				json_incorrect << "\t\t\t\t\t\t\t\t\"$color\": \"#FF0055\"\n"; 
 				json_incorrect << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"Incorrect_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
 				letterIndex++;
+				sumCorrectPercent = sumCorrectPercent + double(iterator->second.correctClassCont)/double(iterator->second.count)*100;
 			}
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
 			variance = variance + alphabetVariance;
+			
+			sumSumCorrectPercent = sumSumCorrectPercent + sumCorrectPercent;
+			sumCorrectAlphabetPercent = sumCorrectAlphabetPercent + double(alphabetCorrect)/double(alphabetTotal)*100;
 
-			report_overview << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n";
+			report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(alphabetTotal) << "</td>\n";
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
 			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << (double(alphabetCorrect)/double(alphabetTotal))*(double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count))*100 << ",\n";
 			json_data << "\t\t\t\t\t\t\"index\": " << alphabetIndex << ",\n";
@@ -382,7 +390,7 @@ void SkewEvaluator::writeResults()
 
 		json_data.close();
 
-		report_overview << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t</tr>\n";
+		report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumSumCorrectPercent/double(total) << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent/double(alphabetIndex) << "</td>\n" << "\t\t</tr>\n";
 	}
 
 	report_overview << htmlFooter;

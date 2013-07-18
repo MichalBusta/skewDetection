@@ -318,7 +318,7 @@ bool IOUtils::DeleteFile(const char* fileName)
  * No sanity checks!
  * @param dirName
  */
-void IOUtils::CreateDirectory(const string& dirName)
+void IOUtils::CreateDir(const std::string& dirName)
 {
 #if defined(ANDROID)
 	cvError(CV_StsError, "Utils::CreateDirectory", "Not implemented!", __FILE__, __LINE__);
