@@ -178,6 +178,20 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 
 			end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
 			cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
+
+			//cut display image
+			std::vector<cv::Point> outerContour;
+			std::vector<cv::Vec4i> hierarchy;
+			findContours( draw, outerContour, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+			cv::Rect r = cv::boundingRect(outerContour);
+			r.x=r.x-10;
+			r.y=r.y-10;
+			r.height=r.height+20;
+			r.width=r.width+20;
+			draw = draw(r);
+			if(  debugImage.cols == workImage.cols && debugImage.rows == workImage.rows)
+				debugImage = debugImage(r);
+
 			std::vector<cv::Mat> toMerge;
 			toMerge.push_back(draw);
 			toMerge.push_back(debugImage);
