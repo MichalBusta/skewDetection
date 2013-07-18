@@ -124,6 +124,8 @@ static cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing,
 	for( std::vector<cv::Mat>::iterator it =  imagesToMerge.begin(); it < imagesToMerge.end(); it++ )
 	{
 		int hoffset = (i % 2 ) * verticalDisplacement;
+		if(it->cols == 0)
+			continue;
 		cv::Rect roi = cv::Rect(wOffset, hoffset, it->cols, it->rows);
 		mergedImage(roi) += *it;
 		wOffset += it->cols + spacing;
