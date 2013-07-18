@@ -70,7 +70,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	//nejlepsi vysledky
 	outStream << "<h3>Best Results</h3>\n";
 
-	outStream << "<table class=\"preview\">\n";
+	outStream << "<table>\n";
 	outStream << "<tr><td>Angle Difference</td><td>Alphabet</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	for(size_t i = 0; i < work.size(); i++)
 	{
