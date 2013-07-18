@@ -69,9 +69,9 @@ public:
 	 */
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, cv::Mat* debugImage = NULL ) = 0;
 
-protected:
-
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours );
+
+protected:
 
 	//@see cv::findContorurs
 	int approximatioMethod;
