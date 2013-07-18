@@ -257,7 +257,7 @@ void SkewEvaluator::writeResults()
 	classMap.resize(detectors.size());
 	std::map<int, std::map<std::string, std::map<std::string, AcumResult> > > resMap;
 	std::map<int, std::map<std::string, AcumResult> > alphabetMap;
-	std::map<int, AcumResult> detectorMap;
+	//std::map<int, AcumResult> detectorMap;
 	std::map<std::string, bool> letters;
 
 	if(results.size() == 0)
@@ -270,6 +270,7 @@ void SkewEvaluator::writeResults()
 	{
 		classMap[ results[i].classificator ].count++;
 		classMap[ results[i].classificator ].classIndex = results[i].classificator;
+		classMap[ results[i].classificator ].sumDiff = classMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
 
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].classIndex = results[i].classificator;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].count++;
@@ -279,16 +280,16 @@ void SkewEvaluator::writeResults()
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].classIndex = results[i].classificator;
 
 		
-		detectorMap[ results[i].classificator ].count++;
-		detectorMap[ results[i].classificator ].sumDiff = detectorMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
-		detectorMap[ results[i].classificator ].classIndex = results[i].classificator;
+		//detectorMap[ results[i].classificator ].count++;
+		//detectorMap[ results[i].classificator ].sumDiff = detectorMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
+		//detectorMap[ results[i].classificator ].classIndex = results[i].classificator;
 		letters[ results[i].letter ] = true;
 		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
 			classMap[ results[i].classificator ].correctClassCont++;
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 			alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
-			detectorMap[ results[i].classificator ].correctClassCont++;
+			//detectorMap[ results[i].classificator ].correctClassCont++;
 		}
 	}
 
@@ -344,6 +345,7 @@ void SkewEvaluator::writeResults()
 		report_detector << "\t\t\t<th colspan=\"6\">Sum</th>\n";
 		report_detector << "\t\t</tr>\n";
 		report_detector << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t\t<th>avg % Correct Letters</th>\n" << "\t\t\t<th>avg % Correct Alphabet</th>\n" << "\t\t</tr>\n";
+		report_detector << "\t\t<tr>\n";
 
 		int total = 0;
 		int correct = 0;
@@ -402,7 +404,7 @@ void SkewEvaluator::writeResults()
 			letterTotal = letterTotal + it->second.size();
 
 			report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
-			report_detector << std::fixed << std::setprecision(2) << "\t\t<tr>\n" << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
+			report_detector << std::fixed << std::setprecision(2)<< "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
 			//json_data << "\t\t\t\t\t\t\"$angularWidth\": " << (double(alphabetCorrect)/double(alphabetTotal))*(double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count))*100 << ",\n";
 			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << double(alphabetCorrect)/double(alphabetTotal)*100*it->second.size() << ",\n";
@@ -491,7 +493,7 @@ series = [{
     }
 }]
 	*/
-	/*std::ofstream overview_json;
+	std::ofstream overview_json;
 	overview_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
 
 	overview_json << "series = [{\n";
@@ -503,7 +505,7 @@ series = [{
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		if(i!=0) overview_json << ", ";
-		overview_json << std::fixed << std::setprecision(2) << double(classMap[i].correctClassCont)/double(classMap[i].count);
+		overview_json << std::fixed << std::setprecision(2) << 100*double(classMap[i].correctClassCont)/double(classMap[i].count);
 	}
 
 	overview_json << "],\n";
@@ -515,7 +517,7 @@ series = [{
     overview_json << "\tcolor: '#89A54E',\n";
     overview_json << "\ttype: 'spline',\n";
 	overview_json << "\tyAxis: 1,\n";
-    overview_json << "\tdata: [\n";
+    overview_json << "\tdata: [";
 
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
@@ -533,11 +535,11 @@ series = [{
 
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
-		overview_json << "'" << detectorNames[classMap[i].classIndex] << "', '";
+		overview_json << "'" << detectorNames[classMap[i].classIndex] << "', ";
 	}
 	
-	overview_json << "Sum' ];";
-	overview_json.close();*/
+	overview_json << "'Sum' ];";
+	overview_json.close();
 }
 
 /**
