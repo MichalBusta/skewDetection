@@ -14,7 +14,7 @@
 #include <string>
 #include <map>
 
-#include "SkewDetector.h"
+#include "SkewDetection.h"
 
 namespace cmp
 {
