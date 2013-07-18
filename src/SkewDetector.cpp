@@ -23,9 +23,7 @@ SkewDetector::~SkewDetector()
 	// TODO Auto-generated destructor stub
 }
 
-} /* namespace cmp */
-
-void cmp::filterContour(std::vector<cv::Point>& vector)
+void filterContour(std::vector<cv::Point>& vector)
 {
 	double maxAllowedDivergence = 5; // uhel ve stupnich !!!
 	maxAllowedDivergence = maxAllowedDivergence/180*M_PI; // prevod na radiany
@@ -66,9 +64,10 @@ void cmp::filterContour(std::vector<cv::Point>& vector)
 	}
 }
 
-void cmp::SkewDetector::getBigestContour(
+void ContourSkewDetector::getBigestContour(
 		std::vector<std::vector<cv::Point> >& contours)
 {
+
 	std::vector<std::vector<cv::Point> > contours2;
 	int maxArea=0;
 	double y=0;
@@ -93,3 +92,49 @@ void cmp::SkewDetector::getBigestContour(
 	contours = contours2;
 
 }
+
+/**
+ * Constructor
+ * @param approximatioMethod the approximation method
+ * @param epsilon if value > 0, the polygon
+ */
+ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon ) : SkewDetector(), approximatioMethod( approximatioMethod ), epsilon(epsilon)
+{
+
+}
+
+/**
+ * The skew detection
+ *
+ * @param mask
+ * @param lineK
+ * @param debugImage
+ * @return
+ */
+double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* debugImage )
+{
+	std::vector<std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+
+	/** find the contour */
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, approximatioMethod, cv::Point(0, 0) );
+
+	if( contours.size() == 0)
+		return 0;
+
+	if( contours.size() > 1)
+		ContourSkewDetector::getBigestContour( contours );
+
+	if(this->epsilon > 0)
+	{
+		std::vector<cv::Point> apCont;
+		approxPolyDP(contours[0], apCont, epsilon, true);
+		contours[0] = apCont;
+	}
+
+	return detectSkew(mask, contours, debugImage );
+}
+
+} /* namespace cmp */
+
+
