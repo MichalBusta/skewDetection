@@ -15,11 +15,9 @@
 #include <iomanip>
 #include <sstream>
 
-#include "ImageFilter.h"
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
-#include "ImageFilter.h"
 #include "TemplateUtils.h"
 #include "ResultsWriter.h"
 
@@ -47,6 +45,7 @@ SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : output
 		IOUtils::CreateDir( detectorDir );
 		TemplateUtils::CopyDetectorTemplates( ".", detectorDir );
 	}
+	this->results.reserve(20000);
 }
 
 SkewEvaluator::~SkewEvaluator()

@@ -39,6 +39,11 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 	indexDst += "/index.htm";
 	IOUtils::CpFile( index, indexDst );
 
+	index = templatesDir + "/style.css";
+	indexDst = dstDir;
+	indexDst += "/style.css";
+	IOUtils::CpFile( index, indexDst );
+
 	std::string jsDir = dstDir;
 	jsDir += "/js";
 	IOUtils::CreateDir( jsDir );
