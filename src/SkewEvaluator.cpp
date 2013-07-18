@@ -182,7 +182,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			std::vector<cv::Vec4i> hierarchy;
 			cv::Mat temp = def.image.clone();
 			findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
-			ContourSkewDetector::getBigestContour(contours);
+			ContourSkewDetector::getBigestContour(contours, hierarchy);
 			cv::Rect r = cv::boundingRect(contours[0]);
 			r.x=r.x-10;
 			r.x = MAX(r.x, 0);

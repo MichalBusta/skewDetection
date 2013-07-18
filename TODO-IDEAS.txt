@@ -1,23 +1,22 @@
 
 
-Vizualizace: oriznout pismenko - obrazek je zbytecne velky 
-
 Vsechny detektory: 
     - pokud pouzivaji konturu - prevest na spolecny interface ContourSkewDetector (definovany v SkewDetector.h)
 
 Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedImages
     - odstranit "nepouzitelne znaky": jako : .,; atd. 
+     
+Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
+
+DONE:
+
+Vizualizace: oriznout pismenko - obrazek je zbytecne velky 
 
 
 Filtrovani pismenek: 
     - pokud tvori vic jak 1 connected componentu
     - pokud znak neni naimplentovan (rucni verifikace)
 
-     
-
-Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
-
-DONE:
 
 Jakub: Centers Sk Detector - ? robustnost - body v pasu? 
 
