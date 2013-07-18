@@ -24,11 +24,11 @@ struct SkewDef
 	/** the ground-truth skew angle */
 	double skewAngle;
 	/** the skew step */
-	int step;
+	size_t imageId;
 	/** the skewed image */
 	cv::Mat image;
 
-	SkewDef(double skewAngle, const cv::Mat& image, int step) : skewAngle(skewAngle), image(image), step(step) { }
+	SkewDef(double skewAngle, const cv::Mat& image, size_t imageId) : skewAngle(skewAngle), image(image), imageId(imageId) { }
 };
 
 struct EvaluationResult
@@ -41,7 +41,14 @@ struct EvaluationResult
 
 	int classificator;
 
-	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator) { };
+	size_t imageId;
+
+	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator), imageId(imageId) { };
+
+	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
+	{
+		return fabs(obj1.angleDiff) < fabs(obj2.angleDiff);
+	}
 };
 
 struct AcumResult
@@ -96,6 +103,8 @@ private:
 	bool debug;
 	/** the output directory */
 	std::string outputDirectory;
+
+	size_t nextImageId;
 
 };
 

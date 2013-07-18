@@ -27,7 +27,7 @@
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug )
+SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0)
 {
 	registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	registerDetector(new CentersSkDet(), "TopBottomCenters" );
@@ -151,7 +151,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			cv::Mat workImage = def.image.clone();
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
 
 			//write image to output directory structure
 			std::string detectorDir = this->outputDirectory;
@@ -165,7 +165,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			IOUtils::CreateDirectory( letterDir );
 
 			std::ostringstream os;
-			os << letterDir << "/" << def.step << ".png";
+			os << letterDir << "/" << def.imageId << ".png";
 
 			//create display image
 			cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
@@ -404,7 +404,6 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 {
 	int x;
 	float y;
-	int i = 0;
 	for(x=-40;x<=40;x=x+10)
 	{
 		double angleRad = x * M_PI / 180;
@@ -414,7 +413,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		affineTransform.at<float>(0, 1) = y;
 		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
-		distortions.push_back( SkewDef( - angleRad, transformed, i++) );
+		distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
 	}
 }
 
