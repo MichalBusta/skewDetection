@@ -256,8 +256,9 @@ void SkewEvaluator::writeResults()
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].count++;
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].classIndex = results[i].classificator;
 
-
+		
 		detectorMap[ results[i].classificator ].count++;
+		detectorMap[ results[i].classificator ].sumDiff = detectorMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
 		detectorMap[ results[i].classificator ].classIndex = results[i].classificator;
 		letters[ results[i].letter ] = true;
 		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
@@ -273,6 +274,8 @@ void SkewEvaluator::writeResults()
 	report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
 	report_overview << "\t<table>\n" << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
+
+	std::vector<double> jsonData_correct, jsonData_deviation;
 
 	std::string subtitle = "";
 
@@ -310,7 +313,7 @@ void SkewEvaluator::writeResults()
 		report_detector << "\t<table>\n" << "\t\t<tr>\n";
 		subtitle = "";
 
-		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
+		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[classMap[i].classIndex].begin(); it != resMap[classMap[i].classIndex].end(); it++)
 		{
 			report_detector << "\t\t\t<th colspan=\"5\">" << it->first << "</th>\n";
 			subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>Variance</th>\n" + "\t\t\t<th>avg % Correct Letters</th>\n";
@@ -445,8 +448,74 @@ void SkewEvaluator::writeResults()
 
 	report_overview.close();
 
+	/*
+series = [{
+    name: 'Correct Classifications',
+    color: '#4572A7',
+    type: 'column',
+    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
+    tooltip: {
+        valueSuffix: ' %'
+    }
 
+}, {
+    name: 'Standard Deviation',
+    color: '#89A54E',
+    type: 'spline',
+	yAxis: 1,
+    data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, -1.0, 9.6],
+    tooltip: {
+        valueSuffix: ''
+    }
+}]
+	*/
+	/*std::ofstream overview_json;
+	overview_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
 
+	overview_json << "series = [{\n";
+	overview_json << "\tname: 'Correct Classifications',\n";
+    overview_json << "\tcolor: '#4572A7',\n";
+    overview_json << "\ttype: 'column',\n";
+    overview_json << "\tdata: [";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		if(i!=0) overview_json << ", ";
+		overview_json << std::fixed << std::setprecision(2) << double(classMap[i].correctClassCont)/double(classMap[i].count);
+	}
+
+	overview_json << "],\n";
+    overview_json << "\ttooltip: {\n";
+    overview_json << "\t\tvalueSuffix: ' %'\n";
+    overview_json << "\t}\n";
+	overview_json << "}, {\n";
+	overview_json << "\tname: 'Standard Deviation',\n";
+    overview_json << "\tcolor: '#89A54E',\n";
+    overview_json << "\ttype: 'spline',\n";
+	overview_json << "\tyAxis: 1,\n";
+    overview_json << "\tdata: [\n";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		if(i!=0) overview_json << ", ";
+		overview_json << std::fixed << std::setprecision(2) << classMap[i].sumDiff;
+	}
+
+    overview_json << "],\n";
+    overview_json << "\ttooltip: {\n";
+    overview_json << "\t\tvalueSuffix: ''\n";
+    overview_json << "\t}\n";
+	overview_json << "}]\n";
+
+	overview_json << "\n\n" << "categories = [ ";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		overview_json << "'" << detectorNames[classMap[i].classIndex] << "', '";
+	}
+	
+	overview_json << "Sum' ];";
+	overview_json.close();*/
 }
 
 /**
