@@ -57,7 +57,7 @@ public:
 
 	virtual ~ContourSkewDetector(){  }
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
+	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
 
 	/**
 	 * Descendants have to implement this method
@@ -67,11 +67,11 @@ public:
 	 * @param debugImage
 	 * @return
 	 */
-	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, cv::Mat* debugImage = NULL ) = 0;
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL ) = 0;
+
+	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 
 protected:
-
-	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours );
 
 	//@see cv::findContorurs
 	int approximatioMethod;

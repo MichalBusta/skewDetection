@@ -20,14 +20,14 @@ namespace cmp
  *
  * TODO type description
  */
-class CentersSkDet : public SkewDetector
+class CentersSkDet : public ContourSkewDetector
 {
 public:
-	CentersSkDet(float precision = 0.1);
+	CentersSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0, float precision = 0.1);
 
 	virtual ~CentersSkDet();
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
 
 	//precision urcuje cast pismene v desetinem tvaru, ktere tvori "horni hranici pismene"
 	float precision;

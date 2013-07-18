@@ -65,10 +65,11 @@ void filterContour(std::vector<cv::Point>& vector)
 }
 
 void ContourSkewDetector::getBigestContour(
-		std::vector<std::vector<cv::Point> >& contours)
+		std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy)
 {
 
 	std::vector<std::vector<cv::Point> > contours2;
+	std::vector<cv::Vec4i> hierarchy2;
 	int maxArea=0;
 	double y=0;
 	int numberOfContour=0;
@@ -90,6 +91,8 @@ void ContourSkewDetector::getBigestContour(
 
 	contours2.push_back( contours[numberOfContour] );
 	contours = contours2;
+	hierarchy2.push_back( hierarchy[numberOfContour] );
+	hierarchy = hierarchy2;
 
 }
 
@@ -123,7 +126,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 		return 0;
 
 	if( contours.size() > 1)
-		ContourSkewDetector::getBigestContour( contours );
+		ContourSkewDetector::getBigestContour( contours, hierarchy );
 
 	if(this->epsilon > 0)
 	{
@@ -132,7 +135,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 		contours[0] = apCont;
 	}
 
-	return detectSkew(mask, contours, debugImage );
+	return detectSkew(mask, contours, hierarchy, debugImage );
 }
 
 } /* namespace cmp */
