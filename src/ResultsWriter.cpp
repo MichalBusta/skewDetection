@@ -43,11 +43,10 @@ void ResultsWriter::writeWorstDetectorResults(
 
 	std::sort(work.begin(), work.end(), &EvaluationResult::SortByAbsAngleDiff);
 
-	outStream << "<br /><br /><br />\n";
-
+	
+	outStream << "<div class=\"preview\">\n";
 	outStream << "<h2>Results Preview</h2>\n";
-
-	outStream << "<div class=\"previewTable\">\n";
+	outStream << "<div class=\"column\">\n";
 
 	outStream << "<h3>Worst Results</h3>\n";
 	//nejhorsi vsledky
@@ -65,8 +64,9 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( ( work.size() - i) > maxCount)
 			break;
 	}
-	outStream << "</table>\n";
-
+	outStream << "</table></div>\n";
+	
+	outStream << "<div class=\"column\">\n";
 	//nejlepsi vysledky
 	outStream << "<h3>Best Results</h3>\n";
 
@@ -86,7 +86,7 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( i > maxCount)
 			break;
 	}
-	outStream << "</table></div>\n";
+	outStream << "</table></div></div>\n";
 
 
 
