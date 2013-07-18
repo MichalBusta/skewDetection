@@ -67,7 +67,7 @@ public:
 	 * @param debugImage
 	 * @return
 	 */
-	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, cv::Mat* debugImage = NULL ) = 0;
 
 protected:
 
