@@ -124,6 +124,8 @@ static cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing,
 	for( std::vector<cv::Mat>::iterator it =  imagesToMerge.begin(); it < imagesToMerge.end(); it++ )
 	{
 		int hoffset = (i % 2 ) * verticalDisplacement;
+		if(it->cols == 0)
+			continue;
 		cv::Rect roi = cv::Rect(wOffset, hoffset, it->cols, it->rows);
 		mergedImage(roi) += *it;
 		wOffset += it->cols + spacing;
@@ -175,16 +177,36 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			std::ostringstream os;
 			os << letterDir << "/" << def.imageId << ".png";
 
-			//create display image
-			cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
-			cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
+			//cut display image
+			std::vector<std::vector<cv::Point> > contours;
+			std::vector<cv::Vec4i> hierarchy;
+			cv::Mat temp = def.image.clone();
+			findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+			ContourSkewDetector::getBigestContour(contours, hierarchy);
+			cv::Rect r = cv::boundingRect(contours[0]);
+			r.x=r.x-10;
+			r.x = MAX(r.x, 0);
+			r.y=r.y-10;
+			r.y = MAX(r.y, 0);
+			r.height=r.height+20;
+			r.height = MIN(r.height, temp.rows - r.y - 1);
+			r.width=r.width+20;
+			r.width = MIN(r.width, temp.cols - r.x - 1);
 
 			cv::Mat draw;
 			cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
-			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
+			draw = draw(r);
+			if(  debugImage.cols == workImage.cols && debugImage.rows == workImage.rows)
+				debugImage = debugImage(r);
 
+			//create display image
+			cv::Point origin = cv::Point( draw.cols / 2.0, 0 );
+			cv::Point end = cv::Point( origin.x + draw.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + draw.rows * sin(detectedAngle + M_PI / 2.0));
+
+			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
 			end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
 			cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
+
 			std::vector<cv::Mat> toMerge;
 			toMerge.push_back(draw);
 			toMerge.push_back(debugImage);

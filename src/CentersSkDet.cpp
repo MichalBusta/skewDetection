@@ -17,7 +17,7 @@ using namespace cv;
 namespace cmp
 {
 
-CentersSkDet::CentersSkDet(float precision) : precision(precision)
+CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision)
 {
 
 }
@@ -34,14 +34,8 @@ bool sortPointY (const Point& i,const Point& j)
 	return (i.y < j.y);
 }
 
-double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage)
+double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {
-
-	std::vector<std::vector<cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
 	
 	if (contours[0].size() < 3) return 0;
 	std::vector<cv::Point> drawContour;
