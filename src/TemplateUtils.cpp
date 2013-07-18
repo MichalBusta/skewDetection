@@ -41,7 +41,7 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 
 	std::string jsDir = dstDir;
 	jsDir += "/js";
-	IOUtils::CreateDirectory( jsDir );
+	IOUtils::CreateDir( jsDir );
 
 	std::string chartsSrc = templatesDir;
 	chartsSrc += "/js/highcharts.js";

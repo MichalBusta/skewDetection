@@ -27,6 +27,8 @@ public:
 	virtual ~TemplateUtils();
 
 	static void CopyIndexTemplates( std::string currentDir, std::string dstDir );
+
+	static void CopyDetectorTemplates( std::string currentDir, std::string dstDir );
 };
 
 } /* namespace cmp */

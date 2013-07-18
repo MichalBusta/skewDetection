@@ -40,13 +40,43 @@ public:
 	 */
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
 
-	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours );
 };
 
+/**
+ * @class cmp::ContourSkewDetector
+ *
+ * @brief The skew detector interface for detectors working on contour
+ *
+ * Class interface carry out: contour detection and returning just biggest contour
+ */
 class ContourSkewDetector : public SkewDetector
 {
 public:
-	virtual double detectSkew( std::vector<std::vector<cv::Point> >& contours, double lineK, const cv::Mat& mask, cv::Mat* debugImage = NULL );
+
+	ContourSkewDetector( int approximatioMethod, double epsilon );
+
+	virtual ~ContourSkewDetector(){  }
+
+	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
+
+	/**
+	 * Descendants have to implement this method
+	 *
+	 * @param mask
+	 * @param contours
+	 * @param debugImage
+	 * @return
+	 */
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, cv::Mat* debugImage = NULL );
+
+protected:
+
+	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours );
+
+	//@see cv::findContorurs
+	int approximatioMethod;
+	/** the constant in approximation method @see cv::approxPolyDP */
+	double epsilon;
 };
 
 /**
