@@ -12,17 +12,17 @@
 
 namespace cmp{
 
-class VerticalDomSkDet : public SkewDetector {
+class VerticalDomSkDet : public ContourSkewDetector {
 public:
-	VerticalDomSkDet(int histColWidth = 1, int sigma = 2, int range = 10, int ignoreAngle = 10);
+	VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0, int histColWidth = 1, int sigma = 2, int range = 10, int ignoreAngle = 10);
 	virtual ~VerticalDomSkDet();
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL);
 
 	float* hist;
 	/** sirka binu histogramu ve stupnich */
 	int histColWidth;
-	/** parametr sigma u normalového rozdeleni */
+	/** parametr sigma u normaloveho rozdeleni */
 	int sigma;
 	/** pocet ovlivnenych binu = sigma*range */
 	int range;

@@ -15,7 +15,8 @@ using namespace cv;
 
 namespace cmp {
 
-LongestEdgeSkDetector::LongestEdgeSkDetector() {
+LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
+{
 	// TODO Auto-generated constructor stub
 
 }
@@ -24,14 +25,8 @@ LongestEdgeSkDetector::~LongestEdgeSkDetector() {
 	// TODO Auto-generated destructor stub
 }
 
-double LongestEdgeSkDetector::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage)
+double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
 {
-	std::vector<std::vector<cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
-
 	std::vector<cv::Point>& outerContour = contours[0];
 	double epsilon = 0.01 * mask.rows;
 	std::vector<cv::Point> apCont;

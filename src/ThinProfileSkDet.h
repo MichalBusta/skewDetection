@@ -20,13 +20,13 @@ namespace cmp
  *
  * TODO type description
  */
-class ThinProfileSkDet : public SkewDetector
+class ThinProfileSkDet : public ContourSkewDetector
 {
 public:
-	ThinProfileSkDet();
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0);
 	virtual ~ThinProfileSkDet();
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
 };
 
 } /* namespace cmp */

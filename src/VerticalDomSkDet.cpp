@@ -26,7 +26,7 @@ using namespace cv;
 namespace cmp{
 
 
-VerticalDomSkDet::VerticalDomSkDet(int histColWidth, int sigma, int range, int ignoreAngle): histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle) {
+VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle) {
 	// TODO Auto-generated constructor stub
 
 	hist = new float [int(180/histColWidth)];
@@ -36,14 +36,8 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 	delete [] hist;
 }
 
-double VerticalDomSkDet::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage)//, int sigma, int range, int ignoreAngle) 
+double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)//, int sigma, int range, int ignoreAngle)
 {
-	std::vector<std::vector<cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
-
 	std::vector<cv::Point> contour = contours[0];
 	filterContour(contour);
 	

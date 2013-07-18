@@ -25,7 +25,7 @@ namespace cmp
  * @param isRight
  * @param contourForm
  */
-LeftRightHullSkDet::LeftRightHullSkDet(float precision, bool isRight, bool contourForm): precision(precision) , isRight(isRight), contourForm(contourForm)
+LeftRightHullSkDet::LeftRightHullSkDet(int approximatioMethod, double epsilon, float precision, bool isRight, bool contourForm): ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), isRight(isRight), contourForm(contourForm)
 {
 
 
@@ -36,25 +36,8 @@ LeftRightHullSkDet::~LeftRightHullSkDet()
 	// TODO Auto-generated destructor stub
 }
 
-double LeftRightHullSkDet::detectSkew(cv::Mat& mask, double lineK,
-		cv::Mat* debugImage)
+double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {
-	std::vector<std::vector<cv::Point> > contours;
-	vector<Vec4i> hierarchy;
-//	cv::Mat mask2;
-//	int x = -40;
-//	double angleRad = x * M_PI / 180;
-//	float y= tan (angleRad);
-//	cv::Mat transformed;
-//	cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
-//	affineTransform.at<float>(0, 1) = y;
-//	cv::warpAffine(mask, mask2, affineTransform, cv::Size(mask.cols * 2, mask.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-
-
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
-
-	//cmp::filterContour(contours[0]);
-
 	vector<Point> hull;
 	convexHull( contours[0], hull, false, true);
 	vector<Point> outerContour = contours[0];

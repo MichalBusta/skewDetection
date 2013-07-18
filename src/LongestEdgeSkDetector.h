@@ -12,12 +12,12 @@
 
 namespace cmp {
 
-class LongestEdgeSkDetector : public SkewDetector {
+class LongestEdgeSkDetector : public ContourSkewDetector {
 public:
-	LongestEdgeSkDetector();
+	LongestEdgeSkDetector(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0);
 	virtual ~LongestEdgeSkDetector();
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
 };
 
 } /* namespace cmp */

@@ -20,14 +20,14 @@ namespace cmp
  *
  * TODO type description
  */
-class LeftRightHullSkDet : public SkewDetector
+class LeftRightHullSkDet : public ContourSkewDetector
 {
 public:
-	LeftRightHullSkDet(float precision = 0.1, bool isRight = true, bool contourForm=true);
+	LeftRightHullSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0, float precision = 0.1, bool isRight = true, bool contourForm=true);
 
 	virtual ~LeftRightHullSkDet();
 
-	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
 
 	//precision urcuje cast pismene v desetinem tvaru, ktere tvori "horni hranici pismene"
 	float precision;
