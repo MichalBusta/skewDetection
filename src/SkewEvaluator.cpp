@@ -19,6 +19,7 @@
 #include "SkewEvaluator.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
+#include "ImageFilter.h"
 
 #define ANGLE_TOLERANCE M_PI / 60.0
 
@@ -26,10 +27,15 @@
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( bool debug ) : debug( debug )
+SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug )
 {
 	registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	registerDetector(new CentersSkDet(), "TopBottomCenters" );
+
+	if(!IOUtils::PathExist(outputDirectory))
+	{
+		IOUtils::CreateDirectory( outputDirectory );
+	}
 }
 
 SkewEvaluator::~SkewEvaluator()
@@ -147,23 +153,42 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i) );
 
+			//write image to output directory structure
+			std::string detectorDir = this->outputDirectory;
+			detectorDir += "/" + this->detectorNames[i];
+			IOUtils::CreateDirectory( detectorDir );
+			std::string alphabetDir = detectorDir;
+			alphabetDir += "/" + alphabet;
+			IOUtils::CreateDirectory( alphabetDir );
+			std::string letterDir = alphabetDir;
+			letterDir += "/" + letter;
+			IOUtils::CreateDirectory( letterDir );
+
+			std::ostringstream os;
+			os << letterDir << "/" << def.step << ".png";
+
+			//create display image
+			cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
+			cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
+
+			cv::Mat draw;
+			cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
+			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
+
+			end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
+			cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
+			std::vector<cv::Mat> toMerge;
+			toMerge.push_back(draw);
+			toMerge.push_back(debugImage);
+			cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
+
+			cv::imwrite( os.str(), dispImage );
+
 			if( debug )
 			{
-				cv::Point origin = cv::Point( debugImage.cols / 2.0, 0 );
-				cv::Point end = cv::Point( origin.x + debugImage.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(detectedAngle + M_PI / 2.0));
-
-				cv::Mat draw;
-				cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
-				cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
-
-				end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
-				cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
-				std::vector<cv::Mat> toMerge;
-				toMerge.push_back(draw);
-				toMerge.push_back(debugImage);
-				cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
 				cv::imshow(detectorNames[i], dispImage);
 			}
+
 		}
 
 		if( debug )
@@ -201,6 +226,8 @@ void SkewEvaluator::writeResults()
 	std::vector<AcumResult> classMap;
 	classMap.resize(detectors.size());
 	std::map<int, std::map<std::string, std::map<std::string, AcumResult> > > resMap;
+	std::map<int, std::map<std::string, AcumResult> > alphabetMap;
+	std::map<int, AcumResult> detectorMap;
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
@@ -209,10 +236,14 @@ void SkewEvaluator::writeResults()
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].classIndex = results[i].classificator;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].count++;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff = resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff + results[i].angleDiff*results[i].angleDiff;
+		alphabetMap[ results[i].classificator ][ results[i].alphabet ].count++;
+		detectorMap[ results[i].classificator ].count++;
 		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
 			classMap[ results[i].classificator ].correctClassCont++;
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
+			alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
+			detectorMap[ results[i].classificator ].correctClassCont++;
 		}
 	}
 	
@@ -266,7 +297,7 @@ void SkewEvaluator::writeResults()
 		double variance = 0.0;
 		int alphabetIndex = 0;
 
-		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[i].begin(); it != resMap[i].end(); it++)
+		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[classMap[i].classIndex].begin(); it != resMap[classMap[i].classIndex].end(); it++)
 		{
 			json_data << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
 			json_incorrect << "\t\t\t\t{\n" << "\t\t\t\t\t\"children\": [\n";
@@ -282,20 +313,22 @@ void SkewEvaluator::writeResults()
 				alphabetCorrect = alphabetCorrect + iterator->second.correctClassCont;
 				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
 				json_data << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
-				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << double(iterator->second.correctClassCont)/double(iterator->second.count)*100 << ",\n";
+				json_data << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << (double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count))*(double(alphabetMap[classMap[i].classIndex][it->first].correctClassCont)/double(alphabetMap[classMap[i].classIndex][it->first].count))*(double(iterator->second.correctClassCont)/double(iterator->second.count))*100 << ",\n";
 				json_data << "\t\t\t\t\t\t\t\t\"index\": " << letterIndex << ",\n";
 				json_data << "\t\t\t\t\t\t\t\t\"correct\": " << iterator->second.correctClassCont << ",\n";
 				json_data << "\t\t\t\t\t\t\t\t\"count\": " << iterator->second.count << ",\n";
 				json_data << "\t\t\t\t\t\t\t\t\"variance\": " << iterator->second.sumDiff << ",\n"; 
+				json_data << "\t\t\t\t\t\t\t\t\"percent\": " << double(iterator->second.correctClassCont)/double(iterator->second.count)*100 << ",\n"; 
 				json_data << "\t\t\t\t\t\t\t\t\"$color\": \"#00FF55\"\n"; 
 				json_data << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"Correct_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
 
 				json_incorrect << "\t\t\t\t\t\t\t],\n" << "\t\t\t\t\t\t\t\"data\": {\n";
-				json_incorrect << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << 100.0-(double(iterator->second.correctClassCont)/double(iterator->second.count)*100) << ",\n"; 
+				json_incorrect << "\t\t\t\t\t\t\t\t\"$angularWidth\": " << (1.0-(double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count)))*(1.0-(double(alphabetMap[classMap[i].classIndex][it->first].correctClassCont)/double(alphabetMap[classMap[i].classIndex][it->first].count)))*(1.0-(double(iterator->second.correctClassCont)/double(iterator->second.count)))*100 << ",\n"; 
 				json_incorrect << "\t\t\t\t\t\t\t\t\"index\": " << letterIndex << ",\n";
 				json_incorrect << "\t\t\t\t\t\t\t\t\"correct\": " << iterator->second.correctClassCont << ",\n";
 				json_incorrect << "\t\t\t\t\t\t\t\t\"count\": " << iterator->second.count << ",\n";
 				json_incorrect << "\t\t\t\t\t\t\t\t\"variance\": " << iterator->second.sumDiff << ",\n"; 
+				json_incorrect << "\t\t\t\t\t\t\t\t\"percent\": " << 100.0-(double(iterator->second.correctClassCont)/double(iterator->second.count)*100) << ",\n"; 
 				json_incorrect << "\t\t\t\t\t\t\t\t\"$color\": \"#FF0055\"\n"; 
 				json_incorrect << "\t\t\t\t\t\t\t},\n" << "\t\t\t\t\t\t\t\"id\": \"Incorrect_" << it->first << "_" << iterator->first << "\",\n" << "\t\t\t\t\t\t\t\"name\": \"" << iterator->first << "\"\n" << "\t\t\t\t\t\t},\n";
 				letterIndex++;
@@ -306,31 +339,35 @@ void SkewEvaluator::writeResults()
 
 			report_overview << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n";
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
-			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << double(alphabetCorrect)/double(alphabetTotal)*100 << ",\n";
+			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << (double(alphabetCorrect)/double(alphabetTotal))*(double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count))*100 << ",\n";
 			json_data << "\t\t\t\t\t\t\"index\": " << alphabetIndex << ",\n";
 			json_data << "\t\t\t\t\t\t\"correct\": " << alphabetCorrect << ",\n";
 			json_data << "\t\t\t\t\t\t\"count\": " << alphabetTotal << ",\n";
 			json_data << "\t\t\t\t\t\t\"variance\": " << alphabetVariance << ",\n";
+			json_data << "\t\t\t\t\t\t\"percent\": " << double(alphabetCorrect)/double(alphabetTotal)*100 << ",\n";
 			json_data << "\t\t\t\t\t\t\"$color\": \"#00FF55\"\n";
 			json_data << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"Correct_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
 
 			json_incorrect << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
-			json_incorrect << "\t\t\t\t\t\t\"$angularWidth\": " << 100.0-(double(alphabetCorrect)/double(alphabetTotal)*100) << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"$angularWidth\": " << (1.0-(double(alphabetCorrect)/double(alphabetTotal)))*(1.0-(double(detectorMap[classMap[i].classIndex].correctClassCont)/double(detectorMap[classMap[i].classIndex].count)))*100 << ",\n";
 			json_incorrect << "\t\t\t\t\t\t\"index\": " << alphabetIndex << ",\n";
 			json_incorrect << "\t\t\t\t\t\t\"correct\": " << alphabetCorrect << ",\n";
 			json_incorrect << "\t\t\t\t\t\t\"count\": " << alphabetTotal << ",\n";
 			json_incorrect << "\t\t\t\t\t\t\"variance\": " << alphabetVariance << ",\n";
+			json_incorrect << "\t\t\t\t\t\t\"percent\": " << 100.0-(double(alphabetCorrect)/double(alphabetTotal)*100) << ",\n";
 			json_incorrect << "\t\t\t\t\t\t\"$color\": \"#FF0055\"\n";
 			json_incorrect << "\t\t\t\t\t},\n" << "\t\t\t\t\t\"id\": \"Incorrect_" << it->first << "\",\n" << "\t\t\t\t\t\"name\": \"" << it->first << "\"\n" << "\t\t\t\t},\n";
 			alphabetIndex++;
 		}
 		json_data << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
 		json_data << "\t\t\t\t\"$angularWidth\": " << double(correct)/double(total)*100 << ",\n";
+		json_data << "\t\t\t\t\"percent\": " << double(correct)/double(total)*100 << ",\n";
 		json_data << "\t\t\t\t\"$color\": \"#00FF00\"\n";
 		json_data << "\t\t\t},\n" << "\t\t\t\"id\": \"Correct\",\n" << "\t\t\t\"name\": \"Correct\"\n" << "\t\t},\n";
 
 		json_incorrect << "\t\t\t],\n" << "\t\t\t\"data\": {\n";
 		json_incorrect << "\t\t\t\t\"$angularWidth\": " << 100.0-(double(correct)/double(total)*100) << ",\n";
+		json_incorrect << "\t\t\t\t\"percent\": " << 100.0-(double(correct)/double(total)*100) << ",\n";
 		json_incorrect << "\t\t\t\t\"$color\": \"#FF0000\"\n";
 		json_incorrect << "\t\t\t},\n" << "\t\t\t\"id\": \"Incorrect\",\n" << "\t\t\t\"name\": \"Incorrect\"\n" << "\t\t}\n";
 
@@ -367,6 +404,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 {
 	int x;
 	float y;
+	int i = 0;
 	for(x=-40;x<=40;x=x+10)
 	{
 		double angleRad = x * M_PI / 180;
@@ -376,7 +414,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		affineTransform.at<float>(0, 1) = y;
 		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
-		distortions.push_back( SkewDef( - angleRad, transformed) );
+		distortions.push_back( SkewDef( - angleRad, transformed, i++) );
 	}
 }
 
