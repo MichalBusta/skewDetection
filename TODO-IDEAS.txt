@@ -22,4 +22,9 @@ Jakub: Centers Sk Detector - ? robustnost - body v pasu?
 
 Jakub: Nejdelsi hranu 
 
-Tomas: Vertikalni smer dominantni 
+Tomas: Vertikalni smer dominantni
+
+
+link na cv::approxPolyDP:
+
+http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm 
