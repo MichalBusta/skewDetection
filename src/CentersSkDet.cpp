@@ -42,7 +42,8 @@ double CentersSkDet::detectSkew(cv::Mat& mask, double lineK,
 	vector<Vec4i> hierarchy;
 
 	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point(0, 0) );
-
+	
+	if (contours[0].size() < 3) return 0;
 	std::vector<cv::Point> drawContour;
 	if(debugImage != NULL)
 	{

@@ -6,6 +6,7 @@
  */
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <assert.h>
 #include <iostream>
 #include <stdio.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -36,20 +37,18 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 {
 	std::vector<std::vector<cv::Point> > contours;
 	vector<Vec4i> hierarchy;
-	cv::Mat mask2;
+/*	cv::Mat mask2;
 	int x = -40;
 	double angleRad = x * M_PI / 180;
 		float y= tan (angleRad);
 		cv::Mat transformed;
 		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
 		affineTransform.at<float>(0, 1) = y;
-		cv::warpAffine(mask, mask2, affineTransform, cv::Size(mask.cols * 2, mask.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-
+		cv::warpAffine(mask, mask2, affineTransform, cv::Size(mask.cols * 2, mask.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));*/
 
 	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS, Point(0, 0) );
-
+	if (contours[0].size() < 3) return 0;
 	//cmp::filterContour(contours[0]);
-
 	vector<Point> hull;
 	convexHull( contours[0], hull );
 
@@ -175,7 +174,6 @@ double ThinProfileSkDet::detectSkew(cv::Mat& mask, double lineK,
 		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 255 ), 1);
 		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 	}
-
 	return angle;
 }
 
