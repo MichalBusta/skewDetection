@@ -51,7 +51,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<h3>Worst Results</h3>\n";
 	//nejhorsi vsledky
 	outStream << "<table>\n";
-	outStream << "<tr><td>Angle Difference</td><td>Alphabet</td><td>Letter</td><td>Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Preview</td></tr>\n";
 	for(int i = (int) work.size() -1; i >= 0; i--)
 	{
 		std::ostringstream picture;
@@ -59,7 +59,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 		std::string pictureLink = picture.str();
 
-		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		if( ( work.size() - i) > maxCount)
 			break;
@@ -71,7 +71,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<h3>Best Results</h3>\n";
 
 	outStream << "<table>\n";
-	outStream << "<tr><td>Angle Difference</td><td>Alphabet</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	for(size_t i = 0; i < work.size(); i++)
 	{
 		std::ostringstream picture;
@@ -81,7 +81,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 
 
-		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		if( i > maxCount)
 			break;

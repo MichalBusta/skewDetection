@@ -1,7 +1,10 @@
 
 
-Vsechny detektory: 
-    - pokud pouzivaji konturu - prevest na spolecny interface ContourSkewDetector (definovany v SkewDetector.h)
+Pridat kriterium: Zhorsuje detektor vysledek ???? 
+
+Vizualizace: grafy - pridat co nejvic info do prehledoveho grafu 
+
+Vizualizace: Vertical Dominant, LongestEdgeSkDetector 
 
 Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedImages
     - odstranit "nepouzitelne znaky": jako : .,; atd. 
@@ -9,6 +12,10 @@ Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedI
 Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
 DONE:
+
+Vsechny detektory: 
+    - pokud pouzivaji konturu - prevest na spolecny interface ContourSkewDetector (definovany v SkewDetector.h)
+
 
 Vizualizace: oriznout pismenko - obrazek je zbytecne velky 
 
