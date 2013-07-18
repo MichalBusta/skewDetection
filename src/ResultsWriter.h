@@ -19,9 +19,9 @@ public:
 	ResultsWriter();
 	virtual ~ResultsWriter();
 
-	void writeWorstDetectorResults(
+	static void writeWorstDetectorResults(
 			std::vector<EvaluationResult>& results,
-			int classificator, int maxCount, std::ofstream& outStream,
+			int classificator, int maxCount, std::fstream& outStream,
 			std::string& outputDir, std::vector<std::string> detctorNames);
 };
 

@@ -57,4 +57,24 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 
 }
 
+void TemplateUtils::CopyDetectorTemplates(std::string currentDir,
+		std::string dstDir)
+{
+	std::string templatesDir = 	currentDir;
+	templatesDir += "/templates/detector";
+
+	std::string index = templatesDir + "/detector.html";
+	std::string indexDst = dstDir;
+	indexDst += "/index.htm";
+	IOUtils::CopyFile( index, indexDst );
+
+	//copy js
+	index = templatesDir + "/detector.js";
+	indexDst = dstDir;
+	indexDst += "/detector.js";
+	IOUtils::CopyFile( index, indexDst );
+}
+
 } /* namespace cmp */
+
+

@@ -21,6 +21,7 @@
 #include "IOUtils.h"
 #include "ImageFilter.h"
 #include "TemplateUtils.h"
+#include "ResultsWriter.h"
 
 #define ANGLE_TOLERANCE M_PI / 60.0
 
@@ -138,9 +139,6 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	//generate modifications
 	std::vector<SkewDef> distortions;
 
-	ImageFilter imageFilter;
-	sourceImage = imageFilter.filterImage( sourceImage );
-
 	cv::Mat negative = ~sourceImage;
 	generateDistortions(negative, distortions);
 
@@ -151,6 +149,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 		{
 			cv::Mat debugImage;
 			cv::Mat workImage = def.image.clone();
+
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
@@ -232,15 +231,27 @@ void SkewEvaluator::writeResults()
 	std::map<int, AcumResult> detectorMap;
 	std::map<std::string, bool> letters;
 
+	if(results.size() == 0)
+	{
+		//TODO write somethin to out html
+		return;
+	}
+
 	for(size_t i = 0; i < results.size(); i++)
 	{
 		classMap[ results[i].classificator ].count++;
 		classMap[ results[i].classificator ].classIndex = results[i].classificator;
+
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].classIndex = results[i].classificator;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].count++;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff = resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff + results[i].angleDiff*results[i].angleDiff;
+
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].count++;
+		alphabetMap[ results[i].classificator ][ results[i].alphabet ].classIndex = results[i].classificator;
+
+
 		detectorMap[ results[i].classificator ].count++;
+		detectorMap[ results[i].classificator ].classIndex = results[i].classificator;
 		letters[ results[i].letter ] = true;
 		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
@@ -254,7 +265,7 @@ void SkewEvaluator::writeResults()
 	//std::string outputDir = "/tmp";
 	//std::string outputDir = "C:/SkewDetection/reports";
 	std::string htmlHeader = "\t<table>\n";
-	std::string htmlFooter = "\t</table>\n</body>\n</html>";
+	std::string htmlFooter = "\t</table>\n";
 
 	std::fstream report_overview;
 	report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::ios_base::out | std::ios_base::app );
@@ -399,6 +410,11 @@ void SkewEvaluator::writeResults()
 	}
 
 	report_overview << htmlFooter;
+
+	ResultsWriter::writeWorstDetectorResults( results,  -1, 100, report_overview, outputDirectory, detectorNames );
+
+	report_overview << "</body>\n</html>";
+
 	report_overview.close();
 
 
