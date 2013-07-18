@@ -16,7 +16,6 @@
 #include <sstream>
 
 #include "SkewEvaluator.h"
-#include "SkewDetection.h"
 #include "IOUtils.h"
 #include "TemplateUtils.h"
 #include "ResultsWriter.h"
@@ -29,22 +28,12 @@ namespace cmp
 
 SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0)
 {
-	registerDetector(new ThinProfileSkDet(), "ThinProfile" );
-	registerDetector(new CentersSkDet(), "TopBottomCenters" );
-
 	if(!IOUtils::PathExist(outputDirectory))
 	{
 		IOUtils::CreateDir( outputDirectory );
 	}
 	TemplateUtils::CopyIndexTemplates( ".", outputDirectory );
 
-	for(size_t i = 0; i < this->detectorNames.size(); i++)
-	{
-		std::string detectorDir = outputDirectory;
-		detectorDir += "/" + detectorNames[i];
-		IOUtils::CreateDir( detectorDir );
-		TemplateUtils::CopyDetectorTemplates( ".", detectorDir );
-	}
 	this->results.reserve(20000);
 }
 
@@ -243,6 +232,12 @@ void SkewEvaluator::registerDetector(cv::Ptr<SkewDetector> detector,
 {
 	detectors.push_back(detector);
 	detectorNames.push_back(detectorName);
+
+	std::string detectorDir = outputDirectory;
+	detectorDir += "/" + detectorName;
+	IOUtils::CreateDir( detectorDir );
+	TemplateUtils::CopyDetectorTemplates( ".", detectorDir );
+
 }
 
 bool sortResultsByCorrectClsCount(const AcumResult& o1, const AcumResult& o2)
@@ -283,7 +278,7 @@ void SkewEvaluator::writeResults()
 		//detectorMap[ results[i].classificator ].sumDiff = detectorMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
 		//detectorMap[ results[i].classificator ].classIndex = results[i].classificator;
 		letters[ results[i].letter ] = true;
-		if( abs(results[i].angleDiff) < ANGLE_TOLERANCE )
+		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
 			classMap[ results[i].classificator ].correctClassCont++;
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
