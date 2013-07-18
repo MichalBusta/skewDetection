@@ -24,22 +24,23 @@ var Log = {
     this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
   }
 };
-
+var sb;
 
 function init(){
 
     //end
     //init Sunburst
-    var sb = new $jit.Sunburst({
+    sb = new $jit.Sunburst({
         //id container for the visualization
         injectInto: 'infovis',
         //Distance between levels
-        levelDistance: 60,
+        levelDistance: 70,
         //Change node and edge styles such as
         //color, width and dimensions.
         Node: {
           overridable: true,
-          type: useGradients? 'gradient-multipie' : 'multipie'
+          type: useGradients? 'gradient-multipie' : 'multipie',
+          span: 5
         },
         //Select canvas labels
         //'HTML', 'SVG' and 'Native' are possible options
@@ -61,7 +62,7 @@ function init(){
         Tips: {
           enable: true,
           onShow: function(tip, node) {
-            var html = "<div class=\"tip-title\">" + node.name + "</div>"; 
+            var html = "<div class=\"tip-title\">" + node.name + (node._depth>0? " (" + Math.round(node.data.percent*100)/100 + "%)":"") + "</div>"; 
             var data = node.data;
             if("days" in data) {
               html += "<b>Last modified:</b> " + data.days + " days ago";
@@ -93,10 +94,58 @@ function init(){
             //hide tip
             sb.tips.hide();
             //rotate
-            sb.rotate(node, animate? 'animate' : 'replot', {
-              duration: 1000,
-              transition: $jit.Trans.Quart.easeInOut
-            });
+            
+            if(node._depth == 2 && sb.toJSON().data["$type"] == "none") {
+            	var newJSON = {"children": [
+								{
+	            					"children": json.children[0].children[node.data.index].children,
+									"data": {
+										"$angularWidth": json.children[0].children[node.data.index].data.$angularWidth,
+										"$color": "#00FF00",
+										"correct": json.children[0].children[node.data.index].data.correct,
+										"count": json.children[0].children[node.data.index].data.count,
+										"variance": json.children[0].children[node.data.index].data.variance,
+										"percent": json.children[0].children[node.data.index].data.percent
+									},
+									"id": "Correct",
+									"name": "Correct"
+	            				},
+								{
+	            					"children": json.children[1].children[node.data.index].children,
+									"data": {
+										"$angularWidth": json.children[1].children[node.data.index].data.$angularWidth,
+										"$color": "#FF0000",
+										"correct": json.children[1].children[node.data.index].data.correct,
+										"count": json.children[1].children[node.data.index].data.count,
+										"variance": json.children[1].children[node.data.index].data.variance,
+										"percent": json.children[1].children[node.data.index].data.percent
+									},
+									"id": "Incorrect",
+									"name": "Incorrect"
+	            				}
+							],
+							"data": {
+								"index": node.data.index
+							},
+							"id": json.children[0].children[node.data.index].id,
+							"name": json.name+" - "+json.children[0].children[node.data.index].name};
+				sb.loadJSON(newJSON);
+				sb.refresh();
+            } else if (node._depth == 0) {
+				sb.loadJSON(json);
+				sb.refresh();
+				/*var nd = $jit.Graph.Util.getNode(sb, node.id);
+				//var nd = sb.getNode(node.id)
+				sb.rotate(nd, animate? 'animate' : 'replot', {
+					duration: 1000,
+					transition: $jit.Trans.Quart.easeInOut
+	            });*/
+            }else {
+	            sb.rotate(node, animate? 'animate' : 'replot', {
+	              duration: 1000,
+	              transition: $jit.Trans.Quart.easeInOut
+	            });
+            }
           }
         },
         // Only used when Label type is 'HTML' or 'SVG'
