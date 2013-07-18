@@ -20,6 +20,7 @@
 #include "SkewDetection.h"
 #include "IOUtils.h"
 #include "ImageFilter.h"
+#include "TemplateUtils.h"
 
 #define ANGLE_TOLERANCE M_PI / 60.0
 
@@ -36,6 +37,7 @@ SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : output
 	{
 		IOUtils::CreateDirectory( outputDirectory );
 	}
+	TemplateUtils::CopyIndexTemplates( ".", outputDirectory );
 }
 
 SkewEvaluator::~SkewEvaluator()
