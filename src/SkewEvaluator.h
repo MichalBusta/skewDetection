@@ -17,7 +17,7 @@
 #include "SkewDetection.h"
 
 #define ANGLE_TOLERANCE M_PI / 60.0
-#define ANGLE_MIN M_PI / 180.0
+#define ANGLE_MIN M_PI / 120.0
 
 namespace cmp
 {

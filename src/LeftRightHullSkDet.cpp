@@ -220,7 +220,7 @@ double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vec
 
 		}
 	}
-	return angle;
+	return -angle;
 }
 
 } /* namespace cmp */
