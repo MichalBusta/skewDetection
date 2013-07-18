@@ -48,7 +48,7 @@ namespace cmp
 		static void ShowImageInWindow(cv::Mat img, int flags = 1, const char* windowName = "Image");
         static std::string SaveTempImage(cv::Mat img, std::string windowName, const bool forceWrite=false);
 
-        static void CopyFile( const std::string& source, const std::string& dst );
+        static void CpFile( const std::string& source, const std::string& dst );
 	};
 
 }

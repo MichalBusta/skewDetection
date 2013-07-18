@@ -37,7 +37,7 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 	std::string index = templatesDir + "/index.htm";
 	std::string indexDst = dstDir;
 	indexDst += "/index.htm";
-	IOUtils::CopyFile( index, indexDst );
+	IOUtils::CpFile( index, indexDst );
 
 	std::string jsDir = dstDir;
 	jsDir += "/js";
@@ -47,13 +47,13 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 	chartsSrc += "/js/highcharts.js";
 	std::string chartsDst = dstDir;
 	chartsDst += "/js/highcharts.js";
-	IOUtils::CopyFile( chartsSrc, chartsDst );
+	IOUtils::CpFile( chartsSrc, chartsDst );
 
 	chartsSrc = templatesDir;
 	chartsSrc += "/js/jquery.min.js";
 	chartsDst = dstDir;
 	chartsDst += "/js/jquery.min.js";
-	IOUtils::CopyFile( chartsSrc, chartsDst );
+	IOUtils::CpFile( chartsSrc, chartsDst );
 
 }
 
@@ -66,13 +66,37 @@ void TemplateUtils::CopyDetectorTemplates(std::string currentDir,
 	std::string index = templatesDir + "/detector.html";
 	std::string indexDst = dstDir;
 	indexDst += "/index.htm";
-	IOUtils::CopyFile( index, indexDst );
+	IOUtils::CpFile( index, indexDst );
 
 	//copy js
 	index = templatesDir + "/detector.js";
 	indexDst = dstDir;
 	indexDst += "/detector.js";
-	IOUtils::CopyFile( index, indexDst );
+	IOUtils::CpFile( index, indexDst );
+
+	index = templatesDir + "/jit.js";
+	indexDst = dstDir;
+	indexDst += "/jit.js";
+	IOUtils::CpFile( index, indexDst );
+
+	index = templatesDir + "/excanvas.js";
+	indexDst = dstDir;
+	indexDst += "/excanvas.js";
+	IOUtils::CpFile( index, indexDst );
+
+	std::string css = dstDir;
+	css += "/css";
+	IOUtils::CreateDir( css );
+
+	index = templatesDir + "/css/base.css";
+	indexDst = css;
+	indexDst += "/base.css";
+	IOUtils::CpFile( index, indexDst );
+
+	index = templatesDir + "/css/Sunburst.css";
+	indexDst = css;
+	indexDst += "/Sunburst.css";
+	IOUtils::CpFile( index, indexDst );
 }
 
 } /* namespace cmp */

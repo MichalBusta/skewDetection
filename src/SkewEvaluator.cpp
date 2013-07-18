@@ -39,6 +39,14 @@ SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : output
 		IOUtils::CreateDir( outputDirectory );
 	}
 	TemplateUtils::CopyIndexTemplates( ".", outputDirectory );
+
+	for(size_t i = 0; i < this->detectorNames.size(); i++)
+	{
+		std::string detectorDir = outputDirectory;
+		detectorDir += "/" + detectorNames[i];
+		IOUtils::CreateDir( detectorDir );
+		TemplateUtils::CopyDetectorTemplates( ".", detectorDir );
+	}
 }
 
 SkewEvaluator::~SkewEvaluator()
@@ -157,7 +165,6 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			//write image to output directory structure
 			std::string detectorDir = this->outputDirectory;
 			detectorDir += "/" + this->detectorNames[i];
-			IOUtils::CreateDir( detectorDir );
 			std::string alphabetDir = detectorDir;
 			alphabetDir += "/" + alphabet;
 			IOUtils::CreateDir( alphabetDir );
