@@ -106,11 +106,13 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double avAngle=0;
 	avAngle = (angle + angle2)/2.0;
 
+#ifdef VERBOSE
 	cout << "maxLength is: " << maxLength << "\n";
 	cout << "angle is: " << angle << "\n";\
 	cout << "secondLength is: " << secondLength << "\n";
 	cout << "angle2 is: " << angle2 << "\n";
 	cout << "avAngle is: " << avAngle << "\n";
+#endif
 
 	if(debugImage != NULL)
 	{
