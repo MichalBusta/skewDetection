@@ -256,6 +256,9 @@ void SkewEvaluator::writeResults()
 	std::map<int, std::map<std::string, AcumResult> > alphabetMap;
 	//std::map<int, AcumResult> detectorMap;
 	std::map<std::string, bool> letters;
+	
+	std::map<int, double> sumCorrectAlphabetPercent;
+	std::map<int, double> sumCorrectLetterPercent;
 
 	if(results.size() == 0)
 	{
@@ -348,8 +351,10 @@ void SkewEvaluator::writeResults()
 		int correct = 0;
 		double variance = 0.0;
 		int alphabetIndex = 0;
-		double sumSumCorrectPercent = 0.0;
-		double sumCorrectAlphabetPercent = 0.0;
+		//double sumSumCorrectPercent = 0.0;
+		//double sumCorrectAlphabetPercent = 0.0;
+		sumCorrectAlphabetPercent[classMap[i].classIndex] = 0.0;
+		sumCorrectLetterPercent[classMap[i].classIndex] = 0.0;
 		int letterTotal = 0;
 
 		for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[classMap[i].classIndex].begin(); it != resMap[classMap[i].classIndex].end(); it++)
@@ -395,9 +400,10 @@ void SkewEvaluator::writeResults()
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
 			variance = variance + alphabetVariance;
-			
-			sumSumCorrectPercent = sumSumCorrectPercent + sumCorrectPercent;
-			sumCorrectAlphabetPercent = sumCorrectAlphabetPercent + double(alphabetCorrect)/double(alphabetTotal)*100;
+
+			sumCorrectAlphabetPercent[classMap[i].classIndex] = sumCorrectAlphabetPercent[classMap[i].classIndex] + double(alphabetCorrect)/double(alphabetTotal)*100;
+			sumCorrectLetterPercent[classMap[i].classIndex] = sumCorrectLetterPercent[classMap[i].classIndex] + sumCorrectPercent;
+
 			letterTotal = letterTotal + it->second.size();
 
 			report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
@@ -448,11 +454,12 @@ void SkewEvaluator::writeResults()
 
 		json_data.close();
 
-		report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumSumCorrectPercent/double(letterTotal) << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent/double(alphabetIndex) << "</td>\n" << "\t\t</tr>\n";
+		sumCorrectAlphabetPercent[classMap[i].classIndex] = sumCorrectAlphabetPercent[classMap[i].classIndex]/double(alphabetIndex);
+		sumCorrectLetterPercent[classMap[i].classIndex] = sumCorrectLetterPercent[classMap[i].classIndex]/double(letterTotal);
 
-		////////
+		report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
 
-		report_detector << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumSumCorrectPercent/double(letterTotal) << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent/double(alphabetIndex) << "</td>\n" << "\t\t</tr>\n";
+		report_detector << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
 		report_detector << "\t</table>\n";
 
 		ResultsWriter::writeWorstDetectorResults( results,  classMap[i].classIndex, 100, report_detector, outputDirectory, detectorNames );
@@ -488,6 +495,41 @@ void SkewEvaluator::writeResults()
     overview_json << "\ttooltip: {\n";
     overview_json << "\t\tvalueSuffix: ' %'\n";
     overview_json << "\t}\n";
+	/*****************/
+	overview_json << "}, {\n";
+	overview_json << "\tname: 'avg Correct Letters',\n";
+    overview_json << "\tcolor: '#42ca2f',\n";
+    overview_json << "\ttype: 'column',\n";
+    overview_json << "\tdata: [";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		if(i!=0) overview_json << ", ";
+		overview_json << std::fixed << std::setprecision(2) << sumCorrectLetterPercent[classMap[i].classIndex];
+	}
+
+    overview_json << "],\n";
+    overview_json << "\ttooltip: {\n";
+    overview_json << "\t\tvalueSuffix: ' %'\n";
+    overview_json << "\t}\n";
+	/***************/
+	overview_json << "}, {\n";
+	overview_json << "\tname: 'avg Correct Alphabet',\n";
+    overview_json << "\tcolor: '#cf2229',\n";
+    overview_json << "\ttype: 'column',\n";
+    overview_json << "\tdata: [";
+
+	for(size_t i = 0; i < classMap.size(); i++)
+	{
+		if(i!=0) overview_json << ", ";
+		overview_json << std::fixed << std::setprecision(2) << sumCorrectAlphabetPercent[classMap[i].classIndex];
+	}
+
+    overview_json << "],\n";
+    overview_json << "\ttooltip: {\n";
+    overview_json << "\t\tvalueSuffix: ' %'\n";
+    overview_json << "\t}\n";
+	/***************/
 	overview_json << "}, {\n";
 	overview_json << "\tname: 'Standard Deviation',\n";
     overview_json << "\tcolor: '#89A54E',\n";
@@ -505,6 +547,7 @@ void SkewEvaluator::writeResults()
     overview_json << "\ttooltip: {\n";
     overview_json << "\t\tvalueSuffix: ''\n";
     overview_json << "\t}\n";
+	/***************/
 	overview_json << "}]\n";
 
 	overview_json << "\n\n" << "categories = [ ";

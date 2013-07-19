@@ -81,7 +81,7 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if (hist[i] > hist[maxI] && i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth) maxI = i;
 
 	}
-	cv::imshow("Histogram", histogram);
+	//cv::imshow("Histogram", histogram);
 
 	if(debugImage != NULL)
 	{

@@ -80,16 +80,47 @@ function init(){
             if(!node) return;
             //Build detailed information about the file/folder
             //and place it in the right column.
-            var html = "<h4>" + node.name + "</h4>", data = node.data;
-            if("days" in data) {
-              html += "<b>Last modified:</b> " + data.days + " days ago";
-            }
-            if("size" in data) {
-              html += "<br /><br /><b>File size:</b> " + Math.round(data.size / 1024) + "KB";
-            }
-            if("description" in data) {
-              html += "<br /><br /><b>Last commit was:</b><br /><pre>" + data.description + "</pre>";
-            }
+            var id_split = node.id.split('_');
+            var html = "";
+            if (id_split.length == 3) {
+            	if (id_split[0].toLowerCase() == "correct") {
+            		html += "<h4>Unicode: #" + node.name + "</h4>";
+		            html += "<strong>Char: </strong> &#" + node.name + ";";
+		            html += "<br /><strong>Total: </strong> " + node.data.count;
+		            html += "<br /><strong>Correct: </strong> " + node.data.correct + " (" + Math.round(node.data.percent*100)/100 + "%)";
+            	} else {
+            		html += "<h4>Unicode: #" + node.name + "</h4>";
+	            	html += "<strong>Char: </strong> &#" + node.name + ";";
+	            	html += "<br /><strong>Total: </strong> " + node.data.count;
+	            	html += "<br /><strong>Incorrect: </strong> " + node.data.correct + " (" + Math.round(node.data.percent*100)/100 + "%)";
+            	}
+            } else if (id_split.length == 2 && sb.toJSON().data["$type"] == "none") {
+            	if (id_split[0].toLowerCase() == "correct") {
+            		html += "<h4>Alphabet: " + node.name + "</h4>";
+		            html += "<br /><strong>Total: </strong> " + node.data.count;
+		            html += "<br /><strong>Correct: </strong> " + node.data.correct + " (" + Math.round(node.data.percent*100)/100 + "%)";
+            	} else {
+            		html += "<h4>Unicode: #" + node.name + "</h4>";
+	            	html += "<br /><strong>Total: </strong> " + node.data.count;
+	            	html += "<br /><strong>Incorrect: </strong> " + node.data.correct + " (" + Math.round(node.data.percent*100)/100 + "%)";
+            	}
+           	} else if (id_split.length == 1) {
+            	if (id_split[0].toLowerCase() == "correct") {
+            		if("alphabet" in sb.toJSON().data) {
+            			html += "<h4>" + sb.toJSON().data.alphabet + " correct</h4>";
+            		} else {
+            			html += "<h4>Correct all alphabets</h4>";
+            		}
+		            html += "<br /><strong>Correct: </strong> " + Math.round(node.data.percent*100)/100 + "%";
+            	} else if (id_split[0].toLowerCase() == "incorrect") {
+            		if("alphabet" in sb.toJSON().data) {
+            			html += "<h4>" + sb.toJSON().data.alphabet + " incorrect</h4>";
+            		} else {
+            			html += "<h4>Incorrect all alphabets</h4>";
+            		}
+	            	html += "<br /><strong>Incorrect: </strong> " + Math.round(node.data.percent*100)/100 + "%";
+            	}
+           	}
             $jit.id('inner-details').innerHTML = html;
             //hide tip
             sb.tips.hide();
@@ -125,7 +156,8 @@ function init(){
 	            				}
 							],
 							"data": {
-								"index": node.data.index
+								"index": node.data.index,
+								"alphabet": json.children[0].children[node.data.index].name
 							},
 							"id": json.children[0].children[node.data.index].id,
 							"name": json.name+" - "+json.children[0].children[node.data.index].name};
