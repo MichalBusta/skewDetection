@@ -9,10 +9,13 @@
 #ifndef SKEWEVALUATOR_H_
 #define SKEWEVALUATOR_H_
 
+#define _USE_MATH_DEFINES
+
 #include <opencv2/core/core.hpp>
 
 #include <string>
 #include <map>
+#include <math.h>
 
 #include "SkewDetection.h"
 
