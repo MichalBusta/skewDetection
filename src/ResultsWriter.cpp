@@ -41,6 +41,8 @@ void ResultsWriter::writeWorstDetectorResults(
 	}else
 		work = results;
 
+	vector<string> LetterCheck;
+
 	std::sort(work.begin(), work.end(), &EvaluationResult::SortByAbsAngleDiff);
 
 	
@@ -55,15 +57,32 @@ void ResultsWriter::writeWorstDetectorResults(
 	int resultsCount = 0;
 	for(int i = (int) work.size() -1; i >= 0; i--)
 	{
-		std::ostringstream picture;
-		picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
+		for(int counter=0; counter<LetterCheck.size();counter++)
+		{
+			if(work[i].letter == LetterCheck[counter])
+			{
+				break;
+			}else
+			{
+				std::ostringstream picture;
+				picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
 
-		std::string pictureLink = picture.str();
+				std::string pictureLink = picture.str();
 
+<<<<<<< HEAD
+				outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+
+				LetterCheck.push_back(work[i].letter);
+			}
+		}
+		if( ( work.size() - i) > maxCount)
+=======
 		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		if( resultsCount++ > maxCount)
+>>>>>>> c80262fa4388a75999a71f39bc81e5ace035523a
 			break;
+
 	}
 	outStream << "</table></div>\n";
 	
