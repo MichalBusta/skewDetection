@@ -64,7 +64,7 @@ void ResultsWriter::writeWorstDetectorResults(
 		std::ostringstream picture;
 		picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
 		std::string pictureLink = picture.str();
-		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << work[i].alphabet << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		LetterCheck.insert(work[i].letter);
 

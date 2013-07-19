@@ -44,7 +44,7 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	memset (hist, 0, int(180/histColWidth) * sizeof(float));
 
 	cv::Point prev = contour.back();
-	std::cout << contour.size() << endl;
+
 	for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
 	{
 		cv::Point pt = *it;
