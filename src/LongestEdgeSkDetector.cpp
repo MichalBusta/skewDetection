@@ -45,7 +45,7 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double deltaX=0, deltaY=0, deltaX2=0, deltaY2=0, actDeltaX=0, actDeltaY=0;
 	for(int c=0;c<outerContour.size();c++)
 	{
-		if(c<outerContour.size())
+		if(c<outerContour.size()-1)
 		{
 			//srovnani 1+2,.....predposledni+posledni
 			actDeltaX = outerContour[c+1].x - outerContour[c].x;
@@ -76,8 +76,8 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 		}else 			//c=outerContour.size()
 		{
 			//srovnani posledniho a prvniho bodu
-			actDeltaX = outerContour[outerContour.size()].x - outerContour[0].x;
-			actDeltaY = outerContour[outerContour.size()].y - outerContour[0].y;
+			actDeltaX = outerContour[outerContour.size()-1].x - outerContour[0].x;
+			actDeltaY = outerContour[outerContour.size()-1].y - outerContour[0].y;
 			QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
 			actLength = sqrt(QactLength);
 			if(actLength>maxLength)
