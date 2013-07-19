@@ -130,8 +130,11 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 
 	if(this->epsilon > 0)
 	{
+		cv::Rect rect= cv::boundingRect(contours[0]);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
-		approxPolyDP(contours[0], apCont, epsilon, true);
+		approxPolyDP(contours[0], apCont, absEpsilon, true);
 		contours[0] = apCont;
 	}
 

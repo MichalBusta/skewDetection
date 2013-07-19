@@ -85,6 +85,7 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 //				atanAngle2=(deltaX2)*1.0/(deltaY2);
 				angle =atan(atanAngle);
 //				angle2 =atan(atanAngle2);
+				counter=outerContour.size()-1;
 			}
 //			else if (actLength>secondLength)
 //			{
