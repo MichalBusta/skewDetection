@@ -21,10 +21,9 @@ using namespace cv;
 namespace cmp
 {
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle)
 {
 	// TODO Auto-generated constructor stub
-
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
@@ -129,7 +128,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if(width <= min_width)
 		{
 			if(
-				(ang >= (M_PI/60-M_PI/2) && ang <= (M_PI/2-M_PI/60))
+				(ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle))
 			)
 			{
 				angle = ang;
