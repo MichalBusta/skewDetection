@@ -26,7 +26,7 @@ using namespace cv;
 namespace cmp{
 
 
-VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle) {
+VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle, int correctAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle) {
 	// TODO Auto-generated constructor stub
 
 	hist = new float [int(180/histColWidth)];
@@ -36,7 +36,7 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 	delete [] hist;
 }
 
-double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)//, int sigma, int range, int ignoreAngle)
+double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
 {
 	std::vector<cv::Point> contour = contours[0];
 	filterContour(contour);
@@ -64,7 +64,7 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			if (j<0) j = j + int(180/histColWidth);
 			if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
 
-			hist[j] = hist[j] + length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i-ang)*(i-ang)/(2*sigma*sigma));
+			hist[j] = hist[j] + length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-angle)*(i*histColWidth+histColWidth/2-angle)/(2*sigma*sigma));
 		}
 		prev = pt;
 		it++;
@@ -90,7 +90,22 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+
+		for (size_t i = 0; i < contour.size(); i++)
+		{
+			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
+
+			cv::circle(drawing, contour[i], 2, Scalar( 0, 0, 255 ), 1);
+
+			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
+			if (ang < 0) ang = ang + M_PI;
+			if (abs(ang-(maxI*histColWidth+histColWidth/2)*M_PI/180) < correctAngle*M_PI/180)
+			{
+				cv::line(drawing, contour[i], contour[i2], Scalar( 0, 255, 0 ), 1);
+			}
+		}
 	}
+
 	return (maxI*histColWidth+histColWidth/2)*M_PI/180-M_PI/2;
 }
 
