@@ -28,7 +28,7 @@ public:
 	int range;
 	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
 	int ignoreAngle;
-	/** zobrazí vizualizaci, pokud je úhel v toleranci; ve stupních */
+	/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
 	int correctAngle;
 };
 
