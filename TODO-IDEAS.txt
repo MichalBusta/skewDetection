@@ -1,5 +1,11 @@
 
 
+Najit nejlepsi parametry pro dany detektor: 
+    - testovaci sada: /datagrid/personal/TextSpotter/fonts/generatedImagesTestSet
+    - parametry: aproximace, epsilon - vsechny detetory
+    + pokud detektor zavisi na dalsich parametrech, pridat .... 
+
+
 Statistiky + prehledy pro abecedu 
 
 
