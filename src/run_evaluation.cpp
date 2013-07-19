@@ -10,6 +10,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <math.h>
+#include <map>
 #include "SkewEvaluator.h"
 #define PI 3.14159265
 
@@ -30,6 +31,20 @@ int main( int argc, char **argv)
 
 	SkewEvaluator evaluator( argv[2], false );
 
+	/*std::map<int, std::string> approx;
+	approx[1] = "NONE";
+	approx[2] = "SIMPLE";
+	approx[3] = "TC89_L1";
+	approx[4] = "TC89_KCOS";
+	for (std::map<int, std::string>::iterator it = approx.begin(); it != approx.end(); it++)
+	{
+		//if->first == generator
+		for (double epsilon = 0.008; epsilon <= 0.022; epsilon=epsilon+0.002)
+		{
+			//epsilon
+
+		}
+	}*/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
