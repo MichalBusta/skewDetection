@@ -23,7 +23,7 @@ namespace cmp
 class CentersSkDet : public ContourSkewDetector
 {
 public:
-	CentersSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0, float precision = 0.1);
+	CentersSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.01, float precision = 0.1);
 
 	virtual ~CentersSkDet();
 

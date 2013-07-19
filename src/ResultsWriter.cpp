@@ -82,10 +82,14 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<table>\n";
 	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	resultsCount = 0;
+	LetterCheck.clear();
 	for(size_t i = 0; i < work.size(); i++)
 	{
 		//skip the almost correct angles ...
 		if( fabs(work[i].angleDiff) < ANGLE_MIN)
+			continue;
+
+		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
 			continue;
 
 		std::ostringstream picture;
@@ -93,7 +97,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 		std::string pictureLink = picture.str();
 
-
+		LetterCheck.insert(work[i].letter);
 
 		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
