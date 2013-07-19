@@ -30,11 +30,11 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	std::vector<cv::Point>& outerContour = contours[0];
 
 	double angle = 0, atanAngle = 0;
-//	double angle2 = 0, atanAngle2 = 0;
 	double QactLength=0, maxLength=0;
-	double secondLength=0, actLength=0;
-	double deltaX=0, deltaY=0, deltaX2=0, deltaY2=0, actDeltaX=0, actDeltaY=0;
+	double actLength=0, actAngle=0;
+	double deltaX=0, deltaY=0, actDeltaX=0, actDeltaY=0;
 	int counter=0;
+	double range = M_PI/2.0/45.0;
 	for(int c=0;c<outerContour.size();c++)
 	{
 		if(c<outerContour.size()-1)
@@ -46,26 +46,17 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 			actLength = sqrt(QactLength);
 			if(actLength>maxLength)
 			{
-//				secondLength=maxLength;
 				maxLength=actLength;
-//				deltaX2=deltaX;
-//				deltaY2=deltaY;
 				deltaX=actDeltaX;
 				deltaY=actDeltaY;
 				atanAngle=(deltaX)*1.0/(deltaY);
-//				atanAngle2=(deltaX2)*1.0/(deltaY2);
-				angle =atan(atanAngle);
-//				angle2 =atan(atanAngle2);
-				counter=c;
+				actAngle =atan(atanAngle);
+				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
+				{
+					angle = actAngle;
+					counter=c;
+				}
 			}
-//			else if (actLength>secondLength)
-//			{
-//				secondLength=actLength;
-//				deltaX2=actDeltaX;
-//				deltaY2=actDeltaY;
-//				atanAngle2=(deltaX2)*1.0/(deltaY2);
-//				angle2 =atan(atanAngle2);
-//			}
 		}else 			//c=outerContour.size()
 		{
 			//srovnani posledniho a prvniho bodu
@@ -75,38 +66,24 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 			actLength = sqrt(QactLength);
 			if(actLength>maxLength)
 			{
-				secondLength=maxLength;
 				maxLength=actLength;
-				deltaX2=deltaX;
-				deltaY2=deltaY;
 				deltaX=actDeltaX;
 				deltaY=actDeltaY;
 				atanAngle=(deltaX)*1.0/(deltaY);
-//				atanAngle2=(deltaX2)*1.0/(deltaY2);
-				angle =atan(atanAngle);
-//				angle2 =atan(atanAngle2);
-				counter=outerContour.size()-1;
+				actAngle =atan(atanAngle);
+				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
+				{
+					angle = actAngle;
+					counter=outerContour.size()-1;
+				}
 			}
-//			else if (actLength>secondLength)
-//			{
-//				secondLength=actLength;
-//				deltaX2=actDeltaX;
-//				deltaY2=actDeltaY;
-//				atanAngle2=(deltaX2)*1.0/(deltaY2);
-//				angle2 =atan(atanAngle2);
-//			}
 		}
 	}
-//	double avAngle=0;
-//	avAngle = (angle + angle2)/2.0;
 
-#ifdef VERBOSE
+/*#ifdef VERBOSE
 	cout << "maxLength is: " << maxLength << "\n";
 	cout << "angle is: " << angle << "\n";\
-	cout << "secondLength is: " << secondLength << "\n";
-	cout << "angle2 is: " << angle2 << "\n";
-	cout << "avAngle is: " << avAngle << "\n";
-#endif
+#endif*/
 
 	if(debugImage != NULL)
 	{
@@ -118,10 +95,22 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 		for(size_t j = 0; j < outerContour.size(); j++)
 		{
 			cv::circle(drawing, outerContour[j], 2, cv::Scalar(0, 255, 255), 2);
+			if(counter==outerContour.size()-1)
+			{
+				cv::line(drawing, outerContour[outerContour.size()-1], outerContour[0], cv::Scalar(255, 255, 0), 1, 0);
+				cv::circle(drawing, outerContour[outerContour.size()-1], 4, cv::Scalar(255, 255, 0), 1, 0);
+				cv::circle(drawing, outerContour[0], 4, cv::Scalar(255, 255, 0), 1, 0);
+			}
+			else
+			{
 			cv::line(drawing, outerContour[counter], outerContour[counter+1], cv::Scalar(255, 255, 0), 1, 0);
+			cv::circle(drawing, outerContour[counter], 4, cv::Scalar(255, 255, 0), 1, 0);
+			cv::circle(drawing, outerContour[counter+1], 4, cv::Scalar(255, 255, 0), 1, 0);
+			}
 		}
 	}
 
+	//y-souradnice je opacne
 	return -angle;
 
 }
