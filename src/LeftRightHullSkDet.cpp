@@ -25,7 +25,7 @@ namespace cmp
  * @param isRight
  * @param contourForm
  */
-LeftRightHullSkDet::LeftRightHullSkDet(int approximatioMethod, double epsilon, float precision, bool isRight, bool contourForm): ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), isRight(isRight), contourForm(contourForm)
+LeftRightHullSkDet::LeftRightHullSkDet(int approximatioMethod, double epsilon, float precision, bool isRight, bool contourForm, int ignoreAngle): ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), isRight(isRight), contourForm(contourForm), ignoreAngle(ignoreAngle)
 {
 
 
@@ -220,6 +220,8 @@ double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vec
 
 		}
 	}
+
+	//y-souradnice je opacne
 	return -angle;
 }
 

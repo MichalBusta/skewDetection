@@ -4,6 +4,7 @@
  *  Created on: Jul 12, 2013
  *      Author: cidlijak
  */
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <math.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -15,7 +16,7 @@ using namespace cv;
 
 namespace cmp {
 
-LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
+LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, int ignoreAngle) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle)
 {
 	// TODO Auto-generated constructor stub
 
@@ -34,7 +35,8 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double actLength=0, actAngle=0;
 	double deltaX=0, deltaY=0, actDeltaX=0, actDeltaY=0;
 	int counter=0;
-	double range = M_PI/2.0/45.0;
+	//double range = M_PI/2.0/45.0;
+	double range = ignoreAngle*M_PI/180;
 	for(int c=0;c<outerContour.size();c++)
 	{
 		if(c<outerContour.size()-1)

@@ -4,6 +4,7 @@
  *  Created on: Jul 11, 2013
  *      Author: Michal Busta
  */
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <math.h>
 #include <opencv2/highgui/highgui.hpp>
