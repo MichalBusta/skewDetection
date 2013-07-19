@@ -125,7 +125,7 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 		}
 	}
 
-	return angle;
+	return -angle;
 
 }
 

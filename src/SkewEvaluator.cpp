@@ -20,8 +20,6 @@
 #include "TemplateUtils.h"
 #include "ResultsWriter.h"
 
-#define ANGLE_TOLERANCE M_PI / 60.0
-
 
 namespace cmp
 {
@@ -151,6 +149,10 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
+
+			//for correct angles, do not write image
+			if( fabs(angleDiff) < ANGLE_MIN)
+				continue;
 
 			//write image to output directory structure
 			std::string detectorDir = this->outputDirectory;
@@ -319,7 +321,7 @@ void SkewEvaluator::writeResults()
 		
 		report_overview << "\t\t<tr>\n";
 		
-		report_overview << "\t\t\t<td>" << detectorNames[classMap[i].classIndex] << "</td>\n";
+		report_overview << "\t\t\t<td><a href=\"" << detectorNames[classMap[i].classIndex] << "/index.htm\" title=\"" << detectorNames[classMap[i].classIndex] << "\">" << detectorNames[classMap[i].classIndex] << "</a></td>\n";
 		
 		json_data << "\t\t{\n" << "\t\t\t\"children\": [\n";
 		json_incorrect << "\t\t{\n" << "\t\t\t\"children\": [\n";
@@ -466,27 +468,6 @@ void SkewEvaluator::writeResults()
 
 	report_overview.close();
 
-	/*
-series = [{
-    name: 'Correct Classifications',
-    color: '#4572A7',
-    type: 'column',
-    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
-    tooltip: {
-        valueSuffix: ' %'
-    }
-
-}, {
-    name: 'Standard Deviation',
-    color: '#89A54E',
-    type: 'spline',
-	yAxis: 1,
-    data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, -1.0, 9.6],
-    tooltip: {
-        valueSuffix: ''
-    }
-}]
-	*/
 	std::ofstream overview_json;
 	overview_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
 
