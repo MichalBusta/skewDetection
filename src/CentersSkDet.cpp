@@ -119,7 +119,7 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 
 		for(size_t j = 0; j < drawContour.size(); j++)
 		{
-			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 2);
+			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 0), 2);
 		}
 
 		cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
