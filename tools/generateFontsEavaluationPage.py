@@ -232,8 +232,11 @@ outputDirAlphabet = "{0}/Runic".format(outputDir)
 specific_fonts = ['Segoe UI Symbol', 'FreeMono-Medium', 'Hnias', 'Code2000', 'EversonMonoUnicode', 'Junicode', 'Quivira']
 for i in range(0x16A0, 0x16F1):
     writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
-
-
+'''
+TODO RUNIC RANGE:     odebrat (16EB - 16ED), 
+	  GREGORIAN RANGE: oderat 10C6, (10C8 - 10CC), 10CE, 10CF
+	  GREEK RANGE:     odebrat 374, 375, 378, 379, (381 - 390), 3A2
+'''
 'write modifications'
 
 
