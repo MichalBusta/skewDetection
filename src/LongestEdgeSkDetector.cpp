@@ -33,29 +33,27 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double angle = 0, atanAngle = 0;
 	double QactLength=0, maxLength=0;
 	double actLength=0, actAngle=0;
-	double deltaX=0, deltaY=0, actDeltaX=0, actDeltaY=0;
+	double deltaX=0, deltaY=0;
 	int counter=0;
 	//double range = M_PI/2.0/45.0;
 	double range = ignoreAngle*M_PI/180;
 	for(int c=0;c<outerContour.size();c++)
 	{
 		int index2 = c + 1;
-		if(index2 > outerContour.size()-1)
+		if(index2 >= outerContour.size())
 			index2 = 0;
 
 		//srovnani 1+2,.....predposledni+posledni
-		actDeltaX = outerContour[index2].x - outerContour[c].x;
-		actDeltaY = outerContour[index2].y - outerContour[c].y;
-		QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
+		deltaX = outerContour[index2].x - outerContour[c].x;
+		deltaY = outerContour[index2].y - outerContour[c].y;
+		QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
 		actLength = sqrt(QactLength);
-		if(actLength>maxLength && (actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
+		atanAngle=(deltaX)*1.0/(deltaY);
+		actAngle =atan(atanAngle);
+
+		if(actLength > maxLength && (actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
 		{
 			maxLength=actLength;
-			deltaX=actDeltaX;
-			deltaY=actDeltaY;
-			atanAngle=(deltaX)*1.0/(deltaY);
-			actAngle =atan(atanAngle);
-
 			angle = actAngle;
 			counter=c;
 		}
