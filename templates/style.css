@@ -53,6 +53,10 @@ div.column {
 	margin-right: 30px;
 }
 
+div.column td:last-child {
+	text-align: center;
+}
+
 th
 {
 	padding: 12px 17px 12px 17px;
