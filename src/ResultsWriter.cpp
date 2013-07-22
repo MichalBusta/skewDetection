@@ -20,11 +20,18 @@ ResultsWriter::~ResultsWriter() {
 	// TODO Auto-generated destructor stub
 }
 
+inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName)
+{
+	std::ostringstream picture;
+	picture << outputDir << "/" << detectorName << "/" << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
+	std::string pictureLink = picture.str();
+	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+}
+
 /**
  * @param classificator - if >= 0 zapise vysledky pouze od daneho detektoru
  * @param maxCount - maximalni pocet radku v tabulce
  */
-
 void ResultsWriter::writeWorstDetectorResults(
 		std::vector<EvaluationResult>& results, int classificator, int maxCount,
 		std::fstream& outStream, std::string& outputDir, std::vector<std::string> detectorNames)
@@ -61,13 +68,8 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
 			continue;
 
-		std::ostringstream picture;
-		picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
-		std::string pictureLink = picture.str();
-		outStream << "<tr><td align=\"center\">" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>" << work[i].letter << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
-
+		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator]);
 		LetterCheck.insert(work[i].letter);
-
 
 		if( resultsCount++ > maxCount)
 			break;
@@ -92,14 +94,8 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
 			continue;
 
-		std::ostringstream picture;
-		picture << outputDir << "/" << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
-
-		std::string pictureLink = picture.str();
-
+		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator]);
 		LetterCheck.insert(work[i].letter);
-
-		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 
 		if( resultsCount++ > maxCount)
 			break;
