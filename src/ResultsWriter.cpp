@@ -20,10 +20,11 @@ ResultsWriter::~ResultsWriter() {
 	// TODO Auto-generated destructor stub
 }
 
-inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName)
+inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName, int classificator)
 {
 	std::ostringstream picture;
-	picture << outputDir << "/" << detectorName << "/" << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
+	if (classificator<0) picture << detectorName << "/";
+	picture << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
 	std::string pictureLink = picture.str();
 	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 }
@@ -68,7 +69,7 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
 			continue;
 
-		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator]);
+		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator], classificator);
 		LetterCheck.insert(work[i].letter);
 
 		if( resultsCount++ > maxCount)
@@ -94,7 +95,7 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
 			continue;
 
-		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator]);
+		writeResultsRow(outStream, outputDir, work[i], detectorNames[work[i].classificator], classificator);
 		LetterCheck.insert(work[i].letter);
 
 		if( resultsCount++ > maxCount)
