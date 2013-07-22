@@ -52,7 +52,6 @@ SkewEvaluator::~SkewEvaluator()
  */
 void SkewEvaluator::evaluate( const std::string& evalDir )
 {
-
 	std::vector<std::string> facesDir = IOUtils::GetDirectoriesInDirectory(evalDir, "*", true);
 	//for all alphabets
 	for( size_t i = 0; i < facesDir.size(); i++ )
