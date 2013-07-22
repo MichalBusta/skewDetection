@@ -21,7 +21,7 @@ using namespace cv;
 namespace cmp
 {
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double ratio) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), ratio(ratio)
 {
 	// TODO Auto-generated constructor stub
 }
@@ -33,6 +33,8 @@ ThinProfileSkDet::~ThinProfileSkDet()
 
 double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {
+	//double ratio = 0.03;
+
 	if (contours[0].size() < 3) return 0;
 	//cmp::filterContour(contours[0]);
 	vector<Point> hull;
@@ -65,6 +67,11 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	Point2f horizont_neg(-1,0);
 	double angle = 0;
 	Point2f resVector, resPoint, resPoint2;
+
+	double angle_2nd = 0;
+	Point2f resVector_2nd, resPoint_2nd, resPoint2_2nd;
+	float min_width_2nd = std::numeric_limits<float>::infinity();
+
 	while(rotated_angle < M_PI)
 	{
 		int p_a_1 = p_a + 1;
@@ -123,21 +130,32 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		ang = ang + M_PI/2;
 		while (ang > M_PI/2) ang = ang - M_PI;
-		while (ang <= -M_PI/2) ang = ang + M_PI;/**/
+		while (ang <= -M_PI/2) ang = ang + M_PI;
 
-		if(width <= min_width)
+		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
 		{
-			if(
-				(ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle))
-			)
+			if(width <= min_width)
 			{
+				angle_2nd = angle;
+				min_width_2nd = min_width;
+				resVector_2nd = resVector;
+				resPoint_2nd = resPoint;
+				resPoint2_2nd = resPoint2;
+
 				angle = ang;
 				min_width = width;
 				resVector = tmpVector;
 				resPoint = tmpPoint;
 				resPoint2 = tmpPoint2;
 			}
-
+			else if(width <= min_width_2nd)
+			{
+				angle_2nd = ang;
+				min_width_2nd = width;
+				resVector_2nd = tmpVector;
+				resPoint_2nd = tmpPoint;
+				resPoint2_2nd = tmpPoint2;
+			}
 		}
 	}
 
@@ -155,11 +173,38 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		{
 			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 0 ), 2);
 		}
-
+		
 		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 1);
-		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 255 ), 1);
-		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
+		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 0, 255 ), 1);
+
+		cv::circle(drawing, resPoint2, 3, Scalar( 0, 0, 255 ), 2);
+
+		if ((min_width/min_width_2nd+ratio) > 1)
+		{
+			cv::Point2f middleVector, middlePoint;
+			cv::line(drawing, resPoint_2nd-resVector_2nd*100, resPoint_2nd+resVector_2nd*100, Scalar( 0, 255, 255 ), 1);
+			cv::line(drawing, resPoint2_2nd-resVector_2nd*100, resPoint2_2nd+resVector_2nd*100, Scalar( 0, 255, 255 ), 1);
+		
+			if(resVector.y*resVector_2nd.y < 0) resVector_2nd = resVector_2nd*(-1);
+
+			middleVector.x = ((resVector.x*min_width)+(resVector_2nd.x*min_width_2nd))/(min_width+min_width_2nd);
+			middleVector.y = ((resVector.y*min_width)+(resVector_2nd.y*min_width_2nd))/(min_width+min_width_2nd);
+
+			middlePoint.x = (resPoint2_2nd.x+resPoint2.x)/2;
+			middlePoint.y = (resPoint2_2nd.y+resPoint2.y)/2;
+
+			cv::line(drawing, middlePoint-middleVector*100, middlePoint+middleVector*100, Scalar( 0, 255, 0 ), 1);
+		
+			cv::circle(drawing, resPoint2_2nd, 3, Scalar( 0, 255, 255 ), 2);
+		}
 	}
+
+	if ((min_width/min_width_2nd+ratio) > 1)
+	{
+		return ((angle*min_width_2nd)+(angle_2nd*min_width))/(min_width+min_width_2nd);
+	}
+	//return ((angle*min_width_2nd)+(angle_2nd*min_width))/(min_width+min_width_2nd);
+
 	return angle;
 }
 
