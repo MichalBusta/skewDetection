@@ -9,6 +9,7 @@ find_package( OpenCV REQUIRED )
 
 if (USE_OPENMP)
     #add_definitions("-std=c++0x")
+    add_definitions("-DDO_PARALLEL")
     if (MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS} /openmp")
     else(MSVC)

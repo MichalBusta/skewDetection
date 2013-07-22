@@ -20,6 +20,10 @@
 #include "TemplateUtils.h"
 #include "ResultsWriter.h"
 
+#ifdef DO_PARALLEL
+#	include <omp.h>
+#endif
+
 
 namespace cmp
 {
@@ -137,6 +141,13 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	cv::Mat negative = ~sourceImage;
 	generateDistortions(negative, distortions);
 
+#ifdef DO_PARALLEL
+	omp_lock_t lock;
+	omp_init_lock(&lock);
+#endif
+
+
+
 	for(size_t j = 0; j < distortions.size(); j++)
 	{
 		SkewDef& def = distortions[j];
@@ -149,8 +160,14 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 
 			double detectedAngle = detectors[i]->detectSkew( workImage, 0, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
+#ifdef DO_PARALLEL
+			omp_set_lock(&lock);
+#endif
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
 
+#ifdef DO_PARALLEL
+			omp_unset_lock(&lock);
+#endif
 			//for correct angles, do not write image
 			if( fabs(angleDiff) < ANGLE_MIN)
 				continue;
@@ -224,7 +241,9 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			}
 		}
 	}
-
+#ifdef DO_PARALLEL
+	omp_destroy_lock(&lock);
+#endif
 }
 
 /**
