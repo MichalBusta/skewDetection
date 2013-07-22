@@ -83,7 +83,7 @@ struct AcumResult
 class SkewEvaluator
 {
 public:
-	SkewEvaluator( std::string outputDirectory, bool debug = false );
+	SkewEvaluator( std::string outputDirectory, bool debug = false, bool writeImages = false );
 
 	virtual ~SkewEvaluator();
 
@@ -111,6 +111,9 @@ private:
 	std::string outputDirectory;
 
 	size_t nextImageId;
+
+	/** if true, result images are saved */
+	bool writeImages;
 
 };
 

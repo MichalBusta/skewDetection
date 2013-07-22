@@ -24,7 +24,7 @@
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0)
+SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug, bool writeImages ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0), writeImages( writeImages )
 {
 	if(!IOUtils::PathExist(outputDirectory))
 	{
@@ -142,7 +142,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 		SkewDef& def = distortions[j];
 
 		#pragma omp parallel for
-		for(size_t i = 0; i < detectors.size(); i++ )
+		for(int i = 0; i < (int) detectors.size(); i++ )
 		{
 			cv::Mat debugImage;
 			cv::Mat workImage = def.image.clone();
@@ -155,62 +155,64 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			if( fabs(angleDiff) < ANGLE_MIN)
 				continue;
 
-			//write image to output directory structure
-			std::string detectorDir = this->outputDirectory;
-			detectorDir += "/" + this->detectorNames[i];
-			std::string alphabetDir = detectorDir;
-			alphabetDir += "/" + alphabet;
-			IOUtils::CreateDir( alphabetDir );
-			std::string letterDir = alphabetDir;
-			letterDir += "/" + letter;
-			IOUtils::CreateDir( letterDir );
-
-			std::ostringstream os;
-			os << letterDir << "/" << def.imageId << ".png";
-
-			//cut display image
-			std::vector<std::vector<cv::Point> > contours;
-			std::vector<cv::Vec4i> hierarchy;
-			cv::Mat temp = def.image.clone();
-			findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
-			if (contours.size() == 0) continue;
-			ContourSkewDetector::getBigestContour(contours, hierarchy);
-			cv::Rect r = cv::boundingRect(contours[0]);
-			r.x=r.x-10;
-			r.x = MAX(r.x, 0);
-			r.y=r.y-10;
-			r.y = MAX(r.y, 0);
-			r.height=r.height+20;
-			r.height = MIN(r.height, temp.rows - r.y - 1);
-			r.width=r.width+20;
-			r.width = MIN(r.width, temp.cols - r.x - 1);
-
-			cv::Mat draw;
-			cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
-			draw = draw(r);
-			if(  debugImage.cols == workImage.cols && debugImage.rows == workImage.rows)
-				debugImage = debugImage(r);
-
-			//create display image
-			cv::Point origin = cv::Point( draw.cols / 2.0, 0 );
-			cv::Point end = cv::Point( origin.x + draw.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + draw.rows * sin(detectedAngle + M_PI / 2.0));
-
-			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
-			end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
-			cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
-
-			std::vector<cv::Mat> toMerge;
-			toMerge.push_back(draw);
-			toMerge.push_back(debugImage);
-			cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
-
-			cv::imwrite( os.str(), dispImage );
-
-			if( debug )
+			if (writeImages)
 			{
-				cv::imshow(detectorNames[i], dispImage);
-			}
+				//write image to output directory structure
+				std::string detectorDir = this->outputDirectory;
+				detectorDir += "/" + this->detectorNames[i];
+				std::string alphabetDir = detectorDir;
+				alphabetDir += "/" + alphabet;
+				IOUtils::CreateDir( alphabetDir );
+				std::string letterDir = alphabetDir;
+				letterDir += "/" + letter;
+				IOUtils::CreateDir( letterDir );
 
+				std::ostringstream os;
+				os << letterDir << "/" << def.imageId << ".png";
+
+				//cut display image
+				std::vector<std::vector<cv::Point> > contours;
+				std::vector<cv::Vec4i> hierarchy;
+				cv::Mat temp = def.image.clone();
+				findContours( temp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+				if (contours.size() == 0) continue;
+				ContourSkewDetector::getBigestContour(contours, hierarchy);
+				cv::Rect r = cv::boundingRect(contours[0]);
+				r.x=r.x-10;
+				r.x = MAX(r.x, 0);
+				r.y=r.y-10;
+				r.y = MAX(r.y, 0);
+				r.height=r.height+20;
+				r.height = MIN(r.height, temp.rows - r.y - 1);
+				r.width=r.width+20;
+				r.width = MIN(r.width, temp.cols - r.x - 1);
+
+				cv::Mat draw;
+				cv::cvtColor( ~def.image, draw, cv::COLOR_GRAY2BGR);
+				draw = draw(r);
+				if(  debugImage.cols == workImage.cols && debugImage.rows == workImage.rows)
+					debugImage = debugImage(r);
+
+				//create display image
+				cv::Point origin = cv::Point( draw.cols / 2.0, 0 );
+				cv::Point end = cv::Point( origin.x + draw.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + draw.rows * sin(detectedAngle + M_PI / 2.0));
+
+				cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
+				end = cv::Point( origin.x + debugImage.rows * cos(def.skewAngle + M_PI / 2.0),  origin.y + debugImage.rows * sin(def.skewAngle + M_PI / 2.0));
+				cv::line( draw, origin, end, cv::Scalar(0, 255, 0), 1 );
+
+				std::vector<cv::Mat> toMerge;
+				toMerge.push_back(draw);
+				toMerge.push_back(debugImage);
+				cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
+
+				cv::imwrite( os.str(), dispImage );
+
+				if( debug )
+				{
+					cv::imshow(detectorNames[i], dispImage);
+				}
+			}
 		}
 
 		if( debug )
