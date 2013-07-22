@@ -140,6 +140,8 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	for(size_t j = 0; j < distortions.size(); j++)
 	{
 		SkewDef& def = distortions[j];
+
+		#pragma omp parallel for
 		for(size_t i = 0; i < detectors.size(); i++ )
 		{
 			cv::Mat debugImage;
@@ -190,7 +192,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 				debugImage = debugImage(r);
 
 			//create display image
-			/*cv::Point origin = cv::Point( draw.cols / 2.0, 0 );
+			cv::Point origin = cv::Point( draw.cols / 2.0, 0 );
 			cv::Point end = cv::Point( origin.x + draw.rows * cos(detectedAngle + M_PI / 2.0),  origin.y + draw.rows * sin(detectedAngle + M_PI / 2.0));
 
 			cv::line( draw, origin, end, cv::Scalar(0, 0, 255), 1 );
@@ -207,7 +209,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			if( debug )
 			{
 				cv::imshow(detectorNames[i], dispImage);
-			}*/
+			}
 
 		}
 
