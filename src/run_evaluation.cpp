@@ -34,6 +34,7 @@ int main( int argc, char **argv)
 
 	SkewEvaluator evaluator( argv[2], false );
 
+	/*
 	std::map<int, std::string> approx;
 	approx[1] = "NONE";
 	approx[2] = "SIMPLE";
@@ -61,12 +62,13 @@ int main( int argc, char **argv)
 			epsilonToStr.clear();
 		}
 	}
-	/*evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
+	*/
+	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
 	evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_NONE, 0, 0.1, false), "LeftHullLongest" );
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdgeSkDetector" );
-	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );*/
+	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
 
 	evaluator.evaluate( argv[1] );
 
