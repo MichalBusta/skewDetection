@@ -16,8 +16,6 @@ namespace cmp
 
 //common functions
 
-void filterContour(std::vector<cv::Point>& vector);
-
 /**
  * @class cmp::SkewDetector
  * 
