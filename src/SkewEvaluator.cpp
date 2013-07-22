@@ -141,6 +141,8 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	for(size_t j = 0; j < distortions.size(); j++)
 	{
 		SkewDef& def = distortions[j];
+
+		#pragma omp parallel for
 		for(size_t i = 0; i < detectors.size(); i++ )
 		{
 			cv::Mat debugImage;
