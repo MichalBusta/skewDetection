@@ -16,7 +16,7 @@ using namespace cv;
 
 namespace cmp {
 
-LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, int ignoreAngle) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle)
+LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle)
 {
 	// TODO Auto-generated constructor stub
 
@@ -33,52 +33,29 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double angle = 0, atanAngle = 0;
 	double QactLength=0, maxLength=0;
 	double actLength=0, actAngle=0;
-	double deltaX=0, deltaY=0, actDeltaX=0, actDeltaY=0;
+	double deltaX=0, deltaY=0;
 	int counter=0;
 	//double range = M_PI/2.0/45.0;
 	double range = ignoreAngle*M_PI/180;
 	for(int c=0;c<outerContour.size();c++)
 	{
-		if(c<outerContour.size()-1)
+		int index2 = c + 1;
+		if(index2 >= outerContour.size())
+			index2 = 0;
+
+		//srovnani 1+2,.....predposledni+posledni
+		deltaX = outerContour[index2].x - outerContour[c].x;
+		deltaY = outerContour[index2].y - outerContour[c].y;
+		QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
+		actLength = sqrt(QactLength);
+		atanAngle=(deltaX)*1.0/(deltaY);
+		actAngle =atan(atanAngle);
+
+		if(actLength > maxLength && (actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
 		{
-			//srovnani 1+2,.....predposledni+posledni
-			actDeltaX = outerContour[c+1].x - outerContour[c].x;
-			actDeltaY = outerContour[c+1].y - outerContour[c].y;
-			QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
-			actLength = sqrt(QactLength);
-			if(actLength>maxLength)
-			{
-				maxLength=actLength;
-				deltaX=actDeltaX;
-				deltaY=actDeltaY;
-				atanAngle=(deltaX)*1.0/(deltaY);
-				actAngle =atan(atanAngle);
-				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-				{
-					angle = actAngle;
-					counter=c;
-				}
-			}
-		}else 			//c=outerContour.size()
-		{
-			//srovnani posledniho a prvniho bodu
-			actDeltaX = outerContour[outerContour.size()-1].x - outerContour[0].x;
-			actDeltaY = outerContour[outerContour.size()-1].y - outerContour[0].y;
-			QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
-			actLength = sqrt(QactLength);
-			if(actLength>maxLength)
-			{
-				maxLength=actLength;
-				deltaX=actDeltaX;
-				deltaY=actDeltaY;
-				atanAngle=(deltaX)*1.0/(deltaY);
-				actAngle =atan(atanAngle);
-				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-				{
-					angle = actAngle;
-					counter=outerContour.size()-1;
-				}
-			}
+			maxLength=actLength;
+			angle = actAngle;
+			counter=c;
 		}
 	}
 

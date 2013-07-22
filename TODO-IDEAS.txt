@@ -1,4 +1,5 @@
 
+Jakub: Left-Right longest edge 
 
 Najit nejlepsi parametry pro dany detektor: 
     - testovaci sada: /datagrid/personal/TextSpotter/fonts/generatedImagesTestSet
@@ -12,12 +13,13 @@ Vytahnout parametry detektoru - v kodu by nemelo byt nic natrvrdo tu if angle > 
 
 Pridat kriterium: Zhorsuje detektor vysledek ???? 
 
-Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedImages
-    - odstranit "nepouzitelne znaky": jako : .,; atd. 
      
 Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
 DONE:
+
+Vygenerovana pismena ulozena na: /datagrid/personal/TextSpotter/fonts/generatedImages
+    - odstranit "nepouzitelne znaky": jako : .,; atd. 
 
 Vizualizace: grafy - pridat co nejvic info do prehledoveho grafu 
 
