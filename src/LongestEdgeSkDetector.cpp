@@ -39,46 +39,25 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 	double range = ignoreAngle*M_PI/180;
 	for(int c=0;c<outerContour.size();c++)
 	{
-		if(c<outerContour.size()-1)
+		int index2 = c + 1;
+		if(index2 > outerContour.size()-1)
+			index2 = 0;
+
+		//srovnani 1+2,.....predposledni+posledni
+		actDeltaX = outerContour[index2].x - outerContour[c].x;
+		actDeltaY = outerContour[index2].y - outerContour[c].y;
+		QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
+		actLength = sqrt(QactLength);
+		if(actLength>maxLength && (actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
 		{
-			//srovnani 1+2,.....predposledni+posledni
-			actDeltaX = outerContour[c+1].x - outerContour[c].x;
-			actDeltaY = outerContour[c+1].y - outerContour[c].y;
-			QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
-			actLength = sqrt(QactLength);
-			if(actLength>maxLength)
-			{
-				maxLength=actLength;
-				deltaX=actDeltaX;
-				deltaY=actDeltaY;
-				atanAngle=(deltaX)*1.0/(deltaY);
-				actAngle =atan(atanAngle);
-				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-				{
-					angle = actAngle;
-					counter=c;
-				}
-			}
-		}else 			//c=outerContour.size()
-		{
-			//srovnani posledniho a prvniho bodu
-			actDeltaX = outerContour[outerContour.size()-1].x - outerContour[0].x;
-			actDeltaY = outerContour[outerContour.size()-1].y - outerContour[0].y;
-			QactLength = (actDeltaX)*(actDeltaX) + (actDeltaY)*(actDeltaY);
-			actLength = sqrt(QactLength);
-			if(actLength>maxLength)
-			{
-				maxLength=actLength;
-				deltaX=actDeltaX;
-				deltaY=actDeltaY;
-				atanAngle=(deltaX)*1.0/(deltaY);
-				actAngle =atan(atanAngle);
-				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-				{
-					angle = actAngle;
-					counter=outerContour.size()-1;
-				}
-			}
+			maxLength=actLength;
+			deltaX=actDeltaX;
+			deltaY=actDeltaY;
+			atanAngle=(deltaX)*1.0/(deltaY);
+			actAngle =atan(atanAngle);
+
+			angle = actAngle;
+			counter=c;
 		}
 	}
 
