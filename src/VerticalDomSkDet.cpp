@@ -39,7 +39,6 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
 {
 	std::vector<cv::Point> contour = contours[0];
-	filterContour(contour);
 	
 	memset (hist, 0, int(180/histColWidth) * sizeof(float));
 

@@ -117,8 +117,6 @@ double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vec
 			Scalar color = Scalar( 255, 255, 255 );
 			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
 
-			cmp::filterContour(contours[0]);
-
 			for(int i=0;i<hull.size();i++)
 			{
 				cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 0 ), 2);
@@ -203,8 +201,6 @@ double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vec
 
 			Scalar color = Scalar( 255, 255, 255 );
 			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
-
-			cmp::filterContour(contours[0]);
 
 			for(int i=0;i<outerContour.size();i++)
 			{

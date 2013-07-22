@@ -23,47 +23,6 @@ SkewDetector::~SkewDetector()
 	// TODO Auto-generated destructor stub
 }
 
-void filterContour(std::vector<cv::Point>& vector)
-{
-	double maxAllowedDivergence = 5; // uhel ve stupnich !!!
-	maxAllowedDivergence = maxAllowedDivergence/180*M_PI; // prevod na radiany
-	cv::Point prev;
-	int del = 0;
-	int notdel = 0;
-	for(std::vector<cv::Point>::iterator it = vector.begin(); it < vector.end(); )
-	{
-		bool remove = false;
-		
-		if(it == vector.begin()) 
-		{
-			prev = (*it);
-			it++;
-		}
-		std::vector<cv::Point>::iterator nextit = it;
-		nextit++;
-		if(nextit == vector.end()) 
-		{
-			break;
-		}
-		
-		cv::Point v1 = (*it) - prev;
-		cv::Point v2 = (*nextit) - (*it);
-		double divergence = acos((v1.x*v2.x + v1.y*v2.y)/(sqrt(v1.x*v1.x+v1.y*v1.y+0.0)*sqrt(v2.x*v2.x+v2.y*v2.y+0.0)));
-
-		prev = (*it);
-
-		if(divergence <= maxAllowedDivergence)
-		{
-			it = vector.erase(it);
-			del++;
-		}else{
-			it++;
-			notdel++;
-		}
-
-	}
-}
-
 void ContourSkewDetector::getBigestContour(
 		std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy)
 {
