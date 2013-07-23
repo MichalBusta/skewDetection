@@ -13,6 +13,7 @@
 #include "VerticalDomSkDet.h"
 #include "LongestEdgeSkDetector.h"
 #include "LeftRightHullSkDet.h"
+#include "LRLongestEdge.h"
 
 
 

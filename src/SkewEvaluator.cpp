@@ -577,6 +577,75 @@ void SkewEvaluator::writeResults()
 	
 	overview_json << "'Sum' ];";
 	overview_json.close();
+	/**************************************************************************/
+	std::ofstream alphabet_json;
+	alphabet_json.open ( (outputDirectory+"/alphabet_object_data.js" ).c_str() );
+	
+	alphabet_json << "series = [";
+	/**********************
+	std::map<std::string, std::stringstream> alphabetResults;
+	for(std::map<int, std::map<std::string, AcumResult>>::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
+	{
+		for(std::map<std::string, AcumResult>::iterator iterator = alphabetMap[ it->first ].begin(); iterator != alphabetMap[ it->first ].end(); iterator++)
+		{
+			if(it != alphabetMap.begin()) alphabetResults[iterator->first] << ", ";
+			alphabetResults[iterator->first] << std::fixed << std::setprecision(2) << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
+		}
+	}*/
+	std::vector<std::string> colors;
+	
+	colors.push_back("#928333");
+	colors.push_back("#da0d4d");
+	colors.push_back("#bd1fc6");
+	colors.push_back("#0950d2");
+	colors.push_back("#987e42");
+	colors.push_back("#e33154");
+	colors.push_back("#0f3313");
+	colors.push_back("#f41b15");
+
+	std::stringstream alphabetNames;
+	int colorIndex = 0;
+	for(std::map<int, std::map<std::string, AcumResult>>::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
+	{
+		if(it != alphabetMap.begin())
+		{
+			alphabet_json << ", ";
+		}
+		alphabet_json << "{\n";
+		alphabet_json << "\tname: '" << detectorNames[it->first] << "',\n";
+		alphabet_json << "\tcolor: '" << colors[colorIndex] << "',\n";
+		colorIndex = colorIndex==colors.size()-1 ? 0 : colorIndex+1;
+		alphabet_json << "\ttype: 'column',\n";
+		alphabet_json << "\tdata: [";
+		for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
+		{
+			if(iterator != it->second.begin()) alphabet_json << ", ";
+			if(it == alphabetMap.begin())
+			{
+				if(iterator != it->second.begin())
+				{
+					alphabetNames << ", ";
+				}
+				alphabetNames << "'" << iterator->first << "'";
+			}
+			alphabet_json << std::fixed << std::setprecision(2) << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
+		}
+		alphabet_json << "],\n";
+		alphabet_json << "\ttooltip: {\n";
+		alphabet_json << "\t\tvalueSuffix: ' %'\n";
+		alphabet_json << "\t}\n";
+		alphabet_json << "}";
+	}
+	/***************/
+	alphabet_json << "]\n";
+
+	alphabet_json << "\n\n" << "categories = [";
+
+	alphabet_json << alphabetNames.str();
+	
+	alphabet_json << "];";
+	alphabet_json.close();
+
 }
 
 /**

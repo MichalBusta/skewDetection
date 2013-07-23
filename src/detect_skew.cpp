@@ -27,6 +27,7 @@ static void help()
 	std::cout << "		3 - Vertical Dominant Detector\n";
 	std::cout << "		4 - Longest vertical edge Detector\n";
 	std::cout << "      5 - Left-Right Hull Detector\n";
+	std::cout << "      6 - LR Longest Edge Detector\n";
 
 	std::cout << std::endl;
 }
@@ -51,6 +52,7 @@ int main( int argc, char **argv)
 	detectors.push_back( new VerticalDomSkDet() );
 	detectors.push_back( new LongestEdgeSkDetector() );
 	detectors.push_back( new LeftRightHullSkDet());
+	detectors.push_back( new LRLongestEdge());
 
 	if(detector > detectors.size())
 	{
