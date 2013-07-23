@@ -93,3 +93,8 @@ table a, table a:visited, table a:hover, table a:active {
 table a:hover {
 	text-decoration: underline;
 }
+
+td img 
+{ 
+	max-width: 150px;
+}
