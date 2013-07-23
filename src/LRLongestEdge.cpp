@@ -62,7 +62,7 @@ double LRLongestEdge::detectSkew(const cv::Mat& mask,
 	}
 
 	size_t maxI = start;
-	cv::Point2d maxVector;
+	cv::Point maxVector;
 
 	double maxLen = 0;
 	double angle = 0;
@@ -108,8 +108,8 @@ double LRLongestEdge::detectSkew(const cv::Mat& mask,
 		{
 			cv::circle(drawing, contours[0][i], 2, cv::Scalar( 255, 0, 0 ), 1);
 		}
-		
-		cv::line(drawing, contours[0][maxI], cv::Point2d(contours[0][maxI])+maxVector, cv::Scalar( 0, 0, 255 ), 1);
+		cv::Point p = contours[0][maxI] + maxVector;
+		cv::line(drawing, contours[0][maxI], p, cv::Scalar( 0, 0, 255 ), 1);
 
 		//cv::circle(drawing, contours[0][maxI], 3, cv::Scalar( 0, 255, 255 ), 2);
 
