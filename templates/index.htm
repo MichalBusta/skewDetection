@@ -9,8 +9,9 @@
 
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script src="object_data.js"></script>
+		<script src="alphabet_object_data.js"></script>
 		<script type="text/javascript">
-$(function () {
+	$(function () {
         $('#container').highcharts({
             chart: {
                 zoomType: 'xy'
@@ -56,7 +57,7 @@ $(function () {
                         color: '#4572A7'
                     }
                 },
-		opposite: true
+			opposite: true
     
             }],
             tooltip: {
@@ -73,6 +74,49 @@ $(function () {
             },
             series: series
         });
+        $('#container2').highcharts({
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Skew Detectors - Alphabet Overview'
+            },
+            subtitle: {
+                text: 'The Skew Detectors Evaluation'
+            },
+            xAxis: [{
+                categories: alphabet_categories
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    formatter: function() {
+                        return this.value +'%';
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                title: {
+                    text: 'Correct Classifications',
+                    style: {
+                        color: '#4572A7'
+                    }
+                }
+            }],
+            tooltip: {
+                shared: false
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                x: 120,
+                verticalAlign: 'top',
+                y: 80,
+                floating: true,
+                backgroundColor: '#FFFFFF'
+            },
+            series: alphabet_series
+        });
     });
     
 
@@ -82,6 +126,7 @@ $(function () {
 <script src="js/highcharts.js"></script>
 
 <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<div id="container2" style="min-width: 400px; height: 400px; margin: 20px auto"></div>
 
 
 

@@ -581,7 +581,7 @@ void SkewEvaluator::writeResults()
 	std::ofstream alphabet_json;
 	alphabet_json.open ( (outputDirectory+"/alphabet_object_data.js" ).c_str() );
 	
-	alphabet_json << "series = [";
+	alphabet_json << "alphabet_series = [";
 	/**********************
 	std::map<std::string, std::stringstream> alphabetResults;
 	for(std::map<int, std::map<std::string, AcumResult>>::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
@@ -639,7 +639,7 @@ void SkewEvaluator::writeResults()
 	/***************/
 	alphabet_json << "]\n";
 
-	alphabet_json << "\n\n" << "categories = [";
+	alphabet_json << "\n\n" << "alphabet_categories = [";
 
 	alphabet_json << alphabetNames.str();
 	
