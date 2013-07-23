@@ -23,10 +23,16 @@ namespace cmp
 class LRLongestEdge : public ContourSkewDetector
 {
 public:
-	LRLongestEdge(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.01);
+	LRLongestEdge(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = 15, bool left = true);
 	virtual ~LRLongestEdge();
 
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
+	
+	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
+	int ignoreAngle;
+
+	/** pri true bude hledat levou nejdelsi hranu, pri false pravou */
+	bool left;
 };
 
 } /* namespace cmp */
