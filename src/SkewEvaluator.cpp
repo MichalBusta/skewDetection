@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <assert.h>
 
 #include "SkewEvaluator.h"
 #include "IOUtils.h"
@@ -73,7 +74,6 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 			{
 				const std::string& letterFile = letterImages[k];
 				std::cout << "Processing image: " << letterFile << std::endl;
-
 				cv::Mat tmp = cv::imread(letterFile, cv::IMREAD_GRAYSCALE);
 				cv::Mat img;
 				copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
@@ -146,12 +146,10 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	omp_init_lock(&lock);
 #endif
 
-
-
 	for(size_t j = 0; j < distortions.size(); j++)
 	{
 		SkewDef& def = distortions[j];
-
+		
 		#pragma omp parallel for
 		for(int i = 0; i < (int) detectors.size(); i++ )
 		{
@@ -171,7 +169,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			//for correct angles, do not write image
 			if( fabs(angleDiff) < ANGLE_MIN)
 				continue;
-
+			
 			if (writeImages)
 			{
 				//write image to output directory structure

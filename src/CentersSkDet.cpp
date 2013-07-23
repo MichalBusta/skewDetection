@@ -81,10 +81,15 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 	Point BR(BRX, bottomPoint);
 
 	//pomocne body pro vztvareni usecek
-	Point P1(0, topPoint + 100*precision);
-	Point P2(mask.rows, topPoint + 100*precision);
+	Point P1(0, topPoint + addEdgeThickness);
+	Point P2(mask.cols, topPoint + addEdgeThickness);
+	Point P3(0, bottomPoint - addEdgeThickness);
+	Point P4(mask.cols, bottomPoint - addEdgeThickness);
+
+	/*Point P1(0, topPoint + 100*precision);
+	Point P2(mask.cols, topPoint + 100*precision);
 	Point P3(0, bottomPoint - 100*precision);
-	Point P4(mask.rows, bottomPoint - 100*precision);
+	Point P4(mask.cols, bottomPoint - 100*precision);*/
 
 	//ziskani prostrednich bodu
 	Point TM((TL.x + TR.x)/2.0,TL.y);
