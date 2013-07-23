@@ -605,7 +605,7 @@ void SkewEvaluator::writeResults()
 
 	std::stringstream alphabetNames;
 	int colorIndex = 0;
-	for(std::map<int, std::map<std::string, AcumResult>>::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
+	for(std::map<int, std::map<std::string, AcumResult> >::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
 	{
 		if(it != alphabetMap.begin())
 		{
