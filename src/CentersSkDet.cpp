@@ -76,12 +76,12 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 	int BRX = 0;
 	for (int c = 0; c < outerContour.size();c++)
 	{
-		if(outerContour[c].y < (topPoint + addEdgeThickness))
+		if(outerContour[c].y <= (topPoint + addEdgeThickness))
 		{
 			TLX = MIN(TLX, outerContour[c].x);
 			TRX = MAX(TRX, outerContour[c].x);
 		}
-		if(outerContour[c].y > (bottomPoint - addEdgeThickness))
+		if(outerContour[c].y >= (bottomPoint - addEdgeThickness))
 		{
 			BLX = MIN(BLX, outerContour[c].x);
 			BRX = MAX(BRX, outerContour[c].x);
@@ -94,10 +94,15 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 	Point BR(BRX, bottomPoint);
 
 	//pomocne body pro vztvareni usecek
-	Point P1(0, topPoint + 100*precision);
-	Point P2(mask.rows, topPoint + 100*precision);
+	Point P1(0, topPoint + addEdgeThickness);
+	Point P2(mask.cols, topPoint + addEdgeThickness);
+	Point P3(0, bottomPoint - addEdgeThickness);
+	Point P4(mask.cols, bottomPoint - addEdgeThickness);
+
+	/*Point P1(0, topPoint + 100*precision);
+	Point P2(mask.cols, topPoint + 100*precision);
 	Point P3(0, bottomPoint - 100*precision);
-	Point P4(mask.rows, bottomPoint - 100*precision);
+	Point P4(mask.cols, bottomPoint - 100*precision);*/
 
 	//ziskani prostrednich bodu
 	Point TM((TL.x + TR.x)/2.0,TL.y);
@@ -120,7 +125,7 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 
 		for(size_t j = 0; j < drawContour.size(); j++)
 		{
-			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 2);
+			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 1);
 		}
 
 		cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
