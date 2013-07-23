@@ -7,14 +7,14 @@ Najit nejlepsi parametry pro dany detektor:
     + pokud detektor zavisi na dalsich parametrech, pridat .... 
 
 
-Statistiky + prehledy pro abecedu 
+Statistiky + prehledy pro abecedu + pismena
 
 Pridat kriterium: Zhorsuje detektor vysledek ???? 
 
-     
-Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
 DONE:
+     
+Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
 Vytahnout parametry detektoru - v kodu by nemelo byt nic natrvrdo jako if angle > konstanta vycucana z prstu .... 
 
