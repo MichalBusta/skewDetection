@@ -28,25 +28,12 @@ CentersSkDet::~CentersSkDet()
 	// TODO Auto-generated destructor stub
 }
 
-bool sortPointY (const Point& i,const Point& j)
-{
-	if( i.y == j.y)
-		return (i.x < j.x);
-	return (i.y < j.y);
-}
-
 double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {
 	
 	if (contours[0].size() < 3) return 0;
-	std::vector<cv::Point> drawContour;
-	if(debugImage != NULL)
-	{
-		drawContour = contours[0];
-	}
 
 	std::vector<cv::Point>& outerContour = contours[0];
-	std::sort (outerContour.begin(), outerContour.end(), &sortPointY );
 
 	//ziskani souradnic Y
 	int topPoint = mask.rows;
@@ -76,12 +63,12 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 	int BRX = 0;
 	for (int c = 0; c < outerContour.size();c++)
 	{
-		if(outerContour[c].y < (topPoint + addEdgeThickness))
+		if(outerContour[c].y <= (topPoint + addEdgeThickness))
 		{
 			TLX = MIN(TLX, outerContour[c].x);
 			TRX = MAX(TRX, outerContour[c].x);
 		}
-		if(outerContour[c].y > (bottomPoint - addEdgeThickness))
+		if(outerContour[c].y >= (bottomPoint - addEdgeThickness))
 		{
 			BLX = MIN(BLX, outerContour[c].x);
 			BRX = MAX(BRX, outerContour[c].x);
@@ -114,13 +101,12 @@ double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv
 	{
 		Mat& drawing =  *debugImage;
 		drawing =  Mat::zeros( mask.size(), CV_8UC3 );
-		contours[0] = drawContour;
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
 
-		for(size_t j = 0; j < drawContour.size(); j++)
+		for(size_t j = 0; j < outerContour.size(); j++)
 		{
-			cv::circle(drawing, drawContour[j], 2, cv::Scalar(0, 255, 255), 2);
+			cv::circle(drawing, outerContour[j], 2, cv::Scalar(0, 255, 255), 2);
 		}
 
 		cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
