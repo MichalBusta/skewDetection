@@ -14,7 +14,7 @@ namespace cmp {
 
 class LongestEdgeSkDetector : public ContourSkewDetector {
 public:
-	LongestEdgeSkDetector(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.01, double ignoreAngle = 15);
+	LongestEdgeSkDetector(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.028, double ignoreAngle = 15);
 	virtual ~LongestEdgeSkDetector();
 
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
