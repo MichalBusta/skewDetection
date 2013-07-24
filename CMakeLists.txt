@@ -7,8 +7,9 @@ option (BUILD_TEST "Build test cases" OFF)
 #Find opencv
 find_package( OpenCV REQUIRED )
 
+#add_definitions("-std=c++0x")
+
 if (USE_OPENMP)
-    #add_definitions("-std=c++0x")
     add_definitions("-DDO_PARALLEL")
     if (MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS} /openmp")

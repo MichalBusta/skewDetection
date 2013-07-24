@@ -7,6 +7,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 #include <set>
 
@@ -229,7 +230,7 @@ void ResultsWriter::writeLettersResults(
 		std::stringstream letterNames;
 		int colorIndex = 0;
 		/********/
-		std::map<int, std::stringstream> data;
+		std::map<int, std::string> data;
 		for(size_t i = 0; i < it->second.size(); i++)
 		{
 			report_overview << "\t\t<tr>\n";
@@ -237,26 +238,28 @@ void ResultsWriter::writeLettersResults(
 			
 			images_table << "\t\t<tr>\n";
 			images_table << "\t\t\t<td>&#" << it->second[i].letter << ";</td>\n";
-			std::vector<std::vector<EvaluationResult>> detectors;
+			std::vector<std::vector<EvaluationResult> > detectors;
 			for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[i].results.begin(); iterator != it->second[i].results.end(); iterator++)
 			{
+				std::stringstream tmpStr;
 				detectors.push_back(iterator->second);
 				if(i==0)
 				{
 					if(iterator != it->second[i].results.begin()) 
 					{
-						data[iterator->first] << ", \n";
+
+						tmpStr << ", \n";
 					}
-					data[iterator->first] << "{\n";
-					data[iterator->first] << "\tname: '" << detectorNames[iterator->first] << "',\n";
-					data[iterator->first] << "\tcolor: '" << colors[colorIndex] << "',\n";
+					tmpStr << "{\n";
+					tmpStr << "\tname: '" << detectorNames[iterator->first] << "',\n";
+					tmpStr << "\tcolor: '" + colors[colorIndex] << "',\n";
 					colorIndex = colorIndex==colors.size()-1 ? 0 : colorIndex+1;
-					data[iterator->first] << "\ttype: 'column',\n";
-					data[iterator->first] << "\tdata: [";
+					tmpStr << "\ttype: 'column',\n";
+					tmpStr << "\tdata: [";
 				}
 				else
 				{
-					data[iterator->first] << ", ";
+					tmpStr << ", ";
 				}
 				double detectorTotal = 0.0;
 				double detectorCorrect = 0.0;
@@ -275,7 +278,8 @@ void ResultsWriter::writeLettersResults(
 					letterNames << "'&#" << it->second[i].letter << ";'";
 				}
 
-				data[iterator->first] << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal;
+				tmpStr << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal;
+				data[iterator->first] +=  tmpStr.str();
 				report_overview << "\t\t\t<td>" << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal << "%</td>\n";
 			}
 			std::sort(detectors.begin(), detectors.end(), sortResultsByBiggestDiff_subvector);
@@ -302,9 +306,9 @@ void ResultsWriter::writeLettersResults(
 			images_table << "\t\t</tr>\n";
 		}
 
-		for(std::map<int, std::stringstream>::iterator iterator = data.begin(); iterator != data.end(); iterator++)
+		for(std::map<int, std::string>::iterator iterator = data.begin(); iterator != data.end(); iterator++)
 		{
-			alphabet_json << iterator->second.str();
+			alphabet_json << iterator->second;
 			alphabet_json << "],\n";
 			alphabet_json << "\ttooltip: {\n";
 			alphabet_json << "\t\tvalueSuffix: ' %'\n";
