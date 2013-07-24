@@ -14,6 +14,9 @@
 namespace cmp
 {
 
+//the horizont threshold
+#define IGNORE_ANGLE 20
+
 //common functions
 
 /**

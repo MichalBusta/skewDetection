@@ -39,41 +39,37 @@ int main( int argc, char **argv)
 	approx[2] = "SIMPLE";
 	approx[3] = "TC89_L1";
 	approx[4] = "TC89_KCOS";/**/
-	/*/for (std::map<int, std::string>::iterator it = approx.begin(); it != approx.end(); it++)
+
+	for (std::map<int, std::string>::iterator it = approx.begin(); it != approx.end(); it++)
 	{
 		//it->first == approx
 		for (double epsilon = 0.014; epsilon <= 0.024; epsilon=epsilon+0.002)
 		{
 			std::stringstream epsilonToStr;
 			epsilonToStr << std::fixed << std::setprecision(3) << epsilon;
-			for (int ignoreAngle = 12; ignoreAngle <= 21; ignoreAngle = ignoreAngle + 3)
+			for (int bin_size = 1; bin_size <= 5; bin_size++)
 			{
-				std::stringstream ignoreAngleToStr;
-				ignoreAngleToStr << ignoreAngle;
-				for (int bin_size = 1; bin_size <= 5; bin_size++)
+				std::stringstream bin_sizeToStr;
+				bin_sizeToStr << bin_size;
+				for (int sigma = 1; sigma <= 3; sigma++)
 				{
-					std::stringstream bin_sizeToStr;
-					bin_sizeToStr << bin_size;
-					for (int sigma = 1; sigma <= 3; sigma++)
+					std::stringstream sigmaToStr;
+					sigmaToStr << std::fixed << std::setprecision(1) << sigma;
+					for (int range = 2; range <= 11; range=range+3)
 					{
-						std::stringstream sigmaToStr;
-						sigmaToStr << std::fixed << std::setprecision(1) << sigma;
-						for (int range = 2; range <= 11; range=range+3)
-						{
-							std::stringstream rangeToStr;
-							rangeToStr << range;
-							evaluator.registerDetector(new VerticalDomSkDet(it->first, epsilon, bin_size, sigma, range, ignoreAngle), "VerticalDom-"+it->second+"-"+epsilonToStr.str()+"-"+bin_sizeToStr.str()+"-"+sigmaToStr.str()+"-"+rangeToStr.str()+"-"+ignoreAngleToStr.str() );
-							rangeToStr.clear();
-						}
-						sigmaToStr.clear();
+						std::stringstream rangeToStr;
+						rangeToStr << range;
+						evaluator.registerDetector(new VerticalDomSkDet(it->first, epsilon, bin_size, sigma, range, 20), "VerticalDom-"+it->second+"-"+epsilonToStr.str()+"-"+bin_sizeToStr.str()+"-"+sigmaToStr.str()+"-"+rangeToStr.str() );
+						rangeToStr.clear();
 					}
-					bin_sizeToStr.clear();
+					sigmaToStr.clear();
 				}
-				ignoreAngleToStr.clear();
+				bin_sizeToStr.clear();
 			}
 			epsilonToStr.clear();
 		}
-	}/**/
+	}
+	/**/
 	/** Centers */
 	/**
 	for (double epsilon = 0.014; epsilon <= 0.020; epsilon=epsilon+0.002)
@@ -106,7 +102,7 @@ int main( int argc, char **argv)
 		epsilonToStr.clear();
 	}
 	/**/
-	/**/
+	/*
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
