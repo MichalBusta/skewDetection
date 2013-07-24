@@ -25,8 +25,10 @@ class TemplateUtils
 public:
 	TemplateUtils();
 	virtual ~TemplateUtils();
-
+	
 	static void CopyIndexTemplates( std::string currentDir, std::string dstDir );
+
+	static void CopyAlphabetIndexTemplates( std::string currentDir, std::string dstDir );
 
 	static void CopyDetectorTemplates( std::string currentDir, std::string dstDir );
 };

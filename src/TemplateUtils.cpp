@@ -62,6 +62,19 @@ void TemplateUtils::CopyIndexTemplates(std::string currentDir,
 
 }
 
+void TemplateUtils::CopyAlphabetIndexTemplates(std::string currentDir,
+		std::string dstDir)
+{
+	std::string templatesDir = 	currentDir;
+	templatesDir += "/templates";
+
+	std::string index = templatesDir + "/alphabet_index.htm";
+	std::string indexDst = dstDir;
+	indexDst += "/index.htm";
+	IOUtils::CpFile( index, indexDst );
+
+}
+
 void TemplateUtils::CopyDetectorTemplates(std::string currentDir,
 		std::string dstDir)
 {

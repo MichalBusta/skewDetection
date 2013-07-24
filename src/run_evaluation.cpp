@@ -36,11 +36,11 @@ int main( int argc, char **argv)
 	/**/
 	std::map<int, std::string> approx;
 	approx[1] = "NONE";
-	approx[2] = "SIMPLE";
+	/*approx[2] = "SIMPLE";
 	approx[3] = "TC89_L1";
 	approx[4] = "TC89_KCOS";/**/
 
-	for (std::map<int, std::string>::iterator it = approx.begin(); it != approx.end(); it++)
+	/*for (std::map<int, std::string>::iterator it = approx.begin(); it != approx.end(); it++)
 	{
 		//it->first == approx
 		for (double epsilon = 0.014; epsilon <= 0.024; epsilon=epsilon+0.002)
@@ -102,7 +102,7 @@ int main( int argc, char **argv)
 		epsilonToStr.clear();
 	}
 	/**/
-	/*
+	/**/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
