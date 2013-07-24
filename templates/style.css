@@ -76,9 +76,20 @@ tbody tr:hover td
 	color: #339;
 	background: #d0dafd;
 }
-div.preview table tr:nth-child(even)
+
+table.images tr
+{
+	background: #F7F7F7;
+}
+
+div.preview table tr:nth-child(even), table.images tr:nth-child(even)
 {
 	background: #EEEEF4;
+}
+
+table.images td
+{
+	text-align: center;
 }
 
 #container 

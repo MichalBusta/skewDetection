@@ -8,6 +8,8 @@
 #ifndef RESULTSWRITER_H_
 #define RESULTSWRITER_H_
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include "SkewEvaluator.h"
 #include <fstream>
 #include <map>
@@ -21,12 +23,13 @@ struct LetterResults
 	std::string alphabet;
 
 	double biggestAngleDiff;
+	double smallestAngleDiff;
 
 	AcumResult acum;
 
 	std::map<int, std::vector<EvaluationResult> > results;
 	
-	LetterResults() : biggestAngleDiff(0) { };
+	LetterResults() : biggestAngleDiff(0), smallestAngleDiff(M_PI) { };
 
 	static bool SortByWorstDetection(const LetterResults& obj1, const LetterResults& obj2)
 	{

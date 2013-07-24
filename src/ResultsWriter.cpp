@@ -4,6 +4,8 @@
  *  Created on: Jul 17, 2013
  *      Author: cidlijak
  */
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <iostream>
 #include <iomanip>
 #include <set>
@@ -108,14 +110,25 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "</table></div></div>\n";
 }
 
-/*inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName, int classificator)
+bool sortResultsByBiggestDiff_subvector(const std::vector<EvaluationResult>& o1, const std::vector<EvaluationResult>& o2)
 {
-	std::ostringstream picture;
-	if (classificator<0) picture << detectorName << "/";
-	picture << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
-	std::string pictureLink = picture.str();
-	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
-}*/
+	double biggestDiff1 = 0.0;
+	double biggestDiff2 = 0.0;
+	for (size_t i=0; i<o1.size(); i++)
+	{
+		biggestDiff1 = MAX(biggestDiff1, fabs(o1[i].angleDiff));
+	}
+	for (size_t i=0; i<o2.size(); i++)
+	{
+		biggestDiff2 = MAX(biggestDiff2, fabs(o2[i].angleDiff));
+	}
+	return biggestDiff2 < biggestDiff1;
+}
+
+bool sortResultsByBiggestDiff(const EvaluationResult& o1, const EvaluationResult& o2)
+{
+	return fabs(o2.angleDiff) < fabs(o1.angleDiff);
+}
 
 void ResultsWriter::writeLettersResults(
 			std::vector<EvaluationResult>& results,
@@ -146,8 +159,9 @@ void ResultsWriter::writeLettersResults(
 		letters[ results[i].letter ].acum.count++;
 		letters[ results[i].letter ].acum.sumDiff = letters[ results[i].letter ].acum.sumDiff + results[i].angleDiff*results[i].angleDiff;
 		letters[ results[i].letter ].results[results[i].classificator].push_back(results[i]);
-
-		letters[ results[i].letter ].biggestAngleDiff = MAX(fabs(results[i].angleDiff*results[i].angleDiff), fabs(letters[ results[i].letter ].biggestAngleDiff));
+		
+		letters[ results[i].letter ].biggestAngleDiff = MAX(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].biggestAngleDiff));
+		letters[ results[i].letter ].smallestAngleDiff = MIN(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].smallestAngleDiff));
 
 
 		if( fabs(results[i].angleDiff) < angleTolerance )
@@ -166,6 +180,36 @@ void ResultsWriter::writeLettersResults(
 		std::string outputDirectory = outputDir+"/"+it->first;
 		IOUtils::CreateDir( outputDirectory );
 		TemplateUtils::CopyAlphabetIndexTemplates( ".", outputDirectory );
+
+		std::fstream report_overview;
+		std::stringstream images_table;
+		report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
+		report_overview << "\t<table>\n" << "\t\t<tr>\n";
+		report_overview << "\t\t\t<th>Char</th>\n";
+		images_table << "\t<table class=\"images\">\n" << "\t\t<tr>\n";
+		images_table << "\t\t\t<th>Char</th>\n";
+		std::map<int, std::vector<EvaluationResult> >::iterator last = it->second[0].results.end();
+		--last;
+		for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[0].results.begin(); iterator != it->second[0].results.end(); iterator++)
+		{
+			report_overview << "\t\t\t<th>" << detectorNames[iterator->first] << "</th>\n";
+			if (iterator == it->second[0].results.begin())
+			{
+				images_table << "\t\t\t<th>Worst detection</th>\n";
+			}
+			else if (iterator == last)
+			{
+				images_table << "\t\t\t<th>Best detection</th>\n";
+			}
+			else
+			{
+				images_table << "\t\t\t<th>&nbsp;</th>\n";
+			}
+		}
+		images_table << "\t\t\t<th>Smallest angle diff</th>\n";
+		images_table << "\t\t\t<th>Biggest angle diff</th>\n";
+		report_overview << "\t\t</tr>\n";
+		images_table << "\t\t</tr>\n";
 
 		std::ofstream alphabet_json;
 		alphabet_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
@@ -188,8 +232,15 @@ void ResultsWriter::writeLettersResults(
 		std::map<int, std::stringstream> data;
 		for(size_t i = 0; i < it->second.size(); i++)
 		{
+			report_overview << "\t\t<tr>\n";
+			report_overview << "\t\t\t<td>&#" << it->second[i].letter << ";</td>\n";
+			
+			images_table << "\t\t<tr>\n";
+			images_table << "\t\t\t<td>&#" << it->second[i].letter << ";</td>\n";
+			std::vector<std::vector<EvaluationResult>> detectors;
 			for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[i].results.begin(); iterator != it->second[i].results.end(); iterator++)
 			{
+				detectors.push_back(iterator->second);
 				if(i==0)
 				{
 					if(iterator != it->second[i].results.begin()) 
@@ -225,12 +276,30 @@ void ResultsWriter::writeLettersResults(
 				}
 
 				data[iterator->first] << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal;
+				report_overview << "\t\t\t<td>" << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal << "%</td>\n";
 			}
-			/*alphabet_json << "],\n";
-			alphabet_json << "\ttooltip: {\n";
-			alphabet_json << "\t\tvalueSuffix: ' %'\n";
-			alphabet_json << "\t}\n";
-			alphabet_json << "}";*/
+			std::sort(detectors.begin(), detectors.end(), sortResultsByBiggestDiff_subvector);
+			for (size_t j = 0; j < detectors.size(); j++) 
+			{
+				double detectorTotal = 0.0;
+				double detectorCorrect = 0.0;
+				for(size_t k = 0; k < detectors[j].size(); k++)
+				{
+					detectorTotal++;
+					if(fabs(detectors[j][k].angleDiff) < angleTolerance) detectorCorrect++;
+				}
+				std::sort(detectors[j].begin(), detectors[j].end(), sortResultsByBiggestDiff);
+				std::stringstream pictureLink;
+				pictureLink << "../" << detectorNames[detectors[j][0].classificator] << "/" << detectors[j][0].alphabet << "/" << detectors[j][0].letter << "/" << detectors[j][0].imageId << ".png";
+				images_table << "\t\t\t<td><img src=\"" << pictureLink.str() << "\" ";
+				images_table << "title=\"" << detectorNames[detectors[j][0].classificator] << " &#10;";
+				images_table << "Angle diff " << detectors[j][0].angleDiff*180/M_PI << " &#10;";
+				images_table << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal << "%\" /></td>\n";
+			}
+			report_overview << "\t\t</tr>\n";
+			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "</td>\n";
+			images_table << "\t\t\t<td>" << it->second[i].biggestAngleDiff*180/M_PI << "</td>\n";
+			images_table << "\t\t</tr>\n";
 		}
 
 		for(std::map<int, std::stringstream>::iterator iterator = data.begin(); iterator != data.end(); iterator++)
@@ -251,129 +320,18 @@ void ResultsWriter::writeLettersResults(
 	
 		alphabet_json << "];";
 		alphabet_json.close();
+
+		report_overview << "\t</table>\n";
+
+		images_table << "\t</table>\n";
+		report_overview << images_table.str();
+		
+		report_overview << "</body>\n</html>";
+
+		report_overview.close();
+
 	}
-	/*
-	std::stringstream detectors;
-		int colorIndex = 0;
 
-		for(size_t i = 0; i < it->second.size(); i++)
-		{
-			if(i > 0)
-			{
-				alphabet_json << ", \n";
-			}
-			alphabet_json << "{\n";
-			alphabet_json << "\tname: '" << it->second[i].letter << "',\n";
-			alphabet_json << "\tcolor: '" << colors[colorIndex] << "',\n";
-			colorIndex = colorIndex==colors.size()-1 ? 0 : colorIndex+1;
-			alphabet_json << "\ttype: 'column',\n";
-			alphabet_json << "\tdata: [";
-			for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[i].results.begin(); iterator != it->second[i].results.end(); iterator++)
-			{
-				double detectorTotal = 0;
-				double detectorCorrect = 0;
-
-				for (size_t j = 0; j < iterator->second.size(); j++)
-				{
-					detectorTotal++;
-					if (fabs(results[i].angleDiff) < angleTolerance )
-					{
-						detectorCorrect++;
-					}
-				}
-
-				if(iterator != it->second[i].results.begin()) alphabet_json << ", ";
-
-
-				if(i == 0)
-				{
-					if(iterator != it->second[i].results.begin())
-					{
-						detectors << ", ";
-					}
-					detectors << "'" << detectorNames[iterator->first] << "'";
-				}
-				alphabet_json << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal;
-			}
-			alphabet_json << "],\n";
-			alphabet_json << "\ttooltip: {\n";
-			alphabet_json << "\t\tvalueSuffix: ' %'\n";
-			alphabet_json << "\t}\n";
-			alphabet_json << "}";
-		}
-		alphabet_json << "]\n";
-
-		alphabet_json << "\n\n" << "categories = [";
-
-		alphabet_json << detectors.str();*/
-
-
-
-
-
-
-
-
-
-
-	/**
-	std::ofstream alphabet_json;
-	alphabet_json.open ( (outputDirectory+"/alphabet_object_data.js" ).c_str() );
-	
-	alphabet_json << "alphabet_series = [";
-	std::vector<std::string> colors;
-	
-	colors.push_back("#928333");
-	colors.push_back("#da0d4d");
-	colors.push_back("#bd1fc6");
-	colors.push_back("#0950d2");
-	colors.push_back("#987e42");
-	colors.push_back("#e33154");
-	colors.push_back("#0f3313");
-	colors.push_back("#f41b15");
-
-	std::stringstream alphabetNames;
-	int colorIndex = 0;
-	for(std::map<int, std::map<std::string, AcumResult> >::iterator it = alphabetMap.begin(); it != alphabetMap.end(); it++)
-	{
-		if(it != alphabetMap.begin())
-		{
-			alphabet_json << ", ";
-		}
-		alphabet_json << "{\n";
-		alphabet_json << "\tname: '" << detectorNames[it->first] << "',\n";
-		alphabet_json << "\tcolor: '" << colors[colorIndex] << "',\n";
-		colorIndex = colorIndex==colors.size()-1 ? 0 : colorIndex+1;
-		alphabet_json << "\ttype: 'column',\n";
-		alphabet_json << "\tdata: [";
-		for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
-		{
-			if(iterator != it->second.begin()) alphabet_json << ", ";
-			if(it == alphabetMap.begin())
-			{
-				if(iterator != it->second.begin())
-				{
-					alphabetNames << ", ";
-				}
-				alphabetNames << "'" << iterator->first << "'";
-			}
-			alphabet_json << std::fixed << std::setprecision(2) << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
-		}
-		alphabet_json << "],\n";
-		alphabet_json << "\ttooltip: {\n";
-		alphabet_json << "\t\tvalueSuffix: ' %'\n";
-		alphabet_json << "\t}\n";
-		alphabet_json << "}";
-	}
-	alphabet_json << "]\n";
-
-	alphabet_json << "\n\n" << "alphabet_categories = [";
-
-	alphabet_json << alphabetNames.str();
-	
-	alphabet_json << "];";
-	alphabet_json.close();
-	*/
 }
 
 } /* namespace cmp */
