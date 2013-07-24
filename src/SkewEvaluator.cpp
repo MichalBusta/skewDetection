@@ -325,13 +325,13 @@ void SkewEvaluator::writeResults()
 	for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
 	{
 		report_overview << "\t\t\t<th colspan=\"5\">" << it->first << "</th>\n";
-		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>Variance</th>\n" + "\t\t\t<th>avg % Correct Letters</th>\n";
+		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>StdDev</th>\n" + "\t\t\t<th>avgL%</th>\n";
 	}
 
 	report_overview << "\t\t\t<th colspan=\"6\">Sum</th>\n";
 	report_overview << "\t\t</tr>\n";
 	
-	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t\t<th>avg % Correct Letters</th>\n" << "\t\t\t<th>avg % Correct Alphabet</th>\n" << "\t\t</tr>\n";
+	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>StdDev</th>\n" << "\t\t\t<th>avgL%</th>\n" << "\t\t\t<th>avgA%</th>\n" << "\t\t</tr>\n";
 
 	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
 
