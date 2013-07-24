@@ -12,10 +12,6 @@
 #include <stdio.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-//#define histColWidth 1
-//#define sigma 2
-//#define range 10
-//#define ignoreAngle 10
 
 using namespace std;
 using namespace cv;
