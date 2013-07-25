@@ -167,8 +167,8 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			omp_unset_lock(&lock);
 #endif
 			//for correct angles, do not write image
-			//if( fabs(angleDiff) < ANGLE_MIN)
-				//continue;
+			if( fabs(angleDiff) < ANGLE_MIN)
+				continue;
 			
 			if (writeImages)
 			{
