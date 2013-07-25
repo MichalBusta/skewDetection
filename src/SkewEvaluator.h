@@ -49,7 +49,9 @@ struct EvaluationResult
 
 	size_t imageId;
 
-	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator), imageId(imageId) { };
+	size_t faceIndex;
+
+	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator), imageId(imageId), faceIndex(faceIndex) { };
 
 	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
 	{
@@ -89,7 +91,7 @@ public:
 
 	void evaluate( const std::string& evalDir );
 
-	void evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter );
+	void evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter, size_t faceIndex );
 
 	void registerDetector( cv::Ptr<SkewDetector> detector, const std::string detectorName );
 

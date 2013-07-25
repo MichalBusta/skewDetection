@@ -76,8 +76,8 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 				std::cout << "Processing image: " << letterFile << std::endl;
 				cv::Mat tmp = cv::imread(letterFile, cv::IMREAD_GRAYSCALE);
 				cv::Mat img;
-				copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
-				evaluateMat( img, alphabet, letterUnicode );
+				copyMakeBorder( tmp, img, 50, 50, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
+				evaluateMat( img, alphabet, letterUnicode, k );
 			}
 		}
 	}
@@ -133,7 +133,7 @@ static cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing,
  * @param alphabet
  * @param letter
  */
-void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter )
+void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter, size_t faceIndex )
 {
 	//generate modifications
 	std::vector<SkewDef> distortions;
@@ -161,7 +161,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 #ifdef DO_PARALLEL
 			omp_set_lock(&lock);
 #endif
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex) );
 
 #ifdef DO_PARALLEL
 			omp_unset_lock(&lock);
