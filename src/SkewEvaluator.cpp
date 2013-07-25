@@ -318,7 +318,7 @@ void SkewEvaluator::writeResults()
 
 	for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
 	{
-		report_overview << "\t\t\t<th colspan=\"5\">" << it->first << "</th>\n";
+		report_overview << "\t\t\t<th colspan=\"5\"><a href=\"" << it->first << "/index.htm\">" << it->first << "</a></th>\n";
 		subtitle = subtitle + "\t\t\t<th>Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>StdDev</th>\n" + "\t\t\t<th>avgL%</th>\n";
 	}
 
