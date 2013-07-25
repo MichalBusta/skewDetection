@@ -314,7 +314,7 @@ void ResultsWriter::writeLettersResults(
 				pictureLink << "../" << detectorNames[detectors[j].detector] << "/" << detectors[j].alphabet << "/" << detectors[j].letter << "/" << detectors[j].results[0].imageId << ".png";
 				images_table << "\t\t\t<td><img src=\"" << pictureLink.str() << "\" ";
 				images_table << "title=\"" << detectorNames[detectors[j].detector] << " &#10;";
-				images_table << "Angle diff " << detectors[j].results[0].angleDiff*180/M_PI << "&deg; &#10;";
+				images_table << "Angle diff " << std::setprecision(2) << detectors[j].results[0].angleDiff*180/M_PI << "&deg; &#10;";
 				images_table << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
 			}
 			report_overview << "\t\t</tr>\n";
