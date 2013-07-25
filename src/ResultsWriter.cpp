@@ -210,6 +210,8 @@ void ResultsWriter::writeLettersResults(
 			}
 		}
 		report_overview << "\t\t\t<th class=\"border_left\" colspan=\"2\">" << detectorNames[detectorNames.size() - 1] << "</th>\n";
+		subtitle << "\t\t\t<th class=\"border_left\">% Correct</th>\n";
+		subtitle << "\t\t\t<th class=\"border_right\">StdDev</th>\n";
 
 		images_table << "\t\t\t<th>Smallest angle diff</th>\n";
 		images_table << "\t\t\t<th>Biggest angle diff</th>\n";
