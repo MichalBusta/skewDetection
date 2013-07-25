@@ -41,6 +41,8 @@ public:
 	 */
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
 
+	/** the measure of "how shure" the detector is about the result */
+	double lastDetectionProbability;
 };
 
 /**

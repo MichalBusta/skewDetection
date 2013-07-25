@@ -12,7 +12,7 @@
 namespace cmp
 {
 
-SkewDetector::SkewDetector()
+SkewDetector::SkewDetector() : lastDetectionProbability(0.5)
 {
 	// TODO Auto-generated constructor stub
 
