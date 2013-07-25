@@ -57,6 +57,16 @@ div.column td:last-child {
 	text-align: center;
 }
 
+.border_left
+{
+	border-left: 1px dashed #6699CC;
+}
+
+.border_right
+{
+	border-right: 1px dashed #6699CC;
+}
+
 th
 {
 	padding: 12px 17px 12px 17px;
@@ -66,9 +76,17 @@ th
 	border-bottom: 1px dashed #69c;
 }
 
+th a 
+{
+	font-weight: normal;
+	font-size: 14px;
+	color: #039;
+}
+
 td
 {
 	color: #669;
+	padding: 1px 7px;
 }
 
 tbody tr:hover td
@@ -108,4 +126,24 @@ table a:hover {
 td img 
 { 
 	max-width: 150px;
+}
+
+#detectors_overview td, #detector_detail_overview td, #alphabet_detail_overview td
+{
+	text-align: center;
+}
+
+#detectors_overview td:first-child
+{
+	text-align: left;
+}
+
+#detectors_overview tr:nth-child(odd), #alphabet_detail_overview tr:nth-child(odd)
+{
+	background: #EEEEF4;
+}
+
+#detectors_overview tr:first-child, #alphabet_detail_overview tr:first-child
+{
+	background: transparent;
 }

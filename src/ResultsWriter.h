@@ -69,9 +69,8 @@ public:
 
 	static void writeLettersResults(
 			std::vector<EvaluationResult>& results,
-			int maxCount,
 			std::string& outputDir, std::vector<std::string> detectorNames,
-			double angleTolerance);
+			double angleTolerance, double angle_min);
 };
 
 } /* namespace cmp */

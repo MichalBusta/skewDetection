@@ -67,7 +67,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 	outStream << "<h3>Worst Results</h3>\n";
 	//nejhorsi vsledky
-	outStream << "<table>\n";
+	outStream << "<table id=\"detectors_wrong_images\">\n";
 	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Preview</td></tr>\n";
 	int resultsCount = 0;
 	for(int i = (int) work.size() -1; i >= 0; i--)
@@ -89,7 +89,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	//nejlepsi vysledky
 	outStream << "<h3>Best Results</h3>\n";
 
-	outStream << "<table>\n";
+	outStream << "<table id=\"detectors_right_images\">\n";
 	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	resultsCount = 0;
 	LetterCheck.clear();
@@ -111,24 +111,8 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "</table></div></div>\n";
 }
 
-/*bool sortResultsByBiggestDiff_subvector(const std::vector<EvaluationResult>& o1, const std::vector<EvaluationResult>& o2)
-{
-	double biggestDiff1 = 0.0;
-	double biggestDiff2 = 0.0;
-	for (size_t i=0; i<o1.size(); i++)
-	{
-		biggestDiff1 = MAX(biggestDiff1, fabs(o1[i].angleDiff));
-	}
-	for (size_t i=0; i<o2.size(); i++)
-	{
-		biggestDiff2 = MAX(biggestDiff2, fabs(o2[i].angleDiff));
-	}
-	return biggestDiff2 < biggestDiff1;
-}*/
-
 bool sortResultsByBiggestDiff_subvector(const DetectorResults& o1, const DetectorResults& o2)
 {
-	//std::cout << o2.biggestAngleDiff << " < " << o1.biggestAngleDiff << "\n";
 	return fabs(o2.biggestAngleDiff) < fabs(o1.biggestAngleDiff);
 }
 
@@ -139,26 +123,15 @@ bool sortResultsByBiggestDiff(const EvaluationResult& o1, const EvaluationResult
 
 void ResultsWriter::writeLettersResults(
 			std::vector<EvaluationResult>& results,
-			int maxCount,
 			std::string& outputDir, std::vector<std::string> detectorNames,
-			double angleTolerance)
+			double angleTolerance, double angle_min)
 {
-	/* resultsMap[alphabet][detector][letter] */
-	//std::map<std::string, std::map<int, std::map<std::string, AcumResult> > > resultsMap;
-	//std::vector<std::map<std::string, std::map<int, AcumResult> > > lettersResults;
-	//std::set<string> letterCheck;
-
-	/*if( letterCheck.find(work[i].letter) != LetterCheck.end() )
-			continue;*/
-
 	std::map<std::string, std::vector<LetterResults> > lettersResults;
 
 	std::map<std::string, LetterResults> letters;
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
-		//letterCheck.insert(results[i].letter);
-		
 		letters[ results[i].letter ].letter = results[i].letter;
 		letters[ results[i].letter ].alphabet = results[i].alphabet;
 
@@ -172,6 +145,7 @@ void ResultsWriter::writeLettersResults(
 		
 		letters[ results[i].letter ].detectors[results[i].classificator].acum.classIndex = results[i].classificator;
 		letters[ results[i].letter ].detectors[results[i].classificator].acum.count++;
+		letters[ results[i].letter ].detectors[results[i].classificator].acum.sumDiff = letters[ results[i].letter ].detectors[results[i].classificator].acum.sumDiff + results[i].angleDiff*results[i].angleDiff;
 		letters[ results[i].letter ].detectors[results[i].classificator].detector = results[i].classificator;
 		letters[ results[i].letter ].detectors[results[i].classificator].alphabet = results[i].alphabet;
 		letters[ results[i].letter ].detectors[results[i].classificator].letter = results[i].letter;
@@ -205,15 +179,18 @@ void ResultsWriter::writeLettersResults(
 		std::fstream report_overview;
 		std::stringstream images_table;
 		report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
-		report_overview << "\t<table>\n" << "\t\t<tr>\n";
-		report_overview << "\t\t\t<th>Char</th>\n";
-		images_table << "\t<table class=\"images\">\n" << "\t\t<tr>\n";
+		report_overview << "\t<table id=\"alphabet_detail_overview\">\n" << "\t\t<tr>\n";
+		report_overview << "\t\t\t<th rowspan=\"2\">Char</th>\n";
+		images_table << "\t<table id=\"alphabet_detail_images\" class=\"images\">\n" << "\t\t<tr>\n";
 		images_table << "\t\t\t<th>Char</th>\n";
 		std::map<int, DetectorResults>::iterator last = it->second[0].detectors.end();
 		--last;
+		std::stringstream subtitle;
 		for(std::map<int, DetectorResults>::iterator iterator = it->second[0].detectors.begin(); iterator != it->second[0].detectors.end(); iterator++)
 		{
-			report_overview << "\t\t\t<th>" << detectorNames[iterator->first] << "</th>\n";
+			report_overview << "\t\t\t<th class=\"border_left\" colspan=\"2\">" << detectorNames[iterator->first] << "</th>\n";
+			subtitle << "\t\t\t<th class=\"border_left\">% Correct</th>\n";
+			subtitle << "\t\t\t<th class=\"border_right\">StdDev</th>\n";
 			if (iterator == it->second[0].detectors.begin())
 			{
 				images_table << "\t\t\t<th>Worst detection</th>\n";
@@ -230,6 +207,9 @@ void ResultsWriter::writeLettersResults(
 		images_table << "\t\t\t<th>Smallest angle diff</th>\n";
 		images_table << "\t\t\t<th>Biggest angle diff</th>\n";
 		images_table << "\t\t\t<th>Best detection for worst font</th>\n";
+		report_overview << "\t\t</tr>\n";
+		report_overview << "\t\t<tr>\n";
+		report_overview << subtitle.str();
 		report_overview << "\t\t</tr>\n";
 		images_table << "\t\t</tr>\n";
 
@@ -296,12 +276,15 @@ void ResultsWriter::writeLettersResults(
 
 				tmpStr << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count;
 				data[iterator->first] +=  tmpStr.str();
-				report_overview << "\t\t\t<td>" << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count << "%</td>\n";
+				report_overview << "\t\t\t<td class=\"border_left\">" << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count << "%</td>\n";
+				report_overview << "\t\t\t<td class=\"border_right\">" << std::fixed << std::setprecision(2) << iterator->second.acum.sumDiff << "</td>\n";
 			}
 			std::sort(detectors.begin(), detectors.end(), sortResultsByBiggestDiff_subvector);
 
 			double bestDiff = M_PI;
 			std::stringstream bestDet;
+
+			int tooGoodRes = 0;
 
 			for (size_t j = 0; j < detectors.size(); j++) 
 			{
@@ -310,14 +293,21 @@ void ResultsWriter::writeLettersResults(
 				{
 					if (detectors[j].results[k].faceIndex == it->second[i].faceBiggestDiff.faceIndex && fabs(detectors[j].results[k].angleDiff) < fabs(bestDiff))
 					{
-						bestDet.str( "" );
-						bestDet << "\t\t\t<td><img src=\"";
-						bestDet << "../" << detectorNames[detectors[j].results[k].classificator] << "/" << detectors[j].results[k].alphabet << "/" << detectors[j].results[k].letter << "/" << detectors[j].results[k].imageId << ".png";
-						bestDet << "\" ";
-						bestDet << "title=\"" << detectorNames[detectors[j].results[k].classificator] << " &#10;";
-						bestDet << "Angle diff " << detectors[j].results[k].angleDiff*180/M_PI << "&deg; &#10;";
-						bestDet << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
-						bestDiff = detectors[j].results[k].angleDiff;
+						if (fabs(detectors[j].results[k].angleDiff) < fabs(angle_min))
+						{
+							tooGoodRes++;
+						}
+						else
+						{
+							bestDet.str( "" );
+							bestDet << "<img src=\"";
+							bestDet << "../" << detectorNames[detectors[j].results[k].classificator] << "/" << detectors[j].results[k].alphabet << "/" << detectors[j].results[k].letter << "/" << detectors[j].results[k].imageId << ".png";
+							bestDet << "\" ";
+							bestDet << "title=\"" << detectorNames[detectors[j].results[k].classificator] << " &#10;";
+							bestDet << "Angle diff " << detectors[j].results[k].angleDiff*180/M_PI << "&deg; &#10;";
+							bestDet << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" />";
+							bestDiff = detectors[j].results[k].angleDiff;
+						}
 					}
 				}
 				std::stringstream pictureLink;
@@ -330,7 +320,7 @@ void ResultsWriter::writeLettersResults(
 			report_overview << "\t\t</tr>\n";
 			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "&deg;</td>\n";
 			images_table << "\t\t\t<td>" << it->second[i].biggestAngleDiff*180/M_PI << "&deg;</td>\n";
-			images_table << bestDet.str();
+			images_table << "\t\t\t<td>" << tooGoodRes << bestDet.str() << "</td>\n";
 
 			images_table << "\t\t</tr>\n";
 		}
