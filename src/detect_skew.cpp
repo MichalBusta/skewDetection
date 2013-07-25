@@ -70,7 +70,8 @@ int main( int argc, char **argv)
 		cv::Mat imgRec = ~img;
 		cv::Mat debugImage;
 		double skew = detectors[detector]->detectSkew( imgRec,  0, &debugImage );
-
+		
+		std::cout << "Detection Probability: " << detectors[detector]->lastDetectionProbability << std::endl;
 		std::cout << "Detected skew is: " << skew << std::endl;
 
 		cv::Point origin = cv::Point( img.cols / 2.0, 0 );
