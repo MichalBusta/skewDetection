@@ -95,6 +95,10 @@ void ResultsWriter::writeWorstDetectorResults(
 	LetterCheck.clear();
 	for(size_t i = 0; i < work.size(); i++)
 	{
+		//skip the best possible detector
+		if(work[i].classificator == detectorNames.size() - 1)
+			continue;
+
 		//skip the almost correct angles ...
 		if( fabs(work[i].angleDiff) < ANGLE_MIN)
 			continue;
@@ -132,6 +136,7 @@ void ResultsWriter::writeLettersResults(
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
+
 		letters[ results[i].letter ].letter = results[i].letter;
 		letters[ results[i].letter ].alphabet = results[i].alphabet;
 
@@ -184,9 +189,9 @@ void ResultsWriter::writeLettersResults(
 		images_table << "\t<table id=\"alphabet_detail_images\" class=\"images\">\n" << "\t\t<tr>\n";
 		images_table << "\t\t\t<th>Char</th>\n";
 		std::map<int, DetectorResults>::iterator last = it->second[0].detectors.end();
-		--last;
+		--last;--last;
 		std::stringstream subtitle;
-		for(std::map<int, DetectorResults>::iterator iterator = it->second[0].detectors.begin(); iterator != it->second[0].detectors.end(); iterator++)
+		for(std::map<int, DetectorResults>::iterator iterator = it->second[0].detectors.begin(); iterator != --(it->second[0].detectors.end()); iterator++)
 		{
 			report_overview << "\t\t\t<th class=\"border_left\" colspan=\"2\">" << detectorNames[iterator->first] << "</th>\n";
 			subtitle << "\t\t\t<th class=\"border_left\">% Correct</th>\n";
@@ -204,6 +209,8 @@ void ResultsWriter::writeLettersResults(
 				images_table << "\t\t\t<th>&nbsp;</th>\n";
 			}
 		}
+		report_overview << "\t\t\t<th class=\"border_left\" colspan=\"2\">" << detectorNames[detectorNames.size() - 1] << "</th>\n";
+
 		images_table << "\t\t\t<th>Smallest angle diff</th>\n";
 		images_table << "\t\t\t<th>Biggest angle diff</th>\n";
 		images_table << "\t\t\t<th>Best detection for worst font</th>\n";
@@ -247,6 +254,7 @@ void ResultsWriter::writeLettersResults(
 			{
 				std::stringstream tmpStr;
 				detectors.push_back(iterator->second);
+
 				if(i==0)
 				{
 					if(iterator != it->second[i].detectors.begin()) 
@@ -286,19 +294,24 @@ void ResultsWriter::writeLettersResults(
 
 			int tooGoodRes = 0;
 
-			for (size_t j = 0; j < detectors.size(); j++) 
+			for (size_t j = 0; j < detectors.size(); j++)
 			{
 				std::sort(detectors[j].results.begin(), detectors[j].results.end(), sortResultsByBiggestDiff);
 				for(size_t k = 0; k < detectors[j].results.size(); k++) 
 				{
 					if (detectors[j].results[k].faceIndex == it->second[i].faceBiggestDiff.faceIndex && fabs(detectors[j].results[k].angleDiff) < fabs(bestDiff))
 					{
+
 						if (fabs(detectors[j].results[k].angleDiff) < fabs(angle_min))
 						{
 							tooGoodRes++;
 						}
 						else
 						{
+							//skip virtual detector "Best of all"
+							if( detectors[j].results[k].classificator ==  detectorNames.size() - 1)
+								continue;
+
 							bestDet.str( "" );
 							bestDet << "<img src=\"";
 							bestDet << "../" << detectorNames[detectors[j].results[k].classificator] << "/" << detectors[j].results[k].alphabet << "/" << detectors[j].results[k].letter << "/" << detectors[j].results[k].imageId << ".png";
@@ -310,6 +323,11 @@ void ResultsWriter::writeLettersResults(
 						}
 					}
 				}
+
+				//skip virtual detector "Best of all"
+				if( detectors[j].detector ==  detectorNames.size() - 1)
+					continue;
+
 				std::stringstream pictureLink;
 				pictureLink << "../" << detectorNames[detectors[j].detector] << "/" << detectors[j].alphabet << "/" << detectors[j].letter << "/" << detectors[j].results[0].imageId << ".png";
 				images_table << "\t\t\t<td><img src=\"" << pictureLink.str() << "\" ";

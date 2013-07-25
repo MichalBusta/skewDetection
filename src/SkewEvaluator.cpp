@@ -57,6 +57,10 @@ SkewEvaluator::~SkewEvaluator()
  */
 void SkewEvaluator::evaluate( const std::string& evalDir )
 {
+
+	//add best possible detector
+	detectorNames.push_back("BestPossible");
+
 	std::vector<std::string> facesDir = IOUtils::GetDirectoriesInDirectory(evalDir, "*", true);
 	//for all alphabets
 	for( size_t i = 0; i < facesDir.size(); i++ )
@@ -149,7 +153,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	for(size_t j = 0; j < distortions.size(); j++)
 	{
 		SkewDef& def = distortions[j];
-		
+		double bestAngleDiff = M_PI;
 		#pragma omp parallel for
 		for(int i = 0; i < (int) detectors.size(); i++ )
 		{
@@ -162,6 +166,10 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			omp_set_lock(&lock);
 #endif
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex) );
+			if( fabs(angleDiff) <  fabs(bestAngleDiff) )
+			{
+				bestAngleDiff = angleDiff;
+			}
 
 #ifdef DO_PARALLEL
 			omp_unset_lock(&lock);
@@ -229,6 +237,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 				}
 			}
 		}
+		results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex) );
 
 		if( debug )
 		{
@@ -271,7 +280,7 @@ bool sortResultsByCorrectClsCount(const AcumResult& o1, const AcumResult& o2)
 void SkewEvaluator::writeResults()
 {
 	std::vector<AcumResult> classMap;
-	classMap.resize(detectors.size());
+	classMap.resize(detectors.size() + 1);
 	std::map<int, std::map<std::string, std::map<std::string, AcumResult> > > resMap;
 	std::map<int, std::map<std::string, AcumResult> > alphabetMap;
 	std::map<std::string, bool> letters;
