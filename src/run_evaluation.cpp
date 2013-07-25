@@ -60,13 +60,13 @@ int main( int argc, char **argv)
 						std::stringstream rangeToStr;
 						rangeToStr << range;
 						evaluator.registerDetector(new VerticalDomSkDet(it->first, epsilon, bin_size, sigma, range, 20), "VerticalDom-"+it->second+"-"+epsilonToStr.str()+"-"+bin_sizeToStr.str()+"-"+sigmaToStr.str()+"-"+rangeToStr.str() );
-						rangeToStr.clear();
+						rangeToStr.str( "" );
 					}
-					sigmaToStr.clear();
+					sigmaToStr.str( "" );
 				}
-				bin_sizeToStr.clear();
+				bin_sizeToStr.str( "" );
 			}
-			epsilonToStr.clear();
+			epsilonToStr.str( "" );
 		}
 	}
 	/**/
@@ -81,9 +81,9 @@ int main( int argc, char **argv)
 			std::stringstream precisionToStr;
 			precisionToStr << precision;
 			evaluator.registerDetector(new CentersSkDet(1, epsilon, precision), "Centers-NONE-"+epsilonToStr.str()+"-"+precisionToStr.str() );
-			precisionToStr.clear();
+			precisionToStr.str( "" );
 		}
-		epsilonToStr.clear();
+		epsilonToStr.str( "" );
 	}
 	/** LR Longest Edge */
 	/*/
@@ -97,9 +97,9 @@ int main( int argc, char **argv)
 			ignoreAngleToStr << ignoreAngle;
 			evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, true), "LeftLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
 			//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
-			ignoreAngleToStr.clear();
+			ignoreAngleToStr.str( "" );
 		}
-		epsilonToStr.clear();
+		epsilonToStr.str( "" );
 	}
 	/**/
 	/**/
@@ -117,7 +117,7 @@ int main( int argc, char **argv)
 		std::stringstream iToStr;
 		iToStr << std::fixed << std::setprecision(2) << i;
 		evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, i), "ThinProfile-"+iToStr.str() );
-		iToStr.clear();
+		iToStr.str( "" );
 	}
 	evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, 1), "ThinProfile-1.00");/**/
 	

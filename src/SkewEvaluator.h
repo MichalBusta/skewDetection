@@ -52,6 +52,8 @@ struct EvaluationResult
 	size_t faceIndex;
 
 	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator), imageId(imageId), faceIndex(faceIndex) { };
+	
+	EvaluationResult() : angleDiff(0) { };
 
 	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
 	{

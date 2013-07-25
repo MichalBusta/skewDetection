@@ -16,6 +16,24 @@
 
 namespace cmp {
 
+struct DetectorResults
+{
+	std::string letter;
+	
+	std::string alphabet;
+
+	int detector;
+
+	double biggestAngleDiff;
+	double smallestAngleDiff;
+
+	AcumResult acum;
+
+	std::vector<EvaluationResult> results;
+	
+	DetectorResults() : biggestAngleDiff(0), smallestAngleDiff(M_PI) { };
+};
+
 struct LetterResults
 {
 	std::string letter;
@@ -27,8 +45,10 @@ struct LetterResults
 
 	AcumResult acum;
 
-	std::map<int, std::vector<EvaluationResult> > results;
-	
+	EvaluationResult faceBiggestDiff;
+
+	std::map<int, DetectorResults> detectors;
+
 	LetterResults() : biggestAngleDiff(0), smallestAngleDiff(M_PI) { };
 
 	static bool SortByWorstDetection(const LetterResults& obj1, const LetterResults& obj2)
