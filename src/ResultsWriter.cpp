@@ -128,6 +128,7 @@ void ResultsWriter::writeWorstDetectorResults(
 
 bool sortResultsByBiggestDiff_subvector(const DetectorResults& o1, const DetectorResults& o2)
 {
+	//std::cout << o2.biggestAngleDiff << " < " << o1.biggestAngleDiff << "\n";
 	return fabs(o2.biggestAngleDiff) < fabs(o1.biggestAngleDiff);
 }
 
@@ -174,6 +175,10 @@ void ResultsWriter::writeLettersResults(
 		letters[ results[i].letter ].detectors[results[i].classificator].detector = results[i].classificator;
 		letters[ results[i].letter ].detectors[results[i].classificator].alphabet = results[i].alphabet;
 		letters[ results[i].letter ].detectors[results[i].classificator].letter = results[i].letter;
+
+		letters[ results[i].letter ].detectors[results[i].classificator].biggestAngleDiff = MAX(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].detectors[results[i].classificator].biggestAngleDiff));
+		letters[ results[i].letter ].detectors[results[i].classificator].smallestAngleDiff = MIN(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].detectors[results[i].classificator].smallestAngleDiff));
+
 		if(fabs(letters[ results[i].letter ].faceBiggestDiff.angleDiff) <= fabs(results[i].angleDiff))
 		{
 			letters[ results[i].letter ].faceBiggestDiff = results[i];
@@ -326,10 +331,6 @@ void ResultsWriter::writeLettersResults(
 			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "&deg;</td>\n";
 			images_table << "\t\t\t<td>" << it->second[i].biggestAngleDiff*180/M_PI << "&deg;</td>\n";
 			images_table << bestDet.str();
-
-
-				/*std::stringstream pictureLink;
-				*/
 
 			images_table << "\t\t</tr>\n";
 		}
