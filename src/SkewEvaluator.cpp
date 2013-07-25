@@ -76,7 +76,7 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 				std::cout << "Processing image: " << letterFile << std::endl;
 				cv::Mat tmp = cv::imread(letterFile, cv::IMREAD_GRAYSCALE);
 				cv::Mat img;
-				copyMakeBorder( tmp, img, 50, 50, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
+				copyMakeBorder( tmp, img, 20, 20, 60, 60, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
 				evaluateMat( img, alphabet, letterUnicode, k );
 			}
 		}
