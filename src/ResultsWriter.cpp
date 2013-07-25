@@ -111,7 +111,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "</table></div></div>\n";
 }
 
-bool sortResultsByBiggestDiff_subvector(const std::vector<EvaluationResult>& o1, const std::vector<EvaluationResult>& o2)
+/*bool sortResultsByBiggestDiff_subvector(const std::vector<EvaluationResult>& o1, const std::vector<EvaluationResult>& o2)
 {
 	double biggestDiff1 = 0.0;
 	double biggestDiff2 = 0.0;
@@ -124,6 +124,11 @@ bool sortResultsByBiggestDiff_subvector(const std::vector<EvaluationResult>& o1,
 		biggestDiff2 = MAX(biggestDiff2, fabs(o2[i].angleDiff));
 	}
 	return biggestDiff2 < biggestDiff1;
+}*/
+
+bool sortResultsByBiggestDiff_subvector(const DetectorResults& o1, const DetectorResults& o2)
+{
+	return fabs(o2.biggestAngleDiff) < fabs(o1.biggestAngleDiff);
 }
 
 bool sortResultsByBiggestDiff(const EvaluationResult& o1, const EvaluationResult& o2)
@@ -159,15 +164,25 @@ void ResultsWriter::writeLettersResults(
 		letters[ results[i].letter ].acum.classIndex = results[i].classificator;
 		letters[ results[i].letter ].acum.count++;
 		letters[ results[i].letter ].acum.sumDiff = letters[ results[i].letter ].acum.sumDiff + results[i].angleDiff*results[i].angleDiff;
-		letters[ results[i].letter ].results[results[i].classificator].push_back(results[i]);
+		letters[ results[i].letter ].detectors[results[i].classificator].results.push_back(results[i]);
 		
 		letters[ results[i].letter ].biggestAngleDiff = MAX(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].biggestAngleDiff));
 		letters[ results[i].letter ].smallestAngleDiff = MIN(fabs(results[i].angleDiff), fabs(letters[ results[i].letter ].smallestAngleDiff));
-
+		
+		letters[ results[i].letter ].detectors[results[i].classificator].acum.classIndex = results[i].classificator;
+		letters[ results[i].letter ].detectors[results[i].classificator].acum.count++;
+		letters[ results[i].letter ].detectors[results[i].classificator].detector = results[i].classificator;
+		letters[ results[i].letter ].detectors[results[i].classificator].alphabet = results[i].alphabet;
+		letters[ results[i].letter ].detectors[results[i].classificator].letter = results[i].letter;
+		if(fabs(letters[ results[i].letter ].faceBiggestDiff.angleDiff) <= fabs(results[i].angleDiff))
+		{
+			letters[ results[i].letter ].faceBiggestDiff = results[i];
+		}
 
 		if( fabs(results[i].angleDiff) < angleTolerance )
 		{
 			letters[ results[i].letter ].acum.correctClassCont++;
+			letters[ results[i].letter ].detectors[results[i].classificator].acum.correctClassCont++;
 		}
 	}
 	for (std::map<std::string, LetterResults>::iterator it = letters.begin(); it != letters.end(); it++)
@@ -189,12 +204,12 @@ void ResultsWriter::writeLettersResults(
 		report_overview << "\t\t\t<th>Char</th>\n";
 		images_table << "\t<table class=\"images\">\n" << "\t\t<tr>\n";
 		images_table << "\t\t\t<th>Char</th>\n";
-		std::map<int, std::vector<EvaluationResult> >::iterator last = it->second[0].results.end();
+		std::map<int, DetectorResults>::iterator last = it->second[0].detectors.end();
 		--last;
-		for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[0].results.begin(); iterator != it->second[0].results.end(); iterator++)
+		for(std::map<int, DetectorResults>::iterator iterator = it->second[0].detectors.begin(); iterator != it->second[0].detectors.end(); iterator++)
 		{
 			report_overview << "\t\t\t<th>" << detectorNames[iterator->first] << "</th>\n";
-			if (iterator == it->second[0].results.begin())
+			if (iterator == it->second[0].detectors.begin())
 			{
 				images_table << "\t\t\t<th>Worst detection</th>\n";
 			}
@@ -209,6 +224,7 @@ void ResultsWriter::writeLettersResults(
 		}
 		images_table << "\t\t\t<th>Smallest angle diff</th>\n";
 		images_table << "\t\t\t<th>Biggest angle diff</th>\n";
+		images_table << "\t\t\t<th>Best detection for worst font</th>\n";
 		report_overview << "\t\t</tr>\n";
 		images_table << "\t\t</tr>\n";
 
@@ -229,7 +245,7 @@ void ResultsWriter::writeLettersResults(
 
 		std::stringstream letterNames;
 		int colorIndex = 0;
-		/********/
+		/** iterate through letters; it->second[i] --> LetterResults */
 		std::map<int, std::string> data;
 		for(size_t i = 0; i < it->second.size(); i++)
 		{
@@ -238,16 +254,18 @@ void ResultsWriter::writeLettersResults(
 			
 			images_table << "\t\t<tr>\n";
 			images_table << "\t\t\t<td>&#" << it->second[i].letter << ";</td>\n";
-			std::vector<std::vector<EvaluationResult> > detectors;
-			for(std::map<int, std::vector<EvaluationResult> >::iterator iterator = it->second[i].results.begin(); iterator != it->second[i].results.end(); iterator++)
+			std::vector<DetectorResults> detectors;
+			size_t worstFaceIndex = 0;
+			double worstFaceAngle = 0.0;
+
+			for(std::map<int, DetectorResults>::iterator iterator = it->second[i].detectors.begin(); iterator != it->second[i].detectors.end(); iterator++)
 			{
 				std::stringstream tmpStr;
 				detectors.push_back(iterator->second);
 				if(i==0)
 				{
-					if(iterator != it->second[i].results.begin()) 
+					if(iterator != it->second[i].detectors.begin()) 
 					{
-
 						tmpStr << ", \n";
 					}
 					tmpStr << "{\n";
@@ -261,15 +279,8 @@ void ResultsWriter::writeLettersResults(
 				{
 					tmpStr << ", ";
 				}
-				double detectorTotal = 0.0;
-				double detectorCorrect = 0.0;
-				for(size_t j = 0; j < iterator->second.size(); j++)
-				{
-					detectorTotal++;
-					if(fabs(iterator->second[j].angleDiff) < angleTolerance) detectorCorrect++;
-				}
 
-				if(iterator == it->second[i].results.begin())
+				if(iterator == it->second[i].detectors.begin())
 				{
 					if(i!=0)
 					{
@@ -278,31 +289,48 @@ void ResultsWriter::writeLettersResults(
 					letterNames << "'&#" << it->second[i].letter << ";'";
 				}
 
-				tmpStr << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal;
+				tmpStr << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count;
 				data[iterator->first] +=  tmpStr.str();
-				report_overview << "\t\t\t<td>" << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal << "%</td>\n";
+				report_overview << "\t\t\t<td>" << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count << "%</td>\n";
 			}
 			std::sort(detectors.begin(), detectors.end(), sortResultsByBiggestDiff_subvector);
+
+			double bestDiff = M_PI;
+			std::stringstream bestDet;
+
 			for (size_t j = 0; j < detectors.size(); j++) 
 			{
-				double detectorTotal = 0.0;
-				double detectorCorrect = 0.0;
-				for(size_t k = 0; k < detectors[j].size(); k++)
+				std::sort(detectors[j].results.begin(), detectors[j].results.end(), sortResultsByBiggestDiff);
+				for(size_t k = 0; k < detectors[j].results.size(); k++) 
 				{
-					detectorTotal++;
-					if(fabs(detectors[j][k].angleDiff) < angleTolerance) detectorCorrect++;
+					if (detectors[j].results[k].faceIndex == it->second[i].faceBiggestDiff.faceIndex && fabs(detectors[j].results[k].angleDiff) < fabs(bestDiff))
+					{
+						bestDet.str( "" );
+						bestDet << "\t\t\t<td><img src=\"";
+						bestDet << "../" << detectorNames[detectors[j].results[k].classificator] << "/" << detectors[j].results[k].alphabet << "/" << detectors[j].results[k].letter << "/" << detectors[j].results[k].imageId << ".png";
+						bestDet << "\" ";
+						bestDet << "title=\"" << detectorNames[detectors[j].results[k].classificator] << " &#10;";
+						bestDet << "Angle diff " << detectors[j].results[k].angleDiff*180/M_PI << "&deg; &#10;";
+						bestDet << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
+						bestDiff = detectors[j].results[k].angleDiff;
+					}
 				}
-				std::sort(detectors[j].begin(), detectors[j].end(), sortResultsByBiggestDiff);
 				std::stringstream pictureLink;
-				pictureLink << "../" << detectorNames[detectors[j][0].classificator] << "/" << detectors[j][0].alphabet << "/" << detectors[j][0].letter << "/" << detectors[j][0].imageId << ".png";
+				pictureLink << "../" << detectorNames[detectors[j].detector] << "/" << detectors[j].alphabet << "/" << detectors[j].letter << "/" << detectors[j].results[0].imageId << ".png";
 				images_table << "\t\t\t<td><img src=\"" << pictureLink.str() << "\" ";
-				images_table << "title=\"" << detectorNames[detectors[j][0].classificator] << " &#10;";
-				images_table << "Angle diff " << detectors[j][0].angleDiff*180/M_PI << " &#10;";
-				images_table << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectorCorrect/detectorTotal << "%\" /></td>\n";
+				images_table << "title=\"" << detectorNames[detectors[j].detector] << " &#10;";
+				images_table << "Angle diff " << detectors[j].results[0].angleDiff*180/M_PI << "&deg; &#10;";
+				images_table << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
 			}
 			report_overview << "\t\t</tr>\n";
-			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "</td>\n";
-			images_table << "\t\t\t<td>" << it->second[i].biggestAngleDiff*180/M_PI << "</td>\n";
+			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "&deg;</td>\n";
+			images_table << "\t\t\t<td>" << it->second[i].biggestAngleDiff*180/M_PI << "&deg;</td>\n";
+			images_table << bestDet.str();
+
+
+				/*std::stringstream pictureLink;
+				*/
+
 			images_table << "\t\t</tr>\n";
 		}
 
