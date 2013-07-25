@@ -25,7 +25,7 @@ namespace cmp{
 VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle, int correctAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle) {
 	// TODO Auto-generated constructor stub
 
-	hist = new float [int(180/histColWidth)];
+	hist = new double [int(180/histColWidth)];
 }
 
 VerticalDomSkDet::~VerticalDomSkDet() {
@@ -36,7 +36,7 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 {
 	std::vector<cv::Point> contour = contours[0];
 	
-	memset (hist, 0, int(180/histColWidth) * sizeof(float));
+	memset (hist, 0, int(180/histColWidth) * sizeof(double));
 
 	cv::Point prev = contour.back();
 
@@ -69,14 +69,31 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
 	int maxI = ceil(double(ignoreAngle/histColWidth));
+	
+	double totalLen = 0.0;
+	double resLen = 0.0;
+
 	for(int i=0;i<int(180/histColWidth);i++)
 	{
-		int rectH = 2*hist[i];
+		int rectH = 20*hist[i];
 		cv::rectangle(histogram, Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), Scalar(0,0,255), CV_FILLED);
-		if (hist[i] > hist[maxI] && i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth) maxI = i;
+		if (i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth)
+		{
+			if (hist[i] > hist[maxI]) maxI = i;
+			totalLen = totalLen + hist[i];
+		}
+	}
+	for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+	{
+		int j = i;
+		if (j<0) j = j + int(180/histColWidth);
+		if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
 
+		resLen = resLen + hist[j];
 	}
 	//cv::imshow("Histogram", histogram);
+
+	this->lastDetectionProbability = resLen/totalLen;
 
 	if(debugImage != NULL)
 	{
