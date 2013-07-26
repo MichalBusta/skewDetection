@@ -94,6 +94,19 @@ double LRLongestEdge::detectSkew(const cv::Mat& mask,
 		i = next;
 	}
 
+	/*double entropy = maxLen/(contours[0][bottomMost].y - contours[0][topMost].y);
+
+	if (entropy > 1)
+	{
+		this->lastDetectionProbability = 2-entropy;
+	}
+	else 
+	{
+		this->lastDetectionProbability = entropy;
+	}/**/
+
+	this->lastDetectionProbability = MIN(maxLen/(contours[0][bottomMost].y - contours[0][topMost].y), 1);
+
 	if(debugImage != NULL)
 	{
 		cv::Mat& drawing =  *debugImage;

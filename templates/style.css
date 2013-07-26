@@ -138,12 +138,12 @@ td img
 	max-width: 150px;
 }
 
-#detectors_overview td, #detector_detail_overview td, #alphabet_detail_overview td
+#detectors_overview td, #detectors_overview_sum td, #detector_detail_overview td, #alphabet_detail_overview td
 {
 	text-align: center;
 }
 
-#detectors_overview td:first-child
+#detectors_overview td:first-child, #detectors_overview_sum td:first-child
 {
 	text-align: left;
 }

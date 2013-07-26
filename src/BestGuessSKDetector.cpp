@@ -15,6 +15,8 @@ BestGuessSKDetector::BestGuessSKDetector()
 {
 	detectors.push_back( new VerticalDomSkDet() );
 	detectors.push_back( new ThinProfileSkDet() );
+	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014) );
+	//detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.05, IGNORE_ANGLE, false) );
 
 }
 
