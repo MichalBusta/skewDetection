@@ -1,0 +1,51 @@
+/*
+ * BestGuessSKDetector.cpp
+ *
+ *  Created on: Jul 26, 2013
+ *      Author: Michal Busta
+ */
+
+#include "BestGuessSKDetector.h"
+#include "SkewDetection.h"
+
+namespace cmp
+{
+
+BestGuessSKDetector::BestGuessSKDetector()
+{
+	detectors.push_back( new VerticalDomSkDet() );
+	detectors.push_back( new ThinProfileSkDet() );
+
+}
+
+BestGuessSKDetector::~BestGuessSKDetector()
+{
+	// TODO Auto-generated destructor stub
+}
+
+double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage )
+{
+	double bestProb = 0;
+	std::vector<double> angles;
+	cv::Mat bestDebugImage;
+	size_t bestDetIndex = -1;
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		cv::Mat dbgImage;
+		angles.push_back( this->detectors[i]->detectSkew( mask, lineK, &dbgImage) );
+		if(bestProb < this->detectors[i]->lastDetectionProbability)
+		{
+			bestDetIndex = i;
+			bestDebugImage = dbgImage;
+			bestProb = this->detectors[i]->lastDetectionProbability;
+		}
+	}
+	this->lastDetectionProbability = bestProb;
+	if(debugImage != NULL)
+		*debugImage = bestDebugImage;
+
+	return angles[bestDetIndex];
+
+}
+
+} /* namespace cmp */
