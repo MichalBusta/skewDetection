@@ -31,6 +31,7 @@ public:
 
 private:
 	std::vector<cv::Ptr<SkewDetector> > detectors;
+	std::vector<double> weights;
 };
 
 } /* namespace cmp */
