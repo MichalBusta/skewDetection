@@ -130,10 +130,10 @@ int main( int argc, char **argv)
 			{
 				for(double l = 0.1; l <= 1.0; l += 0.1)
 				{
-					std::ostringstream str;
-					str << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
+					std::ostringstream desc;
+					desc << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
 					cv::Ptr<BestGuessSKDetector> det = new  BestGuessSKDetector();
-					evaluator.registerDetector( det, str.str() );
+					evaluator.registerDetector( det, desc.str() );
 				}
 			}
 		}
