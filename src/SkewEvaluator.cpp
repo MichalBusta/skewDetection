@@ -154,6 +154,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	{
 		SkewDef& def = distortions[j];
 		double bestAngleDiff = M_PI;
+		EvaluationResult bestResult;
 		#pragma omp parallel for
 		for(int i = 0; i < (int) detectors.size(); i++ )
 		{
@@ -169,6 +170,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			if( fabs(angleDiff) <  fabs(bestAngleDiff) )
 			{
 				bestAngleDiff = angleDiff;
+				bestResult = results.back();
 			}
 
 #ifdef DO_PARALLEL
@@ -238,6 +240,8 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			}
 		}
 		results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex) );
+		if( fabs(bestAngleDiff) > ANGLE_MIN)
+			bestResults.push_back(bestResult);
 
 		if( debug )
 		{
