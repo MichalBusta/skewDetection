@@ -104,6 +104,7 @@ private:
 	void generateDistortions( cv::Mat& source,  std::vector<SkewDef>& distortions );
 
 	std::vector<EvaluationResult> results;
+	std::vector<EvaluationResult> bestResults;
 	/** the detectors to evaluate */
 	std::vector<cv::Ptr<SkewDetector> > detectors;
 	/** the names of detector */
