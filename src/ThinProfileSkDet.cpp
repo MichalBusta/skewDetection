@@ -195,7 +195,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	}
 
 	//cv::imshow("Histogram", histogram);
-	//this->lastDetectionProbability = resLen/totalLen;
+	this->lastDetectionProbability = resLen/totalLen;
 	//std::cout << resLen/totalLen << endl;
 
 	if(debugImage != NULL)

@@ -1,4 +1,7 @@
 
+
+DONE:
+
 Jakub: Left-Right longest edge 
 
 Najit nejlepsi parametry pro dany detektor: 
@@ -8,11 +11,6 @@ Najit nejlepsi parametry pro dany detektor:
 
 
 Statistiky + prehledy pro abecedu + pismena
-
-Pridat kriterium: Zhorsuje detektor vysledek ???? 
-
-
-DONE:
      
 Tomas: Thin Profile Detector ? robustnost - pokud je vic profilu se stejnou sirkou? 
 
