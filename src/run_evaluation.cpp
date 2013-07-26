@@ -132,8 +132,8 @@ int main( int argc, char **argv)
 				{
 					std::ostringstream desc;
 					desc << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
-					cv::Ptr<BestGuessSKDetector> det = new  BestGuessSKDetector();
-					evaluator.registerDetector( det, std::string(desc.str().c_str()) );
+					cv::Ptr<SkewDetector> det = new  BestGuessSKDetector();
+					evaluator.registerDetector( det, desc.str() );
 				}
 			}
 		}
