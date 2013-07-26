@@ -110,6 +110,21 @@ table.images td
 	text-align: center;
 }
 
+#container 
+{
+	/*min-width: 400px;*/
+	height: 400px;
+	margin: 0 auto;
+	min-width: 1200px;	
+}
+#container2
+{
+	/*min-width: 400px;*/
+	height: 400px;
+	margin: 20px auto;
+	min-width: 1200px;	
+}
+
 table a, table a:visited, table a:hover, table a:active {
 	color: #003399;
 	text-decoration: none;

@@ -184,6 +184,8 @@ void ResultsWriter::writeLettersResults(
 		std::fstream report_overview;
 		std::stringstream images_table;
 		report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
+		report_overview << std::fixed << std::setprecision(2);
+		images_table << std::fixed << std::setprecision(2);
 		report_overview << "\t<table id=\"alphabet_detail_overview\">\n" << "\t\t<tr>\n";
 		report_overview << "\t\t\t<th rowspan=\"2\">Char</th>\n";
 		images_table << "\t<table id=\"alphabet_detail_images\" class=\"images\">\n" << "\t\t<tr>\n";
@@ -191,6 +193,7 @@ void ResultsWriter::writeLettersResults(
 		std::map<int, DetectorResults>::iterator last = it->second[0].detectors.end();
 		--last;--last;
 		std::stringstream subtitle;
+		subtitle << std::fixed << std::setprecision(2);
 		for(std::map<int, DetectorResults>::iterator iterator = it->second[0].detectors.begin(); iterator != --(it->second[0].detectors.end()); iterator++)
 		{
 			report_overview << "\t\t\t<th class=\"border_left\" colspan=\"2\">" << detectorNames[iterator->first] << "</th>\n";
@@ -224,7 +227,7 @@ void ResultsWriter::writeLettersResults(
 
 		std::ofstream alphabet_json;
 		alphabet_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
-	
+		alphabet_json << std::fixed << std::setprecision(2);
 		alphabet_json << "series = [";
 		std::vector<std::string> colors;
 	
@@ -238,6 +241,7 @@ void ResultsWriter::writeLettersResults(
 		colors.push_back("#f41b15");
 
 		std::stringstream letterNames;
+		letterNames << std::fixed << std::setprecision(2);
 		int colorIndex = 0;
 		/** iterate through letters; it->second[i] --> LetterResults */
 		std::map<int, std::string> data;
@@ -255,6 +259,7 @@ void ResultsWriter::writeLettersResults(
 			for(std::map<int, DetectorResults>::iterator iterator = it->second[i].detectors.begin(); iterator != it->second[i].detectors.end(); iterator++)
 			{
 				std::stringstream tmpStr;
+				tmpStr << std::fixed << std::setprecision(2);
 				detectors.push_back(iterator->second);
 
 				if(i==0)
@@ -284,15 +289,16 @@ void ResultsWriter::writeLettersResults(
 					letterNames << "'&#" << it->second[i].letter << ";'";
 				}
 
-				tmpStr << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count;
+				tmpStr << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count;
 				data[iterator->first] +=  tmpStr.str();
-				report_overview << "\t\t\t<td class=\"border_left\">" << std::fixed << std::setprecision(2) << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count << "%</td>\n";
-				report_overview << "\t\t\t<td class=\"border_right\">" << std::fixed << std::setprecision(2) << iterator->second.acum.sumDiff << "</td>\n";
+				report_overview << "\t\t\t<td class=\"border_left\">" << 100*iterator->second.acum.correctClassCont/iterator->second.acum.count << "%</td>\n";
+				report_overview << "\t\t\t<td class=\"border_right\">" << iterator->second.acum.sumDiff << "</td>\n";
 			}
 			std::sort(detectors.begin(), detectors.end(), sortResultsByBiggestDiff_subvector);
 
 			double bestDiff = M_PI;
 			std::stringstream bestDet;
+			bestDet << std::fixed << std::setprecision(2);
 
 			int tooGoodRes = 0;
 
@@ -320,7 +326,7 @@ void ResultsWriter::writeLettersResults(
 							bestDet << "\" ";
 							bestDet << "title=\"" << detectorNames[detectors[j].results[k].classificator] << " &#10;";
 							bestDet << "Angle diff " << detectors[j].results[k].angleDiff*180/M_PI << "&deg; &#10;";
-							bestDet << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" />";
+							bestDet << "Detector accuracy " << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" />";
 							bestDiff = detectors[j].results[k].angleDiff;
 						}
 					}
@@ -334,8 +340,8 @@ void ResultsWriter::writeLettersResults(
 				pictureLink << "../" << detectorNames[detectors[j].detector] << "/" << detectors[j].alphabet << "/" << detectors[j].letter << "/" << detectors[j].results[0].imageId << ".png";
 				images_table << "\t\t\t<td><img src=\"" << pictureLink.str() << "\" ";
 				images_table << "title=\"" << detectorNames[detectors[j].detector] << " &#10;";
-				images_table << "Angle diff " << std::setprecision(2) << detectors[j].results[0].angleDiff*180/M_PI << "&deg; &#10;";
-				images_table << "Detector accuracy " << std::fixed << std::setprecision(2) << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
+				images_table << "Angle diff " << detectors[j].results[0].angleDiff*180/M_PI << "&deg; &#10;";
+				images_table << "Detector accuracy " << 100*detectors[j].acum.correctClassCont/detectors[j].acum.count << "%\" /></td>\n";
 			}
 			report_overview << "\t\t</tr>\n";
 			images_table << "\t\t\t<td>" << it->second[i].smallestAngleDiff*180/M_PI << "&deg;</td>\n";

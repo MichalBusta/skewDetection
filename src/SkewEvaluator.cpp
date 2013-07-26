@@ -322,8 +322,19 @@ void SkewEvaluator::writeResults()
 
 	std::fstream report_overview;
 	report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
-	report_overview << "\t<table id=\"detectors_overview\">\n" << "\t\t<tr>\n";
+	report_overview << std::fixed << std::setprecision(2);
+
+	std::stringstream table_overview;
+	table_overview << std::fixed << std::setprecision(2);
+	table_overview << "<div id=\"container2\"></div>";
+	table_overview << "\t<table id=\"detectors_overview\">\n" << "\t\t<tr>\n";
+	table_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
+
+	report_overview << "\t<table id=\"detectors_overview_sum\">\n" << "\t\t<tr>\n";
 	report_overview << "\t\t\t<th rowspan=\"2\">Detector</th>\n";
+	report_overview << "\t\t\t<th class=\"border_left\" colspan=\"6\">Sum</th>\n";
+	report_overview << "\t\t</tr>\n";
+	report_overview << "\t\t<tr>\n" << "\t\t\t<th class=\"border_left\">Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>StdDev</th>\n" << "\t\t\t<th>avgL%</th>\n" << "\t\t\t<th>avgA%</th>\n" << "\t\t</tr>\n";
 
 	std::vector<double> jsonData_correct, jsonData_deviation;
 
@@ -331,14 +342,13 @@ void SkewEvaluator::writeResults()
 
 	for(std::map<std::string, std::map<std::string, AcumResult> >::iterator it = resMap[0].begin(); it != resMap[0].end(); it++)
 	{
-		report_overview << "\t\t\t<th class=\"border_left\" colspan=\"5\"><a href=\"" << it->first << "/index.htm\">" << it->first << "</a></th>\n";
+		table_overview << "\t\t\t<th class=\"border_left\" colspan=\"5\"><a href=\"" << it->first << "/index.htm\">" << it->first << "</a></th>\n";
 		subtitle = subtitle + "\t\t\t<th class=\"border_left\">Total</th>\n" + "\t\t\t<th>Correct</th>\n" + "\t\t\t<th>% Correct</th>\n" + "\t\t\t<th>StdDev</th>\n" + "\t\t\t<th>avgL%</th>\n";
 	}
 
-	report_overview << "\t\t\t<th class=\"border_left\" colspan=\"6\">Sum</th>\n";
-	report_overview << "\t\t</tr>\n";
+	table_overview << "\t\t</tr>\n";
 	
-	report_overview << "\t\t<tr>\n" << subtitle << "\t\t\t<th class=\"border_left\">Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>StdDev</th>\n" << "\t\t\t<th>avgL%</th>\n" << "\t\t\t<th>avgA%</th>\n" << "\t\t</tr>\n";
+	table_overview << "\t\t<tr>\n" << subtitle << "\t\t</tr>\n";
 
 	std::sort( classMap.begin(), classMap.end(), &sortResultsByCorrectClsCount );
 
@@ -346,12 +356,16 @@ void SkewEvaluator::writeResults()
 	{
 		std::ofstream json_data;
 		std::stringstream json_incorrect;
+		json_incorrect << std::fixed << std::setprecision(2);
 
 		json_data.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data.js" ).c_str() );
+		json_data << std::fixed << std::setprecision(2);
 		json_data << "var json = {\n" << "\t\"children\": [\n";
 		
+		table_overview << "\t\t<tr>\n";
 		report_overview << "\t\t<tr>\n";
 		
+		table_overview << "\t\t\t<td><a href=\"" << detectorNames[classMap[i].classIndex] << "/index.htm\" title=\"" << detectorNames[classMap[i].classIndex] << "\">" << detectorNames[classMap[i].classIndex] << "</a></td>\n";
 		report_overview << "\t\t\t<td><a href=\"" << detectorNames[classMap[i].classIndex] << "/index.htm\" title=\"" << detectorNames[classMap[i].classIndex] << "\">" << detectorNames[classMap[i].classIndex] << "</a></td>\n";
 		
 		json_data << "\t\t{\n" << "\t\t\t\"children\": [\n";
@@ -360,6 +374,7 @@ void SkewEvaluator::writeResults()
 
 		std::fstream report_detector;
 		report_detector.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/index.htm" ).c_str(), std::fstream::out | std::fstream::app );
+		report_detector << std::fixed << std::setprecision(2);
 		report_detector << "\t<table id=\"detector_detail_overview\">\n" << "\t\t<tr>\n";
 		subtitle = "";
 
@@ -408,7 +423,7 @@ void SkewEvaluator::writeResults()
 
 			letterTotal = letterTotal + it->second.size();
 
-			report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td class=\"border_left\">" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
+			table_overview << std::fixed << std::setprecision(2) << "\t\t\t<td class=\"border_left\">" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td>" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
 			report_detector << std::fixed << std::setprecision(2)<< "\t\t\t<td>" << alphabetTotal << "</td>\n" << "\t\t\t<td>" << alphabetCorrect << "</td>\n" << "\t\t\t<td>" << double(alphabetCorrect)/double(alphabetTotal)*100 << "</td>\n" << "\t\t\t<td>" << alphabetVariance << "</td>\n" << "\t\t\t<td class=\"border_right\">" << sumCorrectPercent/double(it->second.size()) << "</td>\n";
 			json_data << "\t\t\t\t\t],\n" << "\t\t\t\t\t\"data\": {\n";
 			json_data << "\t\t\t\t\t\t\"$angularWidth\": " << double(alphabetCorrect)/double(alphabetTotal)*100*it->second.size() << ",\n";
@@ -454,10 +469,11 @@ void SkewEvaluator::writeResults()
 
 		sumCorrectAlphabetPercent[classMap[i].classIndex] = sumCorrectAlphabetPercent[classMap[i].classIndex]/double(alphabetIndex);
 		sumCorrectLetterPercent[classMap[i].classIndex] = sumCorrectLetterPercent[classMap[i].classIndex]/double(letterTotal);
+		
+		table_overview << "\t\t</tr>\n";
+		report_overview << "\t\t\t<td class=\"border_left\">" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
 
-		report_overview << std::fixed << std::setprecision(2) << "\t\t\t<td class=\"border_left\">" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
-
-		report_detector << std::fixed << std::setprecision(2) << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
+		report_detector << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
 		report_detector << "\t</table>\n";
 
 		ResultsWriter::writeWorstDetectorResults( results,  classMap[i].classIndex, 100, report_detector, outputDirectory, detectorNames );
@@ -465,8 +481,12 @@ void SkewEvaluator::writeResults()
 		report_detector << "</body>\n</html>";
 		report_detector.close();
 	}
+	
+	table_overview << "\t</table>\n";
 
 	report_overview << "\t</table>\n";
+
+	report_overview << table_overview.str();
 
 	ResultsWriter::writeWorstDetectorResults( results,  -1, 100, report_overview, outputDirectory, detectorNames );
 
@@ -476,6 +496,7 @@ void SkewEvaluator::writeResults()
 
 	std::ofstream overview_json;
 	overview_json.open ( (outputDirectory+"/object_data.js" ).c_str() );
+	overview_json << std::fixed << std::setprecision(2);
 
 	overview_json << "series = [{\n";
 	overview_json << "\tname: 'Correct Classifications',\n";
@@ -486,7 +507,7 @@ void SkewEvaluator::writeResults()
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		if(i!=0) overview_json << ", ";
-		overview_json << std::fixed << std::setprecision(2) << 100*double(classMap[i].correctClassCont)/double(classMap[i].count);
+		overview_json << 100*double(classMap[i].correctClassCont)/double(classMap[i].count);
 	}
 
 	overview_json << "],\n";
@@ -503,7 +524,7 @@ void SkewEvaluator::writeResults()
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		if(i!=0) overview_json << ", ";
-		overview_json << std::fixed << std::setprecision(2) << sumCorrectLetterPercent[classMap[i].classIndex];
+		overview_json << sumCorrectLetterPercent[classMap[i].classIndex];
 	}
 
     overview_json << "],\n";
@@ -520,7 +541,7 @@ void SkewEvaluator::writeResults()
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		if(i!=0) overview_json << ", ";
-		overview_json << std::fixed << std::setprecision(2) << sumCorrectAlphabetPercent[classMap[i].classIndex];
+		overview_json << sumCorrectAlphabetPercent[classMap[i].classIndex];
 	}
 
     overview_json << "],\n";
@@ -538,7 +559,7 @@ void SkewEvaluator::writeResults()
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		if(i!=0) overview_json << ", ";
-		overview_json << std::fixed << std::setprecision(2) << classMap[i].sumDiff;
+		overview_json << classMap[i].sumDiff;
 	}
 
     overview_json << "],\n";
@@ -560,7 +581,8 @@ void SkewEvaluator::writeResults()
 	/**************************************************************************/
 	std::ofstream alphabet_json;
 	alphabet_json.open ( (outputDirectory+"/alphabet_object_data.js" ).c_str() );
-	
+	alphabet_json << std::fixed << std::setprecision(2);
+
 	alphabet_json << "alphabet_series = [";
 	std::vector<std::string> colors;
 	
@@ -598,7 +620,7 @@ void SkewEvaluator::writeResults()
 				}
 				alphabetNames << "'" << iterator->first << "'";
 			}
-			alphabet_json << std::fixed << std::setprecision(2) << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
+			alphabet_json << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
 		}
 		alphabet_json << "],\n";
 		alphabet_json << "\ttooltip: {\n";
