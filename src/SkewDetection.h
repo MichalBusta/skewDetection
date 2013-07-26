@@ -14,6 +14,7 @@
 #include "LongestEdgeSkDetector.h"
 #include "LeftRightHullSkDet.h"
 #include "LRLongestEdge.h"
+#include "BestGuessSKDetector.h"
 
 
 

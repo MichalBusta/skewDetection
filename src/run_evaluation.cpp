@@ -110,7 +110,8 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdgeSkDetector" );
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
 	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
-	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );/**/
+	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
+	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
 
 	/*for(double i = 0; i < 0.4; i=i+0.01)
 	{
