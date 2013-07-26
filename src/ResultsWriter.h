@@ -67,6 +67,10 @@ public:
 			int classificator, int maxCount, std::fstream& outStream,
 			std::string& outputDir, std::vector<std::string> detctorNames);
 
+	static void ResultsWriter::writeBestResults(
+		std::vector<EvaluationResult>& results, int maxCount,
+		std::fstream& outStream, std::vector<std::string> detectorNames);
+
 	static void writeLettersResults(
 			std::vector<EvaluationResult>& results,
 			std::string& outputDir, std::vector<std::string> detectorNames,
