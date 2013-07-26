@@ -132,7 +132,11 @@ int main( int argc, char **argv)
 				{
 					std::ostringstream desc;
 					desc << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
-					cv::Ptr<SkewDetector> det = new  BestGuessSKDetector();
+					BestGuessSKDetector* det = new  BestGuessSKDetector();
+					det->weights[0] = i;
+					det->weights[1] = j;
+					det->weights[2] = k;
+					det->weights[3] = l;
 					evaluator.registerDetector( det, desc.str() );
 				}
 			}

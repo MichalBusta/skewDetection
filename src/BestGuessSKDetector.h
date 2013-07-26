@@ -29,9 +29,9 @@ public:
 
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
 
+	std::vector<double> weights;
 private:
 	std::vector<cv::Ptr<SkewDetector> > detectors;
-	std::vector<double> weights;
 };
 
 } /* namespace cmp */
