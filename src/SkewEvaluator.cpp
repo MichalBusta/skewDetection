@@ -320,6 +320,11 @@ void SkewEvaluator::writeResults()
 		}
 	}
 
+	for(size_t i = 0; i < bestResults.size(); i++)
+	{
+
+	}
+
 	std::fstream report_overview;
 	report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
 	report_overview << std::fixed << std::setprecision(2);
@@ -488,7 +493,11 @@ void SkewEvaluator::writeResults()
 
 	report_overview << table_overview.str();
 
+	report_overview << "<div class=\"preview\">\n";
+	report_overview << "<h2>Results Preview</h2>\n";
 	ResultsWriter::writeWorstDetectorResults( results,  -1, 100, report_overview, outputDirectory, detectorNames );
+	ResultsWriter::writeBestResults( bestResults, 300, report_overview, detectorNames );
+	report_overview << "</div>\n";
 
 	report_overview << "</body>\n</html>";
 

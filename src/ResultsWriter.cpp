@@ -61,8 +61,8 @@ void ResultsWriter::writeWorstDetectorResults(
 	std::sort(work.begin(), work.end(), &EvaluationResult::SortByAbsAngleDiff);
 
 	
-	outStream << "<div class=\"preview\">\n";
-	outStream << "<h2>Results Preview</h2>\n";
+	//outStream << "<div class=\"preview\">\n";
+	//outStream << "<h2>Results Preview</h2>\n";
 	outStream << "<div class=\"column\">\n";
 
 	outStream << "<h3>Worst Results</h3>\n";
@@ -93,7 +93,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
 	resultsCount = 0;
 	LetterCheck.clear();
-	for(size_t i = 0; i < work.size(); i++)
+	for(int i = 0; i < work.size(); i++)
 	{
 		//skip the best possible detector
 		if(work[i].classificator == detectorNames.size() - 1)
@@ -112,7 +112,47 @@ void ResultsWriter::writeWorstDetectorResults(
 		if( resultsCount++ > maxCount)
 			break;
 	}
-	outStream << "</table></div></div>\n";
+	outStream << "</table></div>";
+	//outStream << "</div>\n";
+}
+
+/**
+ * @param classificator - if >= 0 zapise vysledky pouze od daneho detektoru
+ * @param maxCount - maximalni pocet radku v tabulce
+ */
+void ResultsWriter::writeBestResults(
+		std::vector<EvaluationResult>& results, int maxCount,
+		std::fstream& outStream, std::vector<std::string> detectorNames)
+{
+	std::vector<EvaluationResult> work;
+
+	work = results;
+
+	std::set<string> LetterCheck;
+	std::sort(work.begin(), work.end(), &EvaluationResult::SortByAbsAngleDiff);
+	
+	outStream << "<div class=\"column\">\n";
+	outStream << "<h3>Best result for letter (worst->best)</h3>\n";
+
+	outStream << "<table id=\"detectors_right_images\">\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
+	int resultsCount = 0;
+	LetterCheck.clear();
+	for(int i = (int) work.size() -1; i >= 0; i--)
+	{
+		if( LetterCheck.find(work[i].letter) != LetterCheck.end() )
+			continue;
+
+		std::ostringstream pictureLink;
+		pictureLink << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
+		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink.str() << "\"/>" << "</td></tr>\n";
+
+		LetterCheck.insert(work[i].letter);
+
+		if( resultsCount++ > maxCount)
+			break;
+	}
+	outStream << "</table></div>";
 }
 
 bool sortResultsByBiggestDiff_subvector(const DetectorResults& o1, const DetectorResults& o2)
