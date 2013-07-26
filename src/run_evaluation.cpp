@@ -31,7 +31,7 @@ int main( int argc, char **argv)
 		return -1;
 	}
 
-	SkewEvaluator evaluator( argv[2], false, true );
+	SkewEvaluator evaluator( argv[2], false, false );
 
 	/**/
 	std::map<int, std::string> approx;
@@ -102,7 +102,7 @@ int main( int argc, char **argv)
 		epsilonToStr.str( "" );
 	}
 	/**/
-	/**/
+	/*
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
@@ -122,6 +122,23 @@ int main( int argc, char **argv)
 	}
 	evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, 1), "ThinProfile-1.00");/**/
 	
+	for(double i = 0.1; i <= 1.0; i += 0.1)
+	{
+		for(double j = 0.1; j <= 1.0; j += 0.1)
+		{
+			for(double k = 0.1; k <= 1.0; k += 0.1)
+			{
+				for(double l = 0.1; l <= 1.0; l += 0.1)
+				{
+					std::ostringstream str;
+					str << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
+					cv::Ptr<BestGuessSKDetector> det = new  BestGuessSKDetector();
+					evaluator.registerDetector( det, str.str() );
+				}
+			}
+		}
+	}
+
 	evaluator.evaluate( argv[1] );
 
 	return 0;

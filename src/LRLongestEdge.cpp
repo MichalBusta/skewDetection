@@ -105,7 +105,7 @@ double LRLongestEdge::detectSkew(const cv::Mat& mask,
 		this->lastDetectionProbability = entropy;
 	}/**/
 
-	this->lastDetectionProbability = MIN(maxLen/(contours[0][bottomMost].y - contours[0][topMost].y), 0.60);
+	this->lastDetectionProbability = MIN(maxLen/(contours[0][bottomMost].y - contours[0][topMost].y), 1.0);
 
 	if(debugImage != NULL)
 	{
