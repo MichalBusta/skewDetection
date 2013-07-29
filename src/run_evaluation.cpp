@@ -111,6 +111,9 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
 	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
 	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
+
+	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
+
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
 
 	evaluator.evaluate( argv[1] );

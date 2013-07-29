@@ -37,7 +37,8 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
 		cv::Mat dbgImage;
-		angles.push_back( this->detectors[i]->detectSkew( mask, lineK, &dbgImage) );
+		cv::Mat img = mask.clone();
+		angles.push_back( this->detectors[i]->detectSkew( img, lineK, &dbgImage) );
 		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
 		{
 			bestDetIndex = i;
