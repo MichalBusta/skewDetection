@@ -14,13 +14,13 @@ namespace cmp
 BestGuessSKDetector::BestGuessSKDetector()
 {
 	detectors.push_back( new VerticalDomSkDet() );
-	weights.push_back(1.0);
+	weights.push_back(0.9);
 	detectors.push_back( new ThinProfileSkDet() );
-	weights.push_back(0.8);
-	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014) );
 	weights.push_back(0.5);
+	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014) );
+	weights.push_back(1);
 	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, false) );
-	weights.push_back(0.3);
+	weights.push_back(0.5);
 }
 
 BestGuessSKDetector::~BestGuessSKDetector()
@@ -37,7 +37,8 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
 		cv::Mat dbgImage;
-		angles.push_back( this->detectors[i]->detectSkew( mask, lineK, &dbgImage) );
+		cv::Mat img = mask.clone();
+		angles.push_back( this->detectors[i]->detectSkew( img, lineK, &dbgImage) );
 		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
 		{
 			bestDetIndex = i;

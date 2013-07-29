@@ -102,7 +102,7 @@ int main( int argc, char **argv)
 		epsilonToStr.str( "" );
 	}
 	/**/
-	/*
+	/**/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
@@ -111,16 +111,10 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
 	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
 	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
-	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
 
-	/**/for(double i = 0; i < 0.2; i=i+0.01)
-	{
-		std::stringstream iToStr;
-		iToStr << std::fixed << std::setprecision(2) << i;
-		evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, i), "ThinProfile-"+iToStr.str() );
-		iToStr.str( "" );
-	}
-	evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, 1), "ThinProfile-1.00");/**/
+	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
+
+	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
 	
 	/*for(double i = 0.1; i <= 1.0; i += 0.1)
 	{
@@ -142,7 +136,6 @@ int main( int argc, char **argv)
 			}
 		}
 	}*/
-
 	evaluator.evaluate( argv[1] );
 
 	return 0;
