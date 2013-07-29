@@ -102,7 +102,7 @@ int main( int argc, char **argv)
 		epsilonToStr.str( "" );
 	}
 	/**/
-	/*
+	/**/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
@@ -112,36 +112,6 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
 	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
-
-	/*for(double i = 0; i < 0.4; i=i+0.01)
-	{
-		std::stringstream iToStr;
-		iToStr << std::fixed << std::setprecision(2) << i;
-		evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, i), "ThinProfile-"+iToStr.str() );
-		iToStr.str( "" );
-	}
-	evaluator.registerDetector(new ThinProfileSkDet(1, 0.016, 15, 1), "ThinProfile-1.00");/**/
-	
-	for(double i = 0.1; i <= 1.0; i += 0.1)
-	{
-		for(double j = 0.1; j <= 1.0; j += 0.1)
-		{
-			for(double k = 0.1; k <= 1.0; k += 0.1)
-			{
-				for(double l = 0.1; l <= 1.0; l += 0.1)
-				{
-					std::ostringstream desc;
-					desc << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
-					BestGuessSKDetector* det = new  BestGuessSKDetector();
-					det->weights[0] = i;
-					det->weights[1] = j;
-					det->weights[2] = k;
-					det->weights[3] = l;
-					evaluator.registerDetector( det, desc.str() );
-				}
-			}
-		}
-	}
 
 	evaluator.evaluate( argv[1] );
 
