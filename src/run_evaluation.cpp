@@ -31,7 +31,7 @@ int main( int argc, char **argv)
 		return -1;
 	}
 
-	SkewEvaluator evaluator( argv[2], false, false );
+	SkewEvaluator evaluator( argv[2], false, true );
 
 	/**/
 	std::map<int, std::string> approx;
