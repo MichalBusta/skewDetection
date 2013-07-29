@@ -13,6 +13,19 @@
 namespace cmp
 {
 
+struct ThinPrDetection
+{
+	double angle;
+
+	double width;
+	
+	cv::Point2d point1;
+
+	cv::Point2d point2;
+
+	cv::Point2d vector;
+};
+
 /**
  * @class cmp::ThinProfileSkDet
  * 

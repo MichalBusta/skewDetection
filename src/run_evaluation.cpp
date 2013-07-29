@@ -115,7 +115,27 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
 
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
-
+	
+	/*for(double i = 0.1; i <= 1.0; i += 0.1)
+	{
+		for(double j = 0.1; j <= 1.0; j += 0.1)
+		{
+			for(double k = 0.1; k <= 1.0; k += 0.1)
+			{
+				for(double l = 0.1; l <= 1.0; l += 0.1)
+				{
+					std::ostringstream desc;
+					desc << "BG-" << i << "-" << j << "-" << k << "-" << l << std::endl;
+					BestGuessSKDetector* det = new  BestGuessSKDetector();
+					det->weights[0] = i;
+					det->weights[1] = j;
+					det->weights[2] = k;
+					det->weights[3] = l;
+					evaluator.registerDetector( det, desc.str() );
+				}
+			}
+		}
+	}*/
 	evaluator.evaluate( argv[1] );
 
 	return 0;
