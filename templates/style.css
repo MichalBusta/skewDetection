@@ -113,9 +113,8 @@ table.images td
 #container 
 {
 	/*min-width: 400px;*/
-	height: 400px;
+	height: 600px;
 	margin: 0 auto;
-	min-width: 1200px;	
 }
 #container2
 {
