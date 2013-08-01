@@ -23,7 +23,7 @@ namespace cmp
 class LeftRightHullSkDet : public ContourSkewDetector
 {
 public:
-	LeftRightHullSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.01, float precision =0.08, bool isRight = false, bool contourForm=false, int ignoreAngle = IGNORE_ANGLE);
+	LeftRightHullSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.01, float precision =0.08, bool isRight = false, int ignoreAngle = IGNORE_ANGLE);
 
 	virtual ~LeftRightHullSkDet();
 
@@ -33,8 +33,6 @@ public:
 	float precision;
 
 	bool isRight;
-
-	bool contourForm;
 
 	/* ve stupnich */
 	int ignoreAngle;

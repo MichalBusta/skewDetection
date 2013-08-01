@@ -26,7 +26,7 @@ static void help()
 	std::cout << "		2 - Top-Bottom Centers Detector\n";
 	std::cout << "		3 - Vertical Dominant Detector\n";
 	std::cout << "		4 - Longest vertical edge Detector\n";
-	std::cout << "      5 - Left-Right Hull Detector\n";
+	std::cout << "      5 - Left-Right Detector\n";
 	std::cout << "      6 - LR Longest Edge Detector\n";
 
 	std::cout << std::endl;
