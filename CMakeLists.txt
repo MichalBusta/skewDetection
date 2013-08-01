@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 project(SkewDetection)
 
 option (BUILD_TEST "Build test cases" OFF)
+option (BUILD_DOC "Build the documentation" OFF)
 
 #Find opencv
 find_package( OpenCV REQUIRED )
@@ -60,10 +61,23 @@ if(BUILD_TEST AND NOT ANDROID)
     add_executable(run_all_tests ${test_srcs})
 
     target_link_libraries (run_all_tests     
-    skewDetection
-    
-    gtest
-    ${OpenCV_LIBS}
-)
-    
+        skewDetection
+        gtest
+        ${OpenCV_LIBS}
+    )    
 endif(BUILD_TEST AND NOT ANDROID)
+
+# ---------------------------------------------------------------------------
+# Build the documentation
+# ---------------------------------------------------------------------------
+if(BUILD_DOC)
+    message( STATUS "Creating documentation ...")
+    find_package(Doxygen)
+    if(DOXYGEN_FOUND)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
+        add_custom_target(
+            doc ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen" VERBATIM
+        )
+    endif(DOXYGEN_FOUND)
+endif (BUILD_DOC)
