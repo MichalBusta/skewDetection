@@ -366,7 +366,8 @@ void SkewEvaluator::writeResults()
 		json_incorrect << std::fixed << std::setprecision(2);
 
 		json_data.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data.js" ).c_str() );
-		json_data_measure.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data_measure.js" ).c_str() );
+		std::string outMeasure = (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data_measure.js" ).c_str();
+		json_data_measure.open ( outMeasure.c_str(), std::fstream::out );
 		json_data << std::fixed << std::setprecision(2);
 		json_data << "var json = {\n" << "\t\"children\": [\n";
 		

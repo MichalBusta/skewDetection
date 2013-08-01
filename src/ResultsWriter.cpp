@@ -45,7 +45,7 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 
 	//example:
 
-	outStream << "series = [{ \n";
+	outStream << "seriesMeasure = [{ \n";
 	outStream << "             name: 'Correct Classifications', \n";
     outStream << "             color: '#4572A7',\n";
     outStream << "             type: 'column',\n";
@@ -64,7 +64,7 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
     outStream << "                }\n";
     outStream << "            }]\n";
 
-    outStream << "categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']";
+    outStream << "categoriesMeasure = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" << std::endl;
 }
 
 /**
