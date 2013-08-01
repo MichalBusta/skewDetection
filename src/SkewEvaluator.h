@@ -51,9 +51,21 @@ struct EvaluationResult
 
 	size_t faceIndex;
 
-	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex) : angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(classificator), imageId(imageId), faceIndex(faceIndex) { };
+	/** measure for detector to estimate probability */
+	double measure1;
+
+	/** measure for detector to estimate probability */
+	double measure2;
+
+	EvaluationResult(double angleDiff, std::string alphabet, std::string letter,
+			int classificator, size_t imageId, size_t faceIndex) :
+			angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(
+					classificator), imageId(imageId), faceIndex(faceIndex), measure1(0.0), measure2(0.0)
+	{
+	}
+	;
 	
-	EvaluationResult() : angleDiff(0) { };
+	EvaluationResult() : angleDiff(0), measure1(0.0), measure2(0.0), classificator(-1), faceIndex(0), imageId(0) { };
 
 	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
 	{
