@@ -326,11 +326,6 @@ void SkewEvaluator::writeResults()
 		}
 	}
 
-	for(size_t i = 0; i < bestResults.size(); i++)
-	{
-
-	}
-
 	std::fstream report_overview;
 	report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
 	report_overview << std::fixed << std::setprecision(2);
@@ -366,10 +361,12 @@ void SkewEvaluator::writeResults()
 	for(size_t i = 0; i < classMap.size(); i++)
 	{
 		std::ofstream json_data;
+		std::fstream json_data_measure;
 		std::stringstream json_incorrect;
 		json_incorrect << std::fixed << std::setprecision(2);
 
 		json_data.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data.js" ).c_str() );
+		json_data_measure.open ( (outputDirectory+"/"+detectorNames[classMap[i].classIndex]+"/json_data_measure.js" ).c_str() );
 		json_data << std::fixed << std::setprecision(2);
 		json_data << "var json = {\n" << "\t\"children\": [\n";
 		
@@ -491,6 +488,9 @@ void SkewEvaluator::writeResults()
 
 		report_detector << "</body>\n</html>";
 		report_detector.close();
+
+		ResultsWriter::writeDetectorMeasure( results, json_data_measure, classMap[i].classIndex, detectorNames );
+		json_data_measure.close();
 	}
 	
 	table_overview << "\t</table>\n";

@@ -71,6 +71,9 @@ public:
 		std::vector<EvaluationResult>& results, int maxCount,
 		std::fstream& outStream, std::vector<std::string> detectorNames);
 
+	static void writeDetectorMeasure(
+			std::vector<EvaluationResult>& results,	std::fstream& outStream, int classificator, std::vector<std::string> detectorNames);
+
 	static void writeLettersResults(
 			std::vector<EvaluationResult>& results,
 			std::string& outputDir, std::vector<std::string> detectorNames,

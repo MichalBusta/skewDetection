@@ -36,6 +36,37 @@ inline static void writeResultsRow(std::fstream& outStream, std::string& outputD
 	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 }
 
+
+void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
+		std::fstream& outStream, int classificator,
+		std::vector<std::string> detectorNames)
+{
+	//TODO implement!!!!
+
+	//example:
+
+	outStream << "series = [{ \n";
+	outStream << "             name: 'Correct Classifications', \n";
+    outStream << "             color: '#4572A7',\n";
+    outStream << "             type: 'column',\n";
+    outStream << "             data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],\n";
+    outStream << "             tooltip: {\n";
+    outStream << "                 valueSuffix: ' %'\n";
+    outStream << "             }\n";
+    outStream << "            }, {\n";
+    outStream << "                name: 'Standard Deviation',\n";
+    outStream << "                color: '#89A54E',\n";
+    outStream << "                type: 'spline',\n";
+    outStream << "		yAxis: 1,\n";
+    outStream << "                data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, -1.0, 9.6],\n";
+    outStream << "                tooltip: {\n";
+    outStream << "                    valueSuffix: ''\n";
+    outStream << "                }\n";
+    outStream << "            }]\n";
+
+    outStream << "categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']";
+}
+
 /**
  * @param classificator - if >= 0 zapise vysledky pouze od daneho detektoru
  * @param maxCount - maximalni pocet radku v tabulce

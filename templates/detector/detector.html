@@ -16,7 +16,80 @@
 
 <!-- Example File -->
 <script language="javascript" type="text/javascript" src="json_data.js"></script>
+<script language="javascript" type="text/javascript" src="json_data_measure.js"></script>
 <script language="javascript" type="text/javascript" src="detector.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('#container3').highcharts({
+            chart: {
+                zoomType: 'xy'
+            },
+            title: {
+                text: 'Skew Detection'
+            },
+            subtitle: {
+                text: 'Dector Measures'
+            },
+            xAxis: [{
+                categories: categories
+            }],
+            yAxis: [{ // Primary yAxis
+                labels: {
+                    formatter: function() {
+                        return this.value +'%';
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                title: {
+                    text: 'Correct Classifications',
+                    style: {
+                        color: '#4572A7'
+                    }
+                }
+    
+            }, { // Secondary yAxis
+                gridLineWidth: 0,
+                title: {
+                    text: 'Standard Deviation',
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value;
+                    },
+                    style: {
+                        color: '#4572A7'
+                    }
+                },
+            opposite: true
+    
+            }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'left',
+                x: 120,
+                verticalAlign: 'top',
+                y: 80,
+                floating: true,
+                backgroundColor: '#FFFFFF'
+            },
+            series: seriesMeasure
+        });
+    });
+    
+
+</script>
+
+<script src="../js/highcharts.js"></script>
+
 </head>
 
 <body onload="init();">
@@ -34,3 +107,8 @@
 
 <div id="log"></div>
 </div>
+
+<div id="container3"></div>
+</div>
+
+
