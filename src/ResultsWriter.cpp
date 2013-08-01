@@ -43,6 +43,9 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 {
 	//TODO implement!!!!
 
+	//if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
+	//{
+
 	//example:
 
 	outStream << "seriesMeasure = [{ \n";
