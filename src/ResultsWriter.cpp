@@ -63,7 +63,8 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 			continue;
 
 		int boxNo = (int) ( results[i].measure1 - 1 );
-		boxNo = MIN(boxNo, 9);	
+		boxNo = MIN(boxNo, 9);
+		boxNo = MAX(boxNo, 0);
 		histMeasure1Count[boxNo]++;
 		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
@@ -80,10 +81,15 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 		{
 			triesRatio = goodTriesWithNoOfEdges[t] / histMeasure1Count[t] * 100;
 			histMeasure1[t] = triesRatio;
-		}
+		}else
+			histMeasure1[t] = 0;
+
+		
 	}
 
 
+
+	//histMeasure2 aka average length of edges : max length
 	double histMeasure2[10]; 
 	for(int i = 0; i < 10; i++) histMeasure2[i] = 0;
 	double totalEdgesLengthInRange[10];
@@ -103,8 +109,10 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 				maxLength = results[i].measure2;
 	}
 
+
+
 	double binSize = 0;
-	binSize = maxLength / 10;
+	binSize = (maxLength - 1)  / 10;
 
 	int index = 0;
 
@@ -112,26 +120,28 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 	{
 		if(results[i].classificator != classificator)
 			continue;
+		
+		index = ( (int) ((results[i].measure2 - 1) / binSize) );
+
+		index = MIN(index, 9);
+		index = MAX(index, 0);
+		noOfEdgesLengthsInRange[index]++;
 		if( fabs( results[i].angleDiff) < ANGLE_TOLERANCE )
-		{
-			index = results[i].measure2 / binSize;
-			//if( index 
-		
-		
+		{		
+			totalEdgesLengthInRange[index] += 1;
 		}
 	}
 
 
-
+	double averageLengthRatio = 0;
 	double averageLengthOfEdgesInRange[10];
 	for(int i = 0; i < 10; i++) averageLengthOfEdgesInRange[i] = 0;
 
 	for(int i = 0; i < 10; i++)
 	{
 		if(noOfEdgesLengthsInRange[i] > 0)
-			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / noOfEdgesLengthsInRange[i];
-		
-		
+			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / noOfEdgesLengthsInRange[i] * 100;
+
 		histMeasure2[i] = averageLengthOfEdgesInRange[i];
 
 	}
