@@ -36,7 +36,7 @@ int main( int argc, char **argv)
 
 	/** LR Longest Edge */
 	/**/
-	for (double epsilon = 0.014; epsilon <= 0.03; epsilon=epsilon+0.002)
+	for (double epsilon = 0.014; epsilon <= 0.03; epsilon=epsilon + 0.002)
 	{
 		std::stringstream epsilonToStr;
 		epsilonToStr << std::fixed << std::setprecision(3) << epsilon;
@@ -45,6 +45,7 @@ int main( int argc, char **argv)
 			std::stringstream ignoreAngleToStr;
 			ignoreAngleToStr << precision;
 			evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, epsilon, precision), "L-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
+
 			//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
 			ignoreAngleToStr.str( "" );
 		}
