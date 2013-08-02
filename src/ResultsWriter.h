@@ -57,6 +57,14 @@ struct LetterResults
 	}
 };
 
+struct MeasuresHist
+{
+	int classificator;
+	double histMeasure1[10];
+	double histMeasure2[10];
+
+};
+
 class ResultsWriter {
 public:
 	ResultsWriter();
@@ -71,7 +79,7 @@ public:
 		std::vector<EvaluationResult>& results, int maxCount,
 		std::fstream& outStream, std::vector<std::string> detectorNames);
 
-	static void writeDetectorMeasure(
+	static MeasuresHist writeDetectorMeasure(
 			std::vector<EvaluationResult>& results,	std::fstream& outStream, int classificator, std::vector<std::string> detectorNames);
 
 	static void writeLettersResults(
