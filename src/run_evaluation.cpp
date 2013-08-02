@@ -44,7 +44,8 @@ int main( int argc, char **argv)
 		{
 			std::stringstream ignoreAngleToStr;
 			ignoreAngleToStr << precision;
-			evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, epsilon, IGNORE_ANGLE, precision), "L-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
+			evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, epsilon, precision), "L-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
+
 			//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
 			ignoreAngleToStr.str( "" );
 		}

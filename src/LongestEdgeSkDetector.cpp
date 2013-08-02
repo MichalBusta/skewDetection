@@ -89,10 +89,12 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 			}
 		}
 	}
+	edgesLengthInRange = edgesLengthInRange / maxLength;
 
+#ifdef VERBOSE
 	cout << "edgesLengthInRange is: " << edgesLengthInRange << "\n";
 	cout << "noOfEdgesInRange is: " << noOfEdgesInRange << "\n";
-
+#endif
 
 /*#ifdef VERBOSE
 	cout << "maxLength is: " << maxLength << "\n";
@@ -129,7 +131,7 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 		index = counter + 1;
 		if(counter==outerContour.size()-1)
 			index = 0;
-		cv::line(drawing, outerContour[counter], outerContour[counter+1], cv::Scalar( 0, 0, 255 ), 2, 0);
+		cv::line(drawing, outerContour[counter], outerContour[index], cv::Scalar( 0, 0, 255 ), 1, 0);
 		cv::circle(drawing, outerContour[counter], 4, cv::Scalar( 0, 0, 255 ), 1, 0);
 		cv::circle(drawing, outerContour[index], 4, cv::Scalar( 0, 0, 255 ), 1, 0);
 	}
