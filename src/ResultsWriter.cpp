@@ -43,31 +43,141 @@ void ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 {
 	//TODO implement!!!!
 
+
+	double goodTriesWithNoOfEdges[10];
+	for(int g = 0; g < 10; g++) goodTriesWithNoOfEdges[g] = 0;
+	
+
+	double histMeasure1[10]; 
+	int histMeasure1Count[10]; 
+	for(int i = 0; i < 10; i++)
+	{
+		histMeasure1[i] = 0;
+		histMeasure1Count[i] = 0;
+	}
+	for(size_t i = 0; i < results.size(); i++)
+	{
+
+		if(results[i].classificator != classificator)
+			continue;
+
+		int boxNo = (int) ( results[i].measure1 - 1 );
+		boxNo = MIN(boxNo, 9);	
+		histMeasure1Count[boxNo]++;
+		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
+		{
+			goodTriesWithNoOfEdges[boxNo]++;
+		}
+
+	}
+
+	double triesRatio = 0;
+
+	for(int t = 0; t < 10; t++)
+	{
+		if(histMeasure1Count[t] > 0)
+		{
+			triesRatio = goodTriesWithNoOfEdges[t] / histMeasure1Count[t] * 100;
+			histMeasure1[t] = triesRatio;
+		}
+	}
+
+
+	double histMeasure2[10]; 
+	for(int i = 0; i < 10; i++) histMeasure2[i] = 0;
+	double totalEdgesLengthInRange[10];
+	for(int i = 0; i < 10; i++) totalEdgesLengthInRange[i] = 0;
+	double noOfEdgesLengthsInRange[10]; 
+	for(int i = 0; i < 10; i++) noOfEdgesLengthsInRange[i] = 0;
+
+	double maxLength = 0;
+
+	//max length of edges in range
+	for(size_t i = 0; i < results.size(); i++)
+	{
+		if(results[i].classificator != classificator)
+			continue;
+		if( fabs( results[i].angleDiff) < ANGLE_TOLERANCE )
+			if( results[i].measure2 > maxLength )
+				maxLength = results[i].measure2;
+	}
+
+	double binSize = 0;
+	binSize = maxLength / 10;
+
+	int index = 0;
+
+	for(size_t i = 0; i < results.size(); i++)
+	{
+		if(results[i].classificator != classificator)
+			continue;
+		if( fabs( results[i].angleDiff) < ANGLE_TOLERANCE )
+		{
+			index = results[i].measure2 / binSize;
+			//if( index 
+		
+		
+		}
+	}
+
+
+
+	double averageLengthOfEdgesInRange[10];
+	for(int i = 0; i < 10; i++) averageLengthOfEdgesInRange[i] = 0;
+
+	for(int i = 0; i < 10; i++)
+	{
+		if(noOfEdgesLengthsInRange[i] > 0)
+			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / noOfEdgesLengthsInRange[i];
+		
+		
+		histMeasure2[i] = averageLengthOfEdgesInRange[i];
+
+	}
+
+
 	//if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 	//{
 
 	//example:
 
 	outStream << "seriesMeasure = [{ \n";
-	outStream << "             name: 'Correct Classifications', \n";
+	outStream << "             name: 'Number of Edges in Range', \n";
     outStream << "             color: '#4572A7',\n";
     outStream << "             type: 'column',\n";
-    outStream << "             data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],\n";
+	outStream << "             data: [";
+	string delim = "";
+	for(int i = 0; i < 10; i++)
+	{
+		outStream << delim << histMeasure1[i] << " ";
+		delim = ",";
+	}
+	outStream << "],\n";
+		
+
     outStream << "             tooltip: {\n";
     outStream << "                 valueSuffix: ' %'\n";
     outStream << "             }\n";
     outStream << "            }, {\n";
-    outStream << "                name: 'Standard Deviation',\n";
+    outStream << "                name: 'Average Length Of Edges In Range',\n";
     outStream << "                color: '#89A54E',\n";
-    outStream << "                type: 'spline',\n";
-    outStream << "		yAxis: 1,\n";
-    outStream << "                data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, -1.0, 9.6],\n";
+    outStream << "                type: 'column',\n";
+    outStream << "                data: [";
+		
+	delim = "";
+	for(int i = 0; i < 10; i++)
+	{
+		outStream << delim << histMeasure2[i] << " ";
+		delim = ",";
+	}
+	outStream << "],\n";
+
     outStream << "                tooltip: {\n";
     outStream << "                    valueSuffix: ''\n";
     outStream << "                }\n";
     outStream << "            }]\n";
 
-    outStream << "categoriesMeasure = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" << std::endl;
+    outStream << "categoriesMeasure = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']" << std::endl;
 }
 
 /**

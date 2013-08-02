@@ -39,12 +39,13 @@ struct SkewDef
 
 struct EvaluationResult
 {
+	/* rozdil v radianech oproti spravnemu vysledku */
 	double angleDiff;
 
 	std::string alphabet;
 
 	std::string letter;
-
+	/* identifikace detektoru */
 	int classificator;
 
 	size_t imageId;

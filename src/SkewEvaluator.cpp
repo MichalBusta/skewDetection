@@ -171,7 +171,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			if(le != NULL)
 			{
 				results.back().measure1 = le->noOfEdgesInRange;
-				results.back().measure1 = le->edgesLengthInRange;
+				results.back().measure2 = le->edgesLengthInRange;
 			}
 
 			if( fabs(angleDiff) <  fabs(bestAngleDiff) )
