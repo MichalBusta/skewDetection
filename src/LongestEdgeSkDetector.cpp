@@ -17,7 +17,7 @@ using namespace cv;
 namespace cmp {
 
 LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio) : 
-	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio)
+	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio), noOfEdgesInRange(0), edgesLengthInRange(0.0)
 {
 	// TODO Auto-generated constructor stub
 
