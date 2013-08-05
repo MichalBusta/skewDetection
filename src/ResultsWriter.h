@@ -63,6 +63,11 @@ struct MeasuresHist
 	double histMeasure1[10];
 	double histMeasure2[10];
 
+	static inline bool SortHistMeasure1FirstBin(const MeasuresHist& hist1, const MeasuresHist& hist2  )
+	{
+		return hist1.histMeasure1[0] > hist2.histMeasure1[0];
+	}
+
 };
 
 class ResultsWriter {

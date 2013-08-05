@@ -36,21 +36,16 @@ int main( int argc, char **argv)
 
 	/** LR Longest Edge */
 	/**/
-	for (double epsilon = 0.02; epsilon <= 0.04; epsilon=epsilon + 0.002)
+	for (double precision = 0.005; precision <= 0.4; precision += 0.005)
 	{
-		std::stringstream epsilonToStr;
-		epsilonToStr << std::fixed << std::setprecision(3) << epsilon;
-		for (double precision = 0.01; precision <= 0.4; precision += 0.05)
-		{
-			std::stringstream ignoreAngleToStr;
-			ignoreAngleToStr << precision;
-			evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, epsilon, IGNORE_ANGLE, precision), "L-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
+		std::stringstream ignoreAngleToStr;
+		ignoreAngleToStr << precision;
+		evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
 
-			//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
-			ignoreAngleToStr.str( "" );
-		}
-		epsilonToStr.str( "" );
+		//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
+		ignoreAngleToStr.str( "" );
 	}
+
 	/**/
 	/**
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
