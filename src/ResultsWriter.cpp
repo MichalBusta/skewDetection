@@ -313,6 +313,13 @@ bool sortResultsByBiggestDiff(const EvaluationResult& o1, const EvaluationResult
 	return fabs(o2.angleDiff) < fabs(o1.angleDiff);
 }
 
+void ResultsWriter::writeDetectorMeasuresTable(
+		std::vector<MeasuresHist>& results, std::fstream& outStream,
+		std::vector<std::string> detctorNames)
+{
+	//TODO implement!!!
+}
+
 void ResultsWriter::writeLettersResults(
 			std::vector<EvaluationResult>& results,
 			std::string& outputDir, std::vector<std::string> detectorNames,
