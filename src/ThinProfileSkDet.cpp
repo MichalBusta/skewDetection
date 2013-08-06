@@ -24,21 +24,18 @@ namespace cmp
 {
 
 ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange) :
-	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), greatestAngle(0.0), smallestAngle(0.0), profilesRange(profilesRange)
+	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), middleAngle(middleAngle)
 {
-	// TODO Auto-generated constructor stub
-	hist = new double [int(180/histColWidth)];
+
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
 {
-	// TODO Auto-generated destructor stub
-	delete [] hist;
+
 }
 
 double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
 {	
-	memset (hist, 0, int(180/histColWidth) * sizeof(double));
 
 	if (contours[0].size() < 3) return 0;
 	//cmp::filterContour(contours[0]);
@@ -73,13 +70,10 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	double angle = 0;
 	Point2d resVector, resPoint, resPoint2;
 
-	double angle_2nd = 0;
-	Point2d resVector_2nd, resPoint_2nd, resPoint2_2nd;
-	double min_width_2nd = std::numeric_limits<double>::infinity();
-
-	int maxI = (int) ceil(double(ignoreAngle)/double(histColWidth));
-
 	//std::vector<ThinPrDetection> detections;
+
+	double greatestAngle;
+	double smallestAngle;
 
 	vector<double>widths;
 	vector<double>angles;
@@ -87,6 +81,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	vector<Point2d>PointsForWiderProfiles2;
 	vector<Point2d>VectorsForWiderProfiles;
 	vector<double>thinProfiles;
+
+	vector<double>middleAngles;
 
 	while(rotated_angle < M_PI)
 	{
@@ -149,9 +145,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		while (ang > M_PI/2) ang = ang - M_PI;
 		while (ang <= -M_PI/2) ang = ang + M_PI;
 
-		int pos = (int) (ang + M_PI/2)/M_PI*180/histColWidth;
-		hist[pos] = hist[pos] + 1/width;
-		if (hist[pos] > hist[maxI]) maxI = pos;
 
 		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
 		{
@@ -185,6 +178,31 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	greatestAngle =  -M_PI;
 	smallestAngle = M_PI;
 
+
+	//////////////////////////////////
+	vector<double>widths2;
+	widths2 = widths;
+	int goodThinProfiles = 0;
+
+	for(int c=0;c<widths.size();c++)
+	{
+		for(int i=0;i<widths.size();i++)
+		{
+
+			if( (widths[c] <= thinProfilesRange ) && ( widths2[c] != 0 ) && ( c != i) && ( fabs (angles[c] - angles[i]) < M_PI/60 ) )
+			{
+
+				widths2[i] = 0;
+
+				
+			}
+		}
+	}
+	for(int c=0;c<widths.size();c++) if( widths2[c] != 0 && (widths[c] <= thinProfilesRange ) ) probMeasure2++;
+
+	//////////////////////////////////
+
+
 	for(int c=0;c<widths.size();c++)
 	{
 
@@ -194,7 +212,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 
 			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
-			if ( angles[c] < smallestAngle) smallestAngle = angles[c];
+			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
 		}
 		else widths[c] = 0;
 
@@ -202,41 +220,17 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	}
 
+	middleAngle = ( greatestAngle + smallestAngle ) / 2;
+	middleAngles.push_back(middleAngle);
+
 #ifdef VERBOSE
-	cout << "\n";
-	cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
-	cout << "greatestAngle is: " << greatestAngle << "\n";
-	cout << "smallestAngle is: " << smallestAngle << "\n";
+	std::cout << "\n";
+	std::cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
+	std::cout << "greatestAngle is: " << greatestAngle << "\n";
+	std::cout << "smallestAngle is: " << smallestAngle << "\n";
+	std::cout << "middleAngle is: " << middleAngle << "\n";
+	std::cout << "goodThinProfiles is: " << goodThinProfiles << "\n";
 #endif
-	
-	int height = 200*hist[maxI]+20;
-	cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
-	double totalLen = 0.0;
-	double resLen = 0.0;
-	int range = 10;
-
-	for(int i=0;i<int(180/histColWidth);i++)
-	{
-		int rectH = 200*hist[i];
-		cv::rectangle(histogram, Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), Scalar(0,0,255), CV_FILLED);
-		if (i > MIN(ignoreAngle/histColWidth,maxI-range) && i < MAX((180-ignoreAngle)/histColWidth, maxI+range))
-		{
-			if (hist[i] > hist[maxI]) maxI = i;
-			totalLen = totalLen + hist[i];
-		}
-	}
-	for (int i = maxI-range; i <= maxI+range; i++)
-	{
-		int j = i;
-		if (j<0) j = j + int(180/histColWidth);
-		if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
-
-		resLen = resLen + hist[j];
-	}
-
-	//cv::imshow("Histogram", histogram);
-	this->lastDetectionProbability = resLen/totalLen;
-	//std::cout << resLen/totalLen << endl;
 
 	if(debugImage != NULL)
 	{

@@ -58,6 +58,7 @@ struct EvaluationResult
 	/** measure for detector to estimate probability */
 	double measure2;
 
+
 	EvaluationResult(double angleDiff, std::string alphabet, std::string letter,
 			int classificator, size_t imageId, size_t faceIndex) :
 			angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(

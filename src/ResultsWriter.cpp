@@ -175,7 +175,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	outStream << "],\n";
 
     outStream << "                tooltip: {\n";
-    outStream << "                    valueSuffix: ''\n";
+    outStream << "                    valueSuffix: ' %'\n";
     outStream << "                }\n";
 
 	outStream << "            }, {\n";
