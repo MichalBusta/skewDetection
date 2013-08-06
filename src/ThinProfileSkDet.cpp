@@ -223,12 +223,14 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	middleAngle = ( greatestAngle + smallestAngle ) / 2;
 	middleAngles.push_back(middleAngle);
 
+#ifdef VERBOSE
 	std::cout << "\n";
 	std::cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
 	std::cout << "greatestAngle is: " << greatestAngle << "\n";
 	std::cout << "smallestAngle is: " << smallestAngle << "\n";
 	std::cout << "middleAngle is: " << middleAngle << "\n";
 	std::cout << "goodThinProfiles is: " << goodThinProfiles << "\n";
+#endif
 
 	if(debugImage != NULL)
 	{

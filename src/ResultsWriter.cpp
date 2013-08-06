@@ -187,7 +187,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	delim = "";
 	for(int i = 0; i < 10; i++)
 	{
-		outStream << delim << histMeasure1Count[i] / (double) totalCount << " ";
+		outStream << delim << histMeasure1Count[i] / (double) totalCount * 100 << " ";
 		delim = ",";
 	}
 	outStream << "],\n";
@@ -256,7 +256,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<h3>Best Results</h3>\n";
 
 	outStream << "<table id=\"detectors_right_images\">\n";
-	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td align=\"center\">Preview</td></tr>\n";
 	resultsCount = 0;
 	LetterCheck.clear();
 	for(int i = 0; i < work.size(); i++)
@@ -311,7 +311,7 @@ void ResultsWriter::writeBestResults(
 
 		std::ostringstream pictureLink;
 		pictureLink << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
-		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" << "<img src=\"" << pictureLink.str() << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" <<  work[i].measure1 << "</td><td>" << "<img src=\"" << pictureLink.str() << "\"/>" << "</td></tr>\n";
 
 		LetterCheck.insert(work[i].letter);
 
