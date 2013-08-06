@@ -202,12 +202,12 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	}
 
+#ifdef VERBOSE
 	cout << "\n";
 	cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
 	cout << "greatestAngle is: " << greatestAngle << "\n";
 	cout << "smallestAngle is: " << smallestAngle << "\n";
-
-
+#endif
 	
 	int height = 200*hist[maxI]+20;
 	cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);

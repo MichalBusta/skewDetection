@@ -187,7 +187,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	delim = "";
 	for(int i = 0; i < 10; i++)
 	{
-		outStream << delim << histMeasure1Count[i] / (double) totalCount << " ";
+		outStream << delim << histMeasure1Count[i] / (double) totalCount * 100 << " ";
 		delim = ",";
 	}
 	outStream << "],\n";
