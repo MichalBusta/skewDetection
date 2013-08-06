@@ -1,5 +1,9 @@
 
 
+Longest edge detector: 
+    - vizualizace: chyba zobrazeni poctu dlouhych car v rozsahu (zelena cara)
+    - pridat sloupec do measure: kolik v % zapadne do spravne prihradky histogramu? 
+
 DONE:
 
 Jakub: Left-Right longest edge 

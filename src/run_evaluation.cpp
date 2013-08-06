@@ -33,12 +33,13 @@ int main( int argc, char **argv)
 
 	SkewEvaluator evaluator( argv[2], false, true );
 
-
-	for (double precision = 0.05; precision <= 0.3; precision += 0.05)
+	/** LR Longest Edge */
+	/**/
+	for (double precision = 0.005; precision <= 0.4; precision += 0.005)
 	{
 		std::stringstream ignoreAngleToStr;
 		ignoreAngleToStr << precision;
-		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.018, precision), "L-" + ignoreAngleToStr.str() );
+		evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
 	}
 
 	/**/

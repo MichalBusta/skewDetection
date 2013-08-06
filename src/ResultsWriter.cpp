@@ -41,7 +41,6 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		std::fstream& outStream, int classificator,
 		std::vector<std::string> detectorNames)
 {
-	//TODO implement!!!!
 	MeasuresHist ret;
 	ret.classificator = classificator;
 
@@ -301,7 +300,7 @@ void ResultsWriter::writeBestResults(
 	outStream << "<h3>Best result for letter (worst->best)</h3>\n";
 
 	outStream << "<table id=\"detectors_right_images\">\n";
-	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td align=\"center\">Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Preview</td></tr>\n";
 	int resultsCount = 0;
 	LetterCheck.clear();
 	for(int i = (int) work.size() -1; i >= 0; i--)
@@ -329,6 +328,28 @@ bool sortResultsByBiggestDiff_subvector(const DetectorResults& o1, const Detecto
 bool sortResultsByBiggestDiff(const EvaluationResult& o1, const EvaluationResult& o2)
 {
 	return fabs(o2.angleDiff) < fabs(o1.angleDiff);
+}
+
+void ResultsWriter::writeDetectorMeasuresTable(
+		std::vector<MeasuresHist>& results, std::fstream& outStream,
+		std::vector<std::string> detctorNames)
+{
+	std::sort( results.begin(), results.end(), &MeasuresHist::SortHistMeasure1FirstBin );
+
+	outStream << "<div class=\"DPM\"><h2>" << "Detector Probability Measures" << "</h2>";
+
+	outStream << "<table>\n";
+	outStream << "<tr>";
+	outStream << "<th>Detector</th><th>Prob. H1</th><th>Prob. H2</th><th>Prob. H3</th><th>Prob. H4</th>\n";
+	outStream << "</tr>";
+	for(size_t i = 0; i < results.size(); i++)
+	{
+		outStream << "<tr>";
+		outStream << "<td><a href=\"" <<  detctorNames[results[i].classificator] << "/index.htm\">" <<  detctorNames[results[i].classificator] << "</a></td><td>" << results[i].histMeasure1[0] << "</td><td>" << results[i].histMeasure1[1] <<  "</td><td>" << results[i].histMeasure1[2] << "</td><td>" << results[i].histMeasure1[3] << "</td>";
+		outStream << "</tr>\n";
+	}
+
+	outStream << "</table></div>\n";
 }
 
 void ResultsWriter::writeLettersResults(

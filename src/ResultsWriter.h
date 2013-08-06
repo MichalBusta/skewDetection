@@ -63,6 +63,11 @@ struct MeasuresHist
 	double histMeasure1[10];
 	double histMeasure2[10];
 
+	static inline bool SortHistMeasure1FirstBin(const MeasuresHist& hist1, const MeasuresHist& hist2  )
+	{
+		return hist1.histMeasure1[0] > hist2.histMeasure1[0];
+	}
+
 };
 
 class ResultsWriter {
@@ -81,6 +86,8 @@ public:
 
 	static MeasuresHist writeDetectorMeasure(
 			std::vector<EvaluationResult>& results,	std::fstream& outStream, int classificator, std::vector<std::string> detectorNames);
+
+	static void writeDetectorMeasuresTable(	std::vector<MeasuresHist>& results, std::fstream& outStream, std::vector<std::string> detctorNames );
 
 	static void writeLettersResults(
 			std::vector<EvaluationResult>& results,

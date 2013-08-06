@@ -295,6 +295,7 @@ void SkewEvaluator::writeResults()
 	
 	std::map<int, double> sumCorrectAlphabetPercent;
 	std::map<int, double> sumCorrectLetterPercent;
+	std::vector<MeasuresHist> detectorMeasures;
 
 	if(results.size() == 0)
 	{
@@ -488,7 +489,8 @@ void SkewEvaluator::writeResults()
 		report_detector << "</body>\n</html>";
 		report_detector.close();
 
-		ResultsWriter::writeDetectorMeasure( results, json_data_measure, classMap[i].classIndex, detectorNames );
+		MeasuresHist histValue = ResultsWriter::writeDetectorMeasure( results, json_data_measure, classMap[i].classIndex, detectorNames );
+		detectorMeasures.push_back( histValue );
 		json_data_measure.close();
 	}
 	
@@ -503,6 +505,8 @@ void SkewEvaluator::writeResults()
 	ResultsWriter::writeWorstDetectorResults( results,  -1, 100, report_overview, outputDirectory, detectorNames );
 	ResultsWriter::writeBestResults( bestResults, 300, report_overview, detectorNames );
 	report_overview << "</div>\n";
+
+	ResultsWriter::writeDetectorMeasuresTable(detectorMeasures, report_overview, detectorNames);
 
 	report_overview << "</body>\n</html>";
 
@@ -634,7 +638,7 @@ void SkewEvaluator::writeResults()
 				}
 				alphabetNames << "'" << iterator->first << "'";
 			}
-			alphabet_json << 100*double(iterator->second.correctClassCont)/double(iterator->second.count);
+			alphabet_json << 100 * double(iterator->second.correctClassCont)/double(iterator->second.count);
 		}
 		alphabet_json << "],\n";
 		alphabet_json << "\ttooltip: {\n";
