@@ -77,7 +77,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	binSize = (maxLength - 1)  / 10;
 
 	int index = 0;
-
+	int totalCount = 0;
 
 	for(size_t i = 0; i < results.size(); i++)
 	{
@@ -95,6 +95,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		index = MIN(index, 9);
 		index = MAX(index, 0);
 		noOfEdgesLengthsInRange[index]++;
+		totalCount++;
 
 		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
@@ -186,7 +187,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	delim = "";
 	for(int i = 0; i < 10; i++)
 	{
-		outStream << delim << ret.histMeasure2[i] << " ";
+		outStream << delim << histMeasure1Count[i] / (double) totalCount << " ";
 		delim = ",";
 	}
 	outStream << "],\n";
