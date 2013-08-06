@@ -17,6 +17,8 @@ namespace cmp
 //the horizont threshold
 #define IGNORE_ANGLE 20
 
+#define ANGLE_TOLERANCE M_PI / 60.0
+
 //common functions
 
 /**
@@ -78,6 +80,8 @@ public:
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL ) = 0;
 
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
+
+	static void filterValuesBySimiliarAngle(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange = ANGLE_TOLERANCE);
 
 protected:
 

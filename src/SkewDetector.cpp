@@ -12,6 +12,14 @@
 namespace cmp
 {
 
+void ContourSkewDetector::filterValuesBySimiliarAngle(
+		const std::vector<double>& values, const std::vector<double>& angles,
+		std::vector<double>& valuesOut, std::vector<double>& anglesOut,
+		double angleRange)
+{
+	//TODO implement
+}
+
 SkewDetector::SkewDetector() : lastDetectionProbability(0.5)
 {
 	// TODO Auto-generated constructor stub
@@ -101,5 +109,4 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 }
 
 } /* namespace cmp */
-
 
