@@ -42,7 +42,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double ratio = 1);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.1);
 	virtual ~ThinProfileSkDet();
 
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
@@ -52,9 +52,14 @@ public:
 
 	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
 	int ignoreAngle;
+	//% of profile width 
+	double profilesRange;
 
-	/* pomer nejuzsiho a druheho nejuzsiho profilu */
-	double ratio;
+	double greatestAngle;
+
+	double smallestAngle;
+
+
 };
 
 } /* namespace cmp */

@@ -1,9 +1,9 @@
 /*
- * run_evaluation.cpp
- *
- *  Created on: Jul 10, 2013
- *      Author: Michal Busta
- */
+* run_evaluation.cpp
+*
+*  Created on: Jul 10, 2013
+*      Author: Michal Busta
+*/
 
 #include <iostream>
 
@@ -25,7 +25,7 @@ static void help()
 
 int main( int argc, char **argv)
 {
- 	if( argc < 3)
+	if( argc < 3)
 	{
 		help();
 		return -1;
@@ -34,23 +34,13 @@ int main( int argc, char **argv)
 	SkewEvaluator evaluator( argv[2], false, true );
 
 
-	/** LR Longest Edge */
-	/**/
-	for (double epsilon = 0.014; epsilon <= 0.03; epsilon=epsilon + 0.002)
+	for (double precision = 0.05; precision <= 0.3; precision += 0.05)
 	{
-		std::stringstream epsilonToStr;
-		epsilonToStr << std::fixed << std::setprecision(3) << epsilon;
-		for (double precision = 0.05; precision <= 0.3; precision += 0.05)
-		{
-			std::stringstream ignoreAngleToStr;
-			ignoreAngleToStr << precision;
-			evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, epsilon, precision), "L-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
-
-			//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
-			ignoreAngleToStr.str( "" );
-		}
-		epsilonToStr.str( "" );
+		std::stringstream ignoreAngleToStr;
+		ignoreAngleToStr << precision;
+		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.018, precision), "L-" + ignoreAngleToStr.str() );
 	}
+
 	/**/
 	/**
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
@@ -65,7 +55,7 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
 
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
-	
+
 
 	evaluator.evaluate( argv[1] );
 

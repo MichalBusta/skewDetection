@@ -177,6 +177,24 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                tooltip: {\n";
     outStream << "                    valueSuffix: ''\n";
     outStream << "                }\n";
+
+	outStream << "            }, {\n";
+    outStream << "                name: '% of samples in bin',\n";
+    outStream << "                color: '#FF0000',\n";
+    outStream << "                type: 'column',\n";
+    outStream << "                data: [";
+		
+	delim = "";
+	for(int i = 0; i < 10; i++)
+	{
+		outStream << delim << ret.histMeasure2[i] << " ";
+		delim = ",";
+	}
+	outStream << "],\n";
+
+    outStream << "                tooltip: {\n";
+    outStream << "                    valueSuffix: ''\n";
+    outStream << "                }\n";
     outStream << "            }]\n";
 
     outStream << "categoriesMeasure = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']" << std::endl;

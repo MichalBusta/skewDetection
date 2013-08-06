@@ -17,7 +17,7 @@ using namespace cv;
 namespace cmp {
 
 LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio) : 
-	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio), noOfEdgesInRange(0), edgesLengthInRange(0.0)
+	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio)
 {
 	// TODO Auto-generated constructor stub
 
@@ -31,8 +31,8 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 {
 	std::vector<cv::Point>& outerContour = contours[0];
 
-	noOfEdgesInRange = 0;
-	edgesLengthInRange = 0;
+	probMeasure1 = 0;
+	probMeasure2 = 0;
 
 	double angle = 0, atanAngle = 0;
 	double QactLength=0, maxLength=0;
@@ -84,12 +84,12 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 		{
 			if(actLength >= ( maxLength - edgeRatio * maxLength ) )
 			{
-				edgesLengthInRange += actLength;
-				noOfEdgesInRange += 1;
+				probMeasure2 += actLength;
+				probMeasure1 += 1;
 			}
 		}
 	}
-	edgesLengthInRange = edgesLengthInRange / maxLength;
+	probMeasure2 = probMeasure2 / maxLength;
 
 #ifdef VERBOSE
 	cout << "edgesLengthInRange is: " << edgesLengthInRange << "\n";
