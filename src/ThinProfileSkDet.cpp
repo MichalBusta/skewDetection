@@ -23,7 +23,8 @@ using namespace cv;
 namespace cmp
 {
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double ratio) : ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), ratio(ratio)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange) :
+	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), greatestAngle(0.0), smallestAngle(0.0), profilesRange(profilesRange)
 {
 	// TODO Auto-generated constructor stub
 	hist = new double [int(180/histColWidth)];
@@ -80,6 +81,13 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	//std::vector<ThinPrDetection> detections;
 
+	vector<double>widths;
+	vector<double>angles;
+	vector<Point2d>PointsForWiderProfiles;
+	vector<Point2d>PointsForWiderProfiles2;
+	vector<Point2d>VectorsForWiderProfiles;
+	vector<double>thinProfiles;
+
 	while(rotated_angle < M_PI)
 	{
 		int p_a_1 = p_a + 1;
@@ -134,6 +142,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			ang = atan2(horizont_neg.y, horizont_neg.x);
 		}
 
+
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
 
 		ang = ang + M_PI/2;
@@ -154,30 +163,51 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			det.point2 = tmpPoint2;
 			detections.push_back(det);*/
 
+			widths.push_back(width);
+			angles.push_back(ang);
+			PointsForWiderProfiles.push_back(tmpPoint);
+			PointsForWiderProfiles2.push_back(tmpPoint2);
+			VectorsForWiderProfiles.push_back(tmpVector);	
+
 			if(width <= min_width)
 			{
-				angle_2nd = angle;
-				min_width_2nd = min_width;
-				resVector_2nd = resVector;
-				resPoint_2nd = resPoint;
-				resPoint2_2nd = resPoint2;
-
 				angle = ang;
 				min_width = width;
 				resVector = tmpVector;
 				resPoint = tmpPoint;
 				resPoint2 = tmpPoint2;
 			}
-			else if(width <= min_width_2nd)
-			{
-				angle_2nd = ang;
-				min_width_2nd = width;
-				resVector_2nd = tmpVector;
-				resPoint_2nd = tmpPoint;
-				resPoint2_2nd = tmpPoint2;
-			}
 		}
 	}
+
+	double thinProfilesRange = min_width * ( profilesRange + 1 );
+	probMeasure1 = 0;
+	greatestAngle =  -M_PI;
+	smallestAngle = M_PI;
+
+	for(int c=0;c<widths.size();c++)
+	{
+
+		if( (widths[c] <= thinProfilesRange ))
+		{
+			probMeasure1++;
+
+
+			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
+			if ( angles[c] < smallestAngle) smallestAngle = angles[c];
+		}
+		else widths[c] = 0;
+
+		thinProfiles.push_back(widths[c]);
+
+	}
+
+	cout << "\n";
+	cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
+	cout << "greatestAngle is: " << greatestAngle << "\n";
+	cout << "smallestAngle is: " << smallestAngle << "\n";
+
+
 	
 	int height = 200*hist[maxI]+20;
 	cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
@@ -220,38 +250,32 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		for(int i=0;i<hull.size();i++)
 		{
-			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 0 ), 2);
+			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 255 ), 2);
 		}
-		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 1);
-		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 0, 255 ), 1);
+		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 255, 0 ), 2);
+		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 0 ), 2);
 
-		cv::circle(drawing, resPoint2, 3, Scalar( 0, 0, 255 ), 2);
+		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 
-		if ((min_width/min_width_2nd+ratio) > 1)
+
+		for(int i=0;i<widths.size();i++)
 		{
-			cv::Point2f middleVector, middlePoint;
-			cv::line(drawing, resPoint_2nd-resVector_2nd*100, resPoint_2nd+resVector_2nd*100, Scalar( 0, 255, 255 ), 1);
-			cv::line(drawing, resPoint2_2nd-resVector_2nd*100, resPoint2_2nd+resVector_2nd*100, Scalar( 0, 255, 255 ), 1);
-		
-			if(resVector.y*resVector_2nd.y < 0) resVector_2nd = resVector_2nd*(-1);
+			if( thinProfiles[i] > min_width )
+			{
+				if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
 
-			middleVector.x = ((resVector.x*min_width)+(resVector_2nd.x*min_width_2nd))/(min_width+min_width_2nd);
-			middleVector.y = ((resVector.y*min_width)+(resVector_2nd.y*min_width_2nd))/(min_width+min_width_2nd);
 
-			middlePoint.x = (resPoint2_2nd.x+resPoint2.x)/2;
-			middlePoint.y = (resPoint2_2nd.y+resPoint2.y)/2;
+				cv::Point2f middleVector, middlePoint;
+				cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
+				cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
 
-			cv::line(drawing, middlePoint-middleVector*100, middlePoint+middleVector*100, Scalar( 0, 255, 0 ), 1);
-		
-			cv::circle(drawing, resPoint2_2nd, 3, Scalar( 0, 255, 255 ), 2);
+				
+
+				cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 0, 0, 255 ), 1);
+			}
 		}
 	}
 
-	if ((min_width/min_width_2nd+ratio) > 1)
-	{
-		return ((angle*min_width_2nd)+(angle_2nd*min_width))/(min_width+min_width_2nd);
-	}
-	//return ((angle*min_width_2nd)+(angle_2nd*min_width))/(min_width+min_width_2nd);
 
 	return angle;
 }

@@ -25,10 +25,6 @@ public:
 	double ignoreAngle;
 	/* udava % rozsah pro odhad pravdepodobnosti (kolik dalsich hran je s delkou longestEdge +- edgeRatio * longestEdge ) */
 	double edgeRatio;
-	/* udava pocet hran v definovanem rozmezi - longestEdge +- edgeRatio* longestEdge */
-	int noOfEdgesInRange;
-	/* soucet delek hran v definovanem rozmezi - longestEdge +- edgeRatio* longestEdge */
-	double edgesLengthInRange;
 };
 
 } /* namespace cmp */

@@ -43,6 +43,11 @@ public:
 
 	/** the measure of "how shure" the detector is about the result */
 	double lastDetectionProbability;
+
+	/** probality measure 1 */
+	int probMeasure1;
+	/** probality measure 1 */
+	double probMeasure2;
 };
 
 /**

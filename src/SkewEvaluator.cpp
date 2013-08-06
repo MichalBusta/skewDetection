@@ -167,12 +167,9 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			omp_set_lock(&lock);
 #endif
 			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex) );
-			LongestEdgeSkDetector* le = dynamic_cast<LongestEdgeSkDetector*>(&*detectors[i]);
-			if(le != NULL)
-			{
-				results.back().measure1 = le->noOfEdgesInRange;
-				results.back().measure2 = le->edgesLengthInRange;
-			}
+			
+			results.back().measure1 = detectors[i]->probMeasure1;
+			results.back().measure2 = detectors[i]->probMeasure2;
 
 			if( fabs(angleDiff) <  fabs(bestAngleDiff) )
 			{

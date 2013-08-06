@@ -1,9 +1,9 @@
 /*
- * run_evaluation.cpp
- *
- *  Created on: Jul 10, 2013
- *      Author: Michal Busta
- */
+* run_evaluation.cpp
+*
+*  Created on: Jul 10, 2013
+*      Author: Michal Busta
+*/
 
 #include <iostream>
 
@@ -25,14 +25,13 @@ static void help()
 
 int main( int argc, char **argv)
 {
- 	if( argc < 3)
+	if( argc < 3)
 	{
 		help();
 		return -1;
 	}
 
 	SkewEvaluator evaluator( argv[2], false, true );
-
 
 	/** LR Longest Edge */
 	/**/
@@ -41,9 +40,6 @@ int main( int argc, char **argv)
 		std::stringstream ignoreAngleToStr;
 		ignoreAngleToStr << precision;
 		evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
-
-		//evaluator.registerDetector(new LRLongestEdge(1, epsilon, ignoreAngle, false), "RightLongestEdge-NONE-"+epsilonToStr.str()+"-"+ignoreAngleToStr.str() );
-		ignoreAngleToStr.str( "" );
 	}
 
 	/**/
@@ -60,7 +56,7 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
 
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
-	
+
 
 	evaluator.evaluate( argv[1] );
 
