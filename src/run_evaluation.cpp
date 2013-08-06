@@ -39,7 +39,7 @@ int main( int argc, char **argv)
 	{
 		std::stringstream ignoreAngleToStr;
 		ignoreAngleToStr << precision;
-		evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
+		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
 	}
 
 	/**/
