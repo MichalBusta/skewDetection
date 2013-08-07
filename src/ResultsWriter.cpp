@@ -27,15 +27,6 @@ ResultsWriter::~ResultsWriter() {
 	// TODO Auto-generated destructor stub
 }
 
-inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName, int classificator)
-{
-	std::ostringstream picture;
-	if (classificator<0) picture << detectorName << "/";
-	picture << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
-	std::string pictureLink = picture.str();
-	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << work.measure1 << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
-}
-
 
 MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& results,
 		std::fstream& outStream, int classificator,
@@ -49,17 +40,17 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	
 	//histMeasure1 aka number of edges in range
 	int histMeasure1Count[10]; 
+	int histMeasure2Count[10];
+	double totalEdgesLengthInRange[10];
+
 	for(int i = 0; i < 10; i++)
 	{
 		ret.histMeasure1[i] = 0;
+		ret.histMeasure2[i] = 0;
 		histMeasure1Count[i] = 0;
+		histMeasure2Count[i] = 0;
+		totalEdgesLengthInRange[i] = 0;
 	}
-
-	for(int i = 0; i < 10; i++) ret.histMeasure2[i] = 0;
-	double totalEdgesLengthInRange[10];
-	for(int i = 0; i < 10; i++) totalEdgesLengthInRange[i] = 0;
-	double noOfEdgesLengthsInRange[10]; 
-	for(int i = 0; i < 10; i++) noOfEdgesLengthsInRange[i] = 0;
 
 	double maxLength = 0;
 
@@ -91,10 +82,9 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		histMeasure1Count[boxNo]++;
 
 		index = ( (int) ((results[i].measure2 - 1) / binSize) );
-
 		index = MIN(index, 9);
 		index = MAX(index, 0);
-		noOfEdgesLengthsInRange[index]++;
+		histMeasure2Count[index]++;
 		totalCount++;
 
 		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
@@ -105,7 +95,6 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	}
 
 	double triesRatio = 0;
-
 	for(int t = 0; t < 10; t++)
 	{
 		if(histMeasure1Count[t] > 0)
@@ -116,22 +105,14 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 			ret.histMeasure1[t] = 0;
 	}
 
-
-	for(size_t i = 0; i < results.size(); i++)
-	{
-		if(results[i].classificator != classificator)
-			continue;
-	}
-
-
 	double averageLengthRatio = 0;
 	double averageLengthOfEdgesInRange[10];
 	for(int i = 0; i < 10; i++) averageLengthOfEdgesInRange[i] = 0;
 
 	for(int i = 0; i < 10; i++)
 	{
-		if(noOfEdgesLengthsInRange[i] > 0)
-			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / noOfEdgesLengthsInRange[i] * 100;
+		if(histMeasure2Count[i] > 0)
+			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / histMeasure2Count[i] * 100;
 
 		ret.histMeasure2[i] = averageLengthOfEdgesInRange[i];
 
@@ -144,7 +125,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	//example:
 
 	outStream << "seriesMeasure = [{ \n";
-	outStream << "             name: 'Number of Edges in Range', \n";
+	outStream << "             name: 'Measure1', \n";
     outStream << "             color: '#4572A7',\n";
     outStream << "             type: 'column',\n";
 	outStream << "             data: [";
@@ -161,7 +142,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                 valueSuffix: ' %'\n";
     outStream << "             }\n";
     outStream << "            }, {\n";
-    outStream << "                name: 'Average Length Of Edges In Range',\n";
+    outStream << "                name: 'Measure2',\n";
     outStream << "                color: '#89A54E',\n";
     outStream << "                type: 'column',\n";
     outStream << "                data: [";
@@ -179,7 +160,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                }\n";
 
 	outStream << "            }, {\n";
-    outStream << "                name: '% of samples in bin',\n";
+    outStream << "                name: 'Measure1: % of samples in bin ',\n";
     outStream << "                color: '#FF0000',\n";
     outStream << "                type: 'column',\n";
     outStream << "                data: [";
@@ -195,11 +176,38 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                tooltip: {\n";
     outStream << "                    valueSuffix: ''\n";
     outStream << "                }\n";
+    outStream << "            }, {\n";
+    outStream << "                name: 'Measure2: % of samples in bin ',\n";
+    outStream << "                color: '#FFFF00',\n";
+    outStream << "                type: 'column',\n";
+    outStream << "                data: [";
+
+    delim = "";
+    for(int i = 0; i < 10; i++)
+    {
+    	outStream << delim << histMeasure2Count[i] / (double) totalCount * 100 << " ";
+    	delim = ",";
+    }
+    outStream << "],\n";
+
+    outStream << "                tooltip: {\n";
+    outStream << "                    valueSuffix: ''\n";
+    outStream << "                }\n";
+
     outStream << "            }]\n";
 
     outStream << "categoriesMeasure = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']" << std::endl;
 
 	return ret;
+}
+
+inline static void writeResultsRow(std::fstream& outStream, std::string& outputDir, EvaluationResult& work, std::string& detectorName, int classificator)
+{
+	std::ostringstream picture;
+	if (classificator<0) picture << detectorName << "/";
+	picture << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
+	std::string pictureLink = picture.str();
+	outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << work.measure1 << "</td><td>" << work.measure2 << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 }
 
 /**
@@ -234,7 +242,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<h3>Worst Results</h3>\n";
 	//nejhorsi vsledky
 	outStream << "<table id=\"detectors_wrong_images\">\n";
-	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Measure2</td><td>Preview</td></tr>\n";
 	int resultsCount = 0;
 	for(int i = (int) work.size() -1; i >= 0; i--)
 	{
@@ -256,7 +264,7 @@ void ResultsWriter::writeWorstDetectorResults(
 	outStream << "<h3>Best Results</h3>\n";
 
 	outStream << "<table id=\"detectors_right_images\">\n";
-	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td align=\"center\">Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Measure2</td><td align=\"center\">Preview</td></tr>\n";
 	resultsCount = 0;
 	LetterCheck.clear();
 	for(int i = 0; i < work.size(); i++)
@@ -341,12 +349,13 @@ void ResultsWriter::writeDetectorMeasuresTable(
 
 	outStream << "<table>\n";
 	outStream << "<tr>";
-	outStream << "<th>Detector</th><th>Prob. H1</th><th>Prob. H2</th><th>Prob. H3</th><th>Prob. H4</th>\n";
+	outStream << "<th>Detector</th><th>Prob. H1</th><th>Prob. H2</th><th>Prob. H3</th><th>Prob. H4</th><th>Prob. M1</th><th>Prob. M2</th>\n";
 	outStream << "</tr>";
 	for(size_t i = 0; i < results.size(); i++)
 	{
 		outStream << "<tr>";
 		outStream << "<td><a href=\"" <<  detctorNames[results[i].classificator] << "/index.htm\">" <<  detctorNames[results[i].classificator] << "</a></td><td>" << results[i].histMeasure1[0] << "</td><td>" << results[i].histMeasure1[1] <<  "</td><td>" << results[i].histMeasure1[2] << "</td><td>" << results[i].histMeasure1[3] << "</td>";
+		outStream << "<td>" << results[i].histMeasure2[0] << "</td><td>" << results[i].histMeasure2[1] << "</td>";
 		outStream << "</tr>\n";
 	}
 

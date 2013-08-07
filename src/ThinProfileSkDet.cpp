@@ -82,8 +82,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	vector<Point2d>VectorsForWiderProfiles;
 	vector<double>thinProfiles;
 
-	vector<double>middleAngles;
-
 	while(rotated_angle < M_PI)
 	{
 		int p_a_1 = p_a + 1;
@@ -175,30 +173,28 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	double thinProfilesRange = min_width * ( profilesRange + 1 );
 	probMeasure1 = 0;
+	probMeasure2 = 0;
 	greatestAngle =  -M_PI;
 	smallestAngle = M_PI;
 
 
 	//////////////////////////////////
-	vector<double>widths2;
-	widths2 = widths;
+	vector<double> widths2 = widths;
 	int goodThinProfiles = 0;
 
 	for(int c=0;c<widths.size();c++)
 	{
 		for(int i=0;i<widths.size();i++)
 		{
-
 			if( (widths[c] <= thinProfilesRange ) && ( widths2[c] != 0 ) && ( c != i) && ( fabs (angles[c] - angles[i]) < M_PI/60 ) )
 			{
-
 				widths2[i] = 0;
-
-				
 			}
 		}
 	}
-	for(int c=0;c<widths.size();c++) if( widths2[c] != 0 && (widths[c] <= thinProfilesRange ) ) probMeasure2++;
+	for(int c=0;c<widths.size();c++)
+		if( widths2[c] != 0 && (widths[c] <= thinProfilesRange ) )
+			probMeasure2++;
 
 	//////////////////////////////////
 
@@ -209,8 +205,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if( (widths[c] <= thinProfilesRange ))
 		{
 			probMeasure1++;
-
-
 			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
 			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
 		}
@@ -221,7 +215,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	}
 
 	middleAngle = ( greatestAngle + smallestAngle ) / 2;
-	middleAngles.push_back(middleAngle);
 
 #ifdef VERBOSE
 	std::cout << "\n";
@@ -257,8 +250,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			if( thinProfiles[i] > min_width )
 			{
 				if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
-
-
 				cv::Point2f middleVector, middlePoint;
 				cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
 				cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
