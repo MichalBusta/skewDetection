@@ -190,14 +190,18 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	for(int c=0;c<widths.size();c++)
 	{
-		if( widths[c] <= thinProfilesRange ) thinProfileCondition = true;
-		else thinProfileCondition = true;
+		if( widths[c] <= thinProfilesRange )
+			thinProfileCondition = true;
+		else
+			thinProfileCondition = false;
 		thinProfileConditions.push_back(thinProfileCondition);
 	}
 
 	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions);
 
-	for(int c=0;c<widths.size();c++) if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) ) probMeasure2++;
+	for(int c=0;c<widths.size();c++)
+		if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) )
+			probMeasure2++;
 
 	//////////////////////////////////
 

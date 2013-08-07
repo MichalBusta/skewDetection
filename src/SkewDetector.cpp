@@ -12,16 +12,18 @@
 namespace cmp
 {
 
-void ContourSkewDetector::filterValuesBySimiliarAngle(const std::vector<double>& values, const std::vector<double>& angles,std::vector<double>& valuesOut, std::vector<double>& anglesOut,
+void ContourSkewDetector::filterValuesBySimiliarAngle(
+		const std::vector<double>& values, const std::vector<double>& angles,
+		std::vector<double>& valuesOut, std::vector<double>& anglesOut,
 		std::vector<bool>condition, double angleRange)
 {
 	for(int c=0;c<values.size();c++)
 	{
 		if(condition[c] == true)
 		{
-			for(int i=1;i<values.size();i++)
+			for(int i = (c + 1); i < values.size() ; i++)
 			{
-				if( ( valuesOut[c] != 0 ) && ( c != i) && ( fabs (angles[c] - angles[i]) < angleRange ) )
+				if( ( valuesOut[c] != 0 ) && ( fabs (angles[c] - angles[i]) < angleRange ) )
 				{	
 					valuesOut[i] = 0;
 					anglesOut[i] = 0;

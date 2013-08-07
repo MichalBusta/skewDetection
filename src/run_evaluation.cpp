@@ -33,6 +33,7 @@ int main( int argc, char **argv)
 
 	SkewEvaluator evaluator( argv[2], false, true );
 
+	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.005, false), "LF-0.005" );
 	/** LR Longest Edge */
 	/**/
 	for (double precision = 0.005; precision <= 0.4; precision += 0.005)
