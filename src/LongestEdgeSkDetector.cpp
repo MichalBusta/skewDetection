@@ -123,10 +123,10 @@ namespace cmp {
 
 		probMeasure2 = probMeasure2 / maxLength;
 
-		cout << "noOfEdgesInRange is: " << probMeasure1 << "\n";
+
 #ifdef VERBOSE
 		cout << "edgesLengthInRange is: " << probMeasure2 << "\n";
-
+		cout << "noOfEdgesInRange is: " << probMeasure1 << "\n";
 #endif
 
 		/*#ifdef VERBOSE
