@@ -55,6 +55,8 @@ public:
 
 	double middleAngle;
 
+	bool returnMiddleAngle;
+	
 
 };
 
