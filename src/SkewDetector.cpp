@@ -17,19 +17,31 @@ void ContourSkewDetector::filterValuesBySimiliarAngle(
 		std::vector<double>& valuesOut, std::vector<double>& anglesOut,
 		std::vector<bool>condition, double angleRange)
 {
+	anglesOut = angles;
+	valuesOut = values;
+
 	for(int c=0;c<values.size();c++)
 	{
 		if(condition[c] == true)
 		{
+			int greatestAngle = -M_PI;
+			int smallestAngle = M_PI;
+
+			double anglesSum = angles[c];
+			int anglesCount = 1;
+
 			for(int i = (c + 1); i < values.size() ; i++)
 			{
 				if( ( valuesOut[c] != 0 ) && ( fabs (angles[c] - angles[i]) < angleRange ) )
 				{	
+					anglesSum += angles[i];
+					anglesCount++;
 					valuesOut[i] = 0;
 					anglesOut[i] = 0;
 				}
 				else anglesOut[i] = angles[i];
 			}
+			anglesOut[c] = anglesSum / anglesCount;
 		}
 	}
 }
