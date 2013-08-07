@@ -104,6 +104,7 @@ namespace cmp {
 		/////////////////////////////////////////
 		actAngles2 = actAngles;
 		actLenghts2 = actLenghts;
+		double middleAngle;
 
 		vector<bool>longestEdgeConditions;
 		bool longestEdgeCondition;
@@ -115,7 +116,7 @@ namespace cmp {
 			longestEdgeConditions.push_back(longestEdgeCondition);
 		}
 
-		filterValuesBySimiliarAngle(actLenghts,actAngles,actLenghts2,actAngles2, longestEdgeConditions);
+		filterValuesBySimiliarAngle(actLenghts,actAngles,actLenghts2,actAngles2, longestEdgeConditions, middleAngle);
 
 		for(int c=0;c<outerContour.size();c++) if( ( actLenghts2[c] != 0 ) && (actLenghts[c] >= ( maxLength - edgeRatio * maxLength ) ) ) probMeasure1++;
 		///////////////////////////////////////////////

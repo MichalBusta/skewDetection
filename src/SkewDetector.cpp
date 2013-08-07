@@ -13,8 +13,10 @@ namespace cmp
 {
 
 void ContourSkewDetector::filterValuesBySimiliarAngle(const std::vector<double>& values, const std::vector<double>& angles,std::vector<double>& valuesOut, std::vector<double>& anglesOut,
-		std::vector<bool>condition, double angleRange)
+		std::vector<bool>condition, double middleAngle, double angleRange)
 {
+	int greatestAngle = -M_PI;
+	int smallestAngle = M_PI;
 	for(int c=0;c<values.size();c++)
 	{
 		if(condition[c] == true)
@@ -25,11 +27,15 @@ void ContourSkewDetector::filterValuesBySimiliarAngle(const std::vector<double>&
 				{	
 					valuesOut[i] = 0;
 					anglesOut[i] = 0;
+			if( angles[c] > greatestAngle ) greatestAngle = anglesOut[i];
+			if( angles[c] < smallestAngle ) smallestAngle = anglesOut[i];
 				}
 				else anglesOut[i] = angles[i];
 			}
 		}
 	}
+
+	middleAngle = ( greatestAngle + smallestAngle ) / 2;
 }
 
 SkewDetector::SkewDetector() : lastDetectionProbability(0.5), probMeasure1(0), probMeasure2(0)

@@ -86,7 +86,7 @@ public:
 
 	static void filterValuesBySimiliarAngle
 		(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut,
-		std::vector<bool>condition, double angleRange = ANGLE_TOLERANCE);
+		std::vector<bool>condition, double middleAngle, double angleRange = ANGLE_TOLERANCE);
 
 protected:
 

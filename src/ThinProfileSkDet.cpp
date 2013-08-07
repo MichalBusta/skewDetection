@@ -195,7 +195,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		thinProfileConditions.push_back(thinProfileCondition);
 	}
 
-	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions);
+	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions, middleAngle);
 
 	for(int c=0;c<widths.size();c++) if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) ) probMeasure2++;
 
@@ -208,18 +208,12 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if( (widths[c] <= thinProfilesRange ))
 		{
 			probMeasure1++;
-
-
-			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
-			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
 		}
 		else widths[c] = 0;
 
 		thinProfiles.push_back(widths[c]);
 
 	}
-
-	middleAngle = ( greatestAngle + smallestAngle ) / 2;
 
 #ifdef VERBOSE
 	std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
