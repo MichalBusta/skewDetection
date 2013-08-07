@@ -42,7 +42,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.1);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.1, bool returnMiddleAngle = true);
 	virtual ~ThinProfileSkDet();
 
 	virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL );
@@ -55,6 +55,8 @@ public:
 
 	double middleAngle;
 
+	bool returnMiddleAngle;
+	
 
 };
 

@@ -10,6 +10,9 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 namespace cmp
 {
@@ -49,7 +52,7 @@ public:
 	/** probality measure 1 */
 	int probMeasure1;
 	/** probality measure 2 */
-	double probMeasure2;
+	int probMeasure2;
 };
 
 /**
@@ -81,7 +84,9 @@ public:
 
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 
-	static void filterValuesBySimiliarAngle(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange = ANGLE_TOLERANCE);
+	static void filterValuesBySimiliarAngle
+		(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut,
+		std::vector<bool>condition, double angleRange = ANGLE_TOLERANCE);
 
 protected:
 

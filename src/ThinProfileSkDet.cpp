@@ -23,8 +23,9 @@ using namespace cv;
 namespace cmp
 {
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange) :
-	ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), middleAngle(middleAngle)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool returnMiddleAngle) :
+				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
+				middleAngle(middleAngle), returnMiddleAngle(returnMiddleAngle)
 {
 
 }
@@ -35,7 +36,7 @@ ThinProfileSkDet::~ThinProfileSkDet()
 }
 
 double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
-{	
+{
 
 	if (contours[0].size() < 3) return 0;
 	//cmp::filterContour(contours[0]);
@@ -64,7 +65,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	double rotated_angle = 0;
 	double min_width = std::numeric_limits<double>::infinity();
-	
+
 	Point2d horizont_poz(1,0);
 	Point2d horizont_neg(-1,0);
 	double angle = 0;
@@ -90,7 +91,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if (p_b_1 >= hull.size()) p_b_1 = 0;
 		Point2d edge_a(hull[p_a_1].x - hull[p_a].x, hull[p_a_1].y - hull[p_a].y);
 		Point2d edge_b(hull[p_b_1].x - hull[p_b].x, hull[p_b_1].y - hull[p_b].y);
-		
+
 		double angleACos = (edge_a.x*horizont_poz.x + edge_a.y*horizont_poz.y)/(sqrt(edge_a.x*edge_a.x+edge_a.y*edge_a.y)*sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y));
 		double angleBCos = (edge_b.x*horizont_neg.x + edge_b.y*horizont_neg.y)/(sqrt(edge_b.x*edge_b.x+edge_b.y*edge_b.y)*sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y));
 
@@ -105,7 +106,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		double y1 = horizont_poz.y;
 		double x2 = horizont_neg.x;
 		double y2 = horizont_neg.y;
-		
+
 		horizont_poz.x = x1*cos(min(angle_a, angle_b))-y1*sin(min(angle_a, angle_b));
 		horizont_poz.y = x1*sin(min(angle_a, angle_b))+y1*cos(min(angle_a, angle_b));
 
@@ -147,18 +148,18 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
 		{
 			/*ThinPrDetection det;
-			det.width = width;
-			det.angle = ang;
-			det.vector = tmpVector;
-			det.point1 = tmpPoint;
-			det.point2 = tmpPoint2;
-			detections.push_back(det);*/
+				det.width = width;
+				det.angle = ang;
+				det.vector = tmpVector;
+				det.point1 = tmpPoint;
+				det.point2 = tmpPoint2;
+				detections.push_back(det);*/
 
 			widths.push_back(width);
 			angles.push_back(ang);
 			PointsForWiderProfiles.push_back(tmpPoint);
 			PointsForWiderProfiles2.push_back(tmpPoint2);
-			VectorsForWiderProfiles.push_back(tmpVector);	
+			VectorsForWiderProfiles.push_back(tmpVector);
 
 			if(width <= min_width)
 			{
@@ -179,22 +180,24 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 
 	//////////////////////////////////
-	vector<double> widths2 = widths;
-	int goodThinProfiles = 0;
+	vector<double>widths2;
+	vector<double>angles2;
+	widths2 = widths;
+	angles2 = angles;
+
+	vector<bool>thinProfileConditions;
+	bool thinProfileCondition;
 
 	for(int c=0;c<widths.size();c++)
 	{
-		for(int i=0;i<widths.size();i++)
-		{
-			if( (widths[c] <= thinProfilesRange ) && ( widths2[c] != 0 ) && ( c != i) && ( fabs (angles[c] - angles[i]) < M_PI/60 ) )
-			{
-				widths2[i] = 0;
-			}
-		}
+		if( widths[c] <= thinProfilesRange ) thinProfileCondition = true;
+		else thinProfileCondition = true;
+		thinProfileConditions.push_back(thinProfileCondition);
 	}
-	for(int c=0;c<widths.size();c++)
-		if( widths2[c] != 0 && (widths[c] <= thinProfilesRange ) )
-			probMeasure2++;
+
+	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions);
+
+	for(int c=0;c<widths.size();c++) if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) ) probMeasure2++;
 
 	//////////////////////////////////
 
@@ -205,6 +208,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if( (widths[c] <= thinProfilesRange ))
 		{
 			probMeasure1++;
+
+
 			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
 			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
 		}
@@ -217,22 +222,26 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	middleAngle = ( greatestAngle + smallestAngle ) / 2;
 
 #ifdef VERBOSE
+	std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
 	std::cout << "\n";
 	std::cout << "noOfThinProfilesInRange is: " << probMeasure1 << "\n";
 	std::cout << "greatestAngle is: " << greatestAngle << "\n";
 	std::cout << "smallestAngle is: " << smallestAngle << "\n";
 	std::cout << "middleAngle is: " << middleAngle << "\n";
-	std::cout << "goodThinProfiles is: " << goodThinProfiles << "\n";
+
 #endif
+
+
+
 
 	if(debugImage != NULL)
 	{
 		Mat& drawing =  *debugImage;
 		drawing =  Mat::zeros( mask.size(), CV_8UC3 );
-		
+
 		Scalar color = Scalar( 255, 255, 255 );
 		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
-		
+
 		//cmp::filterContour(contours[0]);
 
 		for(int i=0;i<hull.size();i++)
@@ -250,6 +259,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			if( thinProfiles[i] > min_width )
 			{
 				if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
+
+
 				cv::Point2f middleVector, middlePoint;
 				cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
 				cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
@@ -258,6 +269,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		}
 	}
 
+	if( returnMiddleAngle == true) angle = middleAngle;
 
 	return angle;
 }

@@ -12,12 +12,24 @@
 namespace cmp
 {
 
-void ContourSkewDetector::filterValuesBySimiliarAngle(
-		const std::vector<double>& values, const std::vector<double>& angles,
-		std::vector<double>& valuesOut, std::vector<double>& anglesOut,
-		double angleRange)
+void ContourSkewDetector::filterValuesBySimiliarAngle(const std::vector<double>& values, const std::vector<double>& angles,std::vector<double>& valuesOut, std::vector<double>& anglesOut,
+		std::vector<bool>condition, double angleRange)
 {
-	//TODO implement
+	for(int c=0;c<values.size();c++)
+	{
+		if(condition[c] == true)
+		{
+			for(int i=1;i<values.size();i++)
+			{
+				if( ( valuesOut[c] != 0 ) && ( c != i) && ( fabs (angles[c] - angles[i]) < angleRange ) )
+				{	
+					valuesOut[i] = 0;
+					anglesOut[i] = 0;
+				}
+				else anglesOut[i] = angles[i];
+			}
+		}
+	}
 }
 
 SkewDetector::SkewDetector() : lastDetectionProbability(0.5), probMeasure1(0), probMeasure2(0)
