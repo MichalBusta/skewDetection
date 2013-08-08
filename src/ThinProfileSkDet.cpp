@@ -180,8 +180,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 
 	//////////////////////////////////
-	vector<double>widths2;
-	vector<double>angles2;
+	vector<double> widths2;
+	vector<double> angles2;
 
 	vector<bool>thinProfileConditions;
 	bool thinProfileCondition;
@@ -210,12 +210,16 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		if( (widths[c] <= thinProfilesRange ))
 		{
 			probMeasure1++;
+			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
+			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
 		}
 		else widths[c] = 0;
 
 		thinProfiles.push_back(widths[c]);
 
 	}
+
+	middleAngle = ( greatestAngle + smallestAngle ) / 2;
 
 #ifdef VERBOSE
 	std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
