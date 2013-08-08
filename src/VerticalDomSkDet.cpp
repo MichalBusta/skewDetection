@@ -45,8 +45,8 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		cv::Point pt = *it;
 		cv::Point vector = pt - prev;
 		double angle = atan2(double (vector.y), double (vector.x))*180/M_PI;
-		if (angle < 0) angle = angle + 180;
-		if (angle >= 180) angle = angle - 180;
+		if (angle < 0) angle += 180;
+		if (angle >= 180) angle -= 180;
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
 		int ang = angle/histColWidth;
@@ -56,8 +56,8 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
 		{
 			int j = i;
-			if (j<0) j = j + int(180/histColWidth);
-			if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+			if (j<0) j += int(180/histColWidth);
+			if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
 
 			hist[j] = hist[j] + length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-angle)*(i*histColWidth+histColWidth/2-angle)/(2*sigma*sigma));
 		}
