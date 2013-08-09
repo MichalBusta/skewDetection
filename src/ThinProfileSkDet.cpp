@@ -25,7 +25,7 @@ namespace cmp
 
 ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool returnMiddleAngle) :
 				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
-				middleAngle(middleAngle), returnMiddleAngle(returnMiddleAngle)
+				returnMiddleAngle(returnMiddleAngle)
 {
 	probabilities.push_back(0.48);
 	probabilities.push_back(0.79);
@@ -75,8 +75,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	Point2d horizont_neg(-1,0);
 	double angle = 0;
 	Point2d resVector, resPoint, resPoint2;
-
-	//std::vector<ThinPrDetection> detections;
 
 	vector<double>widths;
 	vector<double>angles;
@@ -174,6 +172,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	probMeasure1 = 0;
 	probMeasure2 = 0;
 
+	double greatestAngle = -M_PI;
+	double smallestAngle = M_PI;
 
 	// filtering thin profiles that are closer than ANGLE_TOLERANCE to other profile
 	vector<double>widths2;
@@ -190,7 +190,11 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	// counting all profiles in thinProfilesRange
 	for(int c=0;c<widths.size();c++)
 		if( (widths[c] <= thinProfilesRange ))
+		{
 			probMeasure1++;
+			greatestAngle = MAX(greatestAngle, angles[c]);
+			smallestAngle = MIN(smallestAngle, angles[c]);
+		}
 
 	
 
@@ -247,7 +251,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	index = MAX(index, this->probabilities.size() - 1);
 	lastDetectionProbability = probabilities[index];
 
-	if( returnMiddleAngle == true) angle = middleAngle;
+	if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
 
 	return angle;
 }
