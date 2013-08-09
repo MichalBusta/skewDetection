@@ -1,9 +1,9 @@
 /*
-* VerticalDomSkDet.cpp
-*
-*  Created on: Jul 12, 2013
-*      Author: cidlijak
-*/
+ * VerticalDomSkDet.cpp
+ *
+ *  Created on: Jul 12, 2013
+ *      Author: cidlijak
+ */
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -22,103 +22,104 @@ using namespace cv;
 namespace cmp{
 
 
-	VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle, int correctAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle) {
-		// TODO Auto-generated constructor stub
+VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int histColWidth, int sigma, int range, int ignoreAngle, int correctAngle): ContourSkewDetector(approximatioMethod, epsilon), histColWidth(histColWidth), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle) {
+	// TODO Auto-generated constructor stub
 
-		hist = new double [int(180/histColWidth)];
-	}
+	hist = new double [int(180/histColWidth)];
+}
 
-	VerticalDomSkDet::~VerticalDomSkDet() {
-		delete [] hist;
-	}
+VerticalDomSkDet::~VerticalDomSkDet() {
+	delete [] hist;
+}
 
-	double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
+double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
+{
+	std::vector<cv::Point> contour = contours[0];
+
+	memset (hist, 0, int(180/histColWidth) * sizeof(double));
+
+	cv::Point prev = contour.back();
+
+	for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
 	{
-		std::vector<cv::Point> contour = contours[0];
+		cv::Point pt = *it;
+		cv::Point vector = pt - prev;
+		double angle = atan2(double (vector.y), double (vector.x))*180/M_PI;
+		if (angle < 0) angle += 180;
+		if (angle >= 180) angle -= 180;
+		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
-		memset (hist, 0, int(180/histColWidth) * sizeof(double));
+		int ang = angle/histColWidth;
+		//hist[ang] = hist[ang] + length;
+		//if (hist[ang] > hist[highestCol]) highestCol = ang;
 
-		cv::Point prev = contour.back();
-
-		for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
-		{
-			cv::Point pt = *it;
-			cv::Point vector = pt - prev;
-			double angle = atan2(double (vector.y), double (vector.x))*180/M_PI;
-			if (angle < 0) angle += 180;
-			if (angle >= 180) angle -= 180;
-			double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
-
-			int ang = angle/histColWidth;
-			//hist[ang] = hist[ang] + length;
-			//if (hist[ang] > hist[highestCol]) highestCol = ang;
-
-			for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
-			{
-				int j = i;
-				if (j<0) j += int(180/histColWidth);
-				if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
-
-				hist[j] = hist[j] + length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-angle)*(i*histColWidth+histColWidth/2-angle)/(2*sigma*sigma));
-			}
-			prev = pt;
-			it++;
-		}
-
-		int height = 300;
-
-		cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
-		int maxI = ceil(double(ignoreAngle/histColWidth));
-
-		double totalLen = 0.0;
-		double resLen = 0.0;
-
-		for(int i=0;i<int(180/histColWidth);i++)
-		{
-			int rectH = 20*hist[i];
-			cv::rectangle(histogram, Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), Scalar(0,0,255), CV_FILLED);
-			if (i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth)
-			{
-				if (hist[i] > hist[maxI]) maxI = i;
-				totalLen += hist[i];
-			}
-		}
-		for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+		for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
 		{
 			int j = i;
-			if (j<0) j = j + int(180/histColWidth);
-			if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+			if (j<0) j += int(180/histColWidth);
+			if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
 
-			resLen += hist[j];
+			hist[j] = hist[j] + length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-angle)*(i*histColWidth+histColWidth/2-angle)/(2*sigma*sigma));
 		}
-		cv::imshow("Histogram", histogram);
+		prev = pt;
+		it++;
+	}
 
-		this->lastDetectionProbability = resLen/totalLen;
+	int height = 300;
 
-		if(debugImage != NULL)
+	cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
+	int maxI = ceil(double(ignoreAngle/histColWidth));
+
+	double totalLen = 0.0;
+	double resLen = 0.0;
+
+	for(int i=0;i<int(180/histColWidth);i++)
+	{
+		int rectH = 20*hist[i];
+		cv::rectangle(histogram, Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), Scalar(0,0,255), CV_FILLED);
+		if (i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth)
 		{
-			Mat& drawing =  *debugImage;
-			drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+			if (hist[i] > hist[maxI]) maxI = i;
+			totalLen += hist[i];
+		}
+	}
+	for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+	{
+		int j = i;
+		if (j<0) j = j + int(180/histColWidth);
+		if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
 
-			Scalar color = Scalar( 255, 255, 255 );
-			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+		resLen += hist[j];
+	}
+	cv::imshow("Histogram", histogram);
 
-			for (size_t i = 0; i < contour.size(); i++)
+	this->lastDetectionProbability = resLen/totalLen;
+	this->probMeasure2 = this->lastDetectionProbability;
+
+	if(debugImage != NULL)
+	{
+		Mat& drawing =  *debugImage;
+		drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+
+		Scalar color = Scalar( 255, 255, 255 );
+		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+
+		for (size_t i = 0; i < contour.size(); i++)
+		{
+			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
+
+			cv::circle(drawing, contour[i], 2, Scalar( 0, 0, 255 ), 1);
+
+			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
+			if (ang < 0) ang = ang + M_PI;
+			if (abs(ang-(maxI*histColWidth+histColWidth/2)*M_PI/180) < correctAngle*M_PI/180)
 			{
-				size_t i2 = (i==contour.size()-1) ? 0 : i+1;
-
-				cv::circle(drawing, contour[i], 2, Scalar( 0, 0, 255 ), 1);
-
-				double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
-				if (ang < 0) ang = ang + M_PI;
-				if (abs(ang-(maxI*histColWidth+histColWidth/2)*M_PI/180) < correctAngle*M_PI/180)
-				{
-					cv::line(drawing, contour[i], contour[i2], Scalar( 0, 255, 0 ), 1);
-				}
+				cv::line(drawing, contour[i], contour[i2], Scalar( 0, 255, 0 ), 1);
 			}
 		}
-
-		return (maxI*histColWidth+histColWidth/2)*M_PI/180-M_PI/2;
 	}
+
+	return (maxI*histColWidth+histColWidth/2)*M_PI/180-M_PI/2;
+}
 
 }//namespace cmp

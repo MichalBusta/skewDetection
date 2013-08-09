@@ -46,13 +46,16 @@ int main( int argc, char **argv)
 		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, precision), "L-"+ignoreAngleToStr.str() );
 	}/*/
 
-	/**/
+	/*
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
 	evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_NONE, 0, 0.1, false), "LeftHullLongest" );
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdgeSkDetector" );
+	*/
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
+
+	/*
 	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
 	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
 

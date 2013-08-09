@@ -52,7 +52,7 @@ namespace cmp
 		/** probality measure 1 */
 		int probMeasure1;
 		/** probality measure 2 */
-		int probMeasure2;
+		double probMeasure2;
 	};
 
 	/**
@@ -86,7 +86,7 @@ namespace cmp
 
 		// function to filter things that are closer than ANGLE_TOLERANCE to other thing (e.g. thin profiles)
 		static void filterValuesBySimiliarAngle
-			(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange = ANGLE_TOLERANCE);
+			(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange = ANGLE_TOLERANCE * 2);
 
 	protected:
 
