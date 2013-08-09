@@ -40,9 +40,9 @@ int main( int argc, char **argv)
 	/**
 	for (double precision = 0.005; precision <= 0.4; precision += 0.005)
 	{
-		std::stringstream ignoreAngleToStr;
-		ignoreAngleToStr << precision;
-		evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
+	std::stringstream ignoreAngleToStr;
+	ignoreAngleToStr << precision;
+	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
 	}
 
 	/**/

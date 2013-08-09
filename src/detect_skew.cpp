@@ -1,9 +1,9 @@
 /*
- * detect_skew.cpp
- *
- *  Created on: Jul 11, 2013
- *      Author: Michal Busta
- */
+* detect_skew.cpp
+*
+*  Created on: Jul 11, 2013
+*      Author: Michal Busta
+*/
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -71,7 +71,7 @@ int main( int argc, char **argv)
 		cv::Mat imgRec = ~img;
 		cv::Mat debugImage;
 		double skew = detectors[detector]->detectSkew( imgRec,  0, &debugImage );
-		
+
 		std::cout << "Detection Probability: " << detectors[detector]->lastDetectionProbability << std::endl;
 		std::cout << "Detected skew is: " << skew << std::endl;
 

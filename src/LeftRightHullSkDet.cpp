@@ -119,10 +119,10 @@ namespace cmp
 			{
 				cv::circle(drawing, outerContour[i], 1, Scalar( 0, 0, 255 ), 1,5);
 			}
-			
+
 			cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
 			cv::line(drawing, P3, P4, cv::Scalar(255, 255, 0), 1 );			
-			
+
 			cv::circle(drawing, TL, 4, Scalar( 0, 255, 255 ), 1);
 			cv::circle(drawing, TR, 4, Scalar( 0, 255, 255 ), 1);
 			cv::circle(drawing, BL, 4, Scalar( 0, 255, 0 ), 1);

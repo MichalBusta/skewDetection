@@ -95,11 +95,11 @@ namespace cmp{
 		/*
 		for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
 		{
-			int j = i;
-			if (j<0) j = j + int(180/histColWidth);
-			if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+		int j = i;
+		if (j<0) j = j + int(180/histColWidth);
+		if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
 
-			resLen += hist[j];
+		resLen += hist[j];
 		}*/
 		//cv::imshow("Histogram", histogram);
 		resLen = hist[maxI];
