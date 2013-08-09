@@ -27,7 +27,12 @@ ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int i
 				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
 				middleAngle(middleAngle), returnMiddleAngle(returnMiddleAngle)
 {
-
+	probabilities.push_back(0.48);
+	probabilities.push_back(0.79);
+	probabilities.push_back(0.74);
+	probabilities.push_back(0.53);
+	probabilities.push_back(0.50);
+	probabilities.push_back(0.48);
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
@@ -145,14 +150,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
 		{
-			/*ThinPrDetection det;
-				det.width = width;
-				det.angle = ang;
-				det.vector = tmpVector;
-				det.point1 = tmpPoint;
-				det.point2 = tmpPoint2;
-				detections.push_back(det);*/
-			
 			// noting all information about profiles from our angle range
 			widths.push_back(width);
 			angles.push_back(ang);
@@ -182,26 +179,11 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	vector<double>widths2;
 	vector<double>angles2;
 
-	vector<bool>thinProfileConditions;
-	bool thinProfileCondition;
-
-	// condition to filter wider profiles
-	for(int c=0;c<widths.size();c++)
-	{
-		if( widths[c] <= thinProfilesRange )
-			thinProfileCondition = true;
-		else
-			thinProfileCondition = false;
-		thinProfileConditions.push_back(thinProfileCondition);
-	}
-
-	// function to filter values by similiar angle
-	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions);
-
+	filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
 	
 	// counting profiles filtered by filterValuesBySimiliarAngle
 	for(int c=0;c<widths.size();c++)
-		if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) )
+		if( ( widths2[c] != 0 ) && ( widths2[c] <= thinProfilesRange ) )
 			probMeasure2++;
 
 
@@ -261,7 +243,11 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		}
 	}
 
-	if( returnMiddleAngle == true) angle = middleAngle;
+	int index = (probMeasure1 - 1);
+	index = MAX(index, this->probabilities.size() - 1);
+	lastDetectionProbability = probabilities[index];
+
+	//if( returnMiddleAngle == true) angle = middleAngle;
 
 	return angle;
 }

@@ -13,14 +13,14 @@ namespace cmp
 
 BestGuessSKDetector::BestGuessSKDetector()
 {
-	detectors.push_back( new VerticalDomSkDet() );
-	weights.push_back(0.9);
-	detectors.push_back( new ThinProfileSkDet() );
-	weights.push_back(0.5);
-	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014) );
-	weights.push_back(1);
-	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, false) );
-	weights.push_back(0.5);
+	//detectors.push_back( new VerticalDomSkDet());
+	//weights.push_back(1.0);
+	detectors.push_back( new ThinProfileSkDet());
+	weights.push_back(1.0);
+	detectors.push_back( new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
+	weights.push_back(1.0);
+	//detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
+	//weights.push_back(0.5);
 }
 
 BestGuessSKDetector::~BestGuessSKDetector()
