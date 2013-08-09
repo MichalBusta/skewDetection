@@ -85,8 +85,9 @@ public:
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 
 	static void filterValuesBySimiliarAngle
-		(const std::vector<double>& values, const std::vector<double>& angles, std::vector<double>& valuesOut, std::vector<double>& anglesOut,
-		std::vector<bool>condition, double angleRange = ANGLE_TOLERANCE);
+		(const std::vector<double>& values, const std::vector<double>& angles,
+				std::vector<double>& valuesOut, std::vector<double>& anglesOut,
+				double angleRange = ANGLE_TOLERANCE * 2);
 
 protected:
 

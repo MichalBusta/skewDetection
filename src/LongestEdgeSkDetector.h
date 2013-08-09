@@ -25,6 +25,8 @@ public:
 	double ignoreAngle;
 	/* udava % rozsah pro odhad pravdepodobnosti (kolik dalsich hran je s delkou longestEdge +- edgeRatio * longestEdge ) */
 	double edgeRatio;
+
+	std::vector<double> probabilities;
 };
 
 } /* namespace cmp */

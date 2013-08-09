@@ -53,19 +53,20 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	}
 
 	double maxLength = 0;
+	double minLength = DBL_MAX;
 
 	//max length of edges in range
 	for(size_t i = 0; i < results.size(); i++)
 	{
 		if(results[i].classificator != classificator)
 			continue;
-		if( fabs( results[i].angleDiff) < ANGLE_TOLERANCE )
-			if( results[i].measure2 > maxLength )
-				maxLength = results[i].measure2;
+
+		maxLength = MAX( results[i].measure2, maxLength);
+		minLength = MIN( results[i].measure2, minLength);
 	}
 
 	double binSize = 0;
-	binSize = (maxLength - 1)  / 10;
+	binSize = (maxLength - minLength)  / 10;
 
 	int index = 0;
 	int totalCount = 0;
@@ -81,7 +82,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		boxNo = MAX(boxNo, 0);
 		histMeasure1Count[boxNo]++;
 
-		index = ( (int) ((results[i].measure2 - 1) / binSize) );
+		index = ( (int) ((results[i].measure2 - minLength) / binSize) );
 		index = MIN(index, 9);
 		index = MAX(index, 0);
 		histMeasure2Count[index]++;

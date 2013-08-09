@@ -27,7 +27,12 @@ ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int i
 				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
 				middleAngle(middleAngle), returnMiddleAngle(returnMiddleAngle)
 {
-
+	probabilities.push_back(0.48);
+	probabilities.push_back(0.79);
+	probabilities.push_back(0.74);
+	probabilities.push_back(0.53);
+	probabilities.push_back(0.50);
+	probabilities.push_back(0.48);
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
@@ -183,22 +188,10 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	vector<double> widths2;
 	vector<double> angles2;
 
-	vector<bool>thinProfileConditions;
-	bool thinProfileCondition;
+	filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
 
 	for(int c=0;c<widths.size();c++)
-	{
-		if( widths[c] <= thinProfilesRange )
-			thinProfileCondition = true;
-		else
-			thinProfileCondition = false;
-		thinProfileConditions.push_back(thinProfileCondition);
-	}
-
-	filterValuesBySimiliarAngle(widths, angles, widths2, angles2, thinProfileConditions);
-
-	for(int c=0;c<widths.size();c++)
-		if( ( widths2[c] != 0 ) && ( widths[c] <= thinProfilesRange ) )
+		if( ( widths2[c] != 0 ) && ( widths2[c] <= thinProfilesRange ) )
 			probMeasure2++;
 
 	//////////////////////////////////
@@ -268,6 +261,10 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 			}
 		}
 	}
+
+	int index = (probMeasure1 - 1);
+	index = MAX(index, this->probabilities.size() - 1);
+	lastDetectionProbability = probabilities[index];
 
 	if( returnMiddleAngle == true) angle = middleAngle;
 
