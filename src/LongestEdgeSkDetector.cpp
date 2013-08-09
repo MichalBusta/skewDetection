@@ -63,14 +63,12 @@ namespace cmp {
 
 			}
 		}
-		/////////////////////
+
 		vector<double>actAngles;
 		vector<double>actLenghts;
 		vector<double>actAngles2;
 		vector<double>actLenghts2;
 
-
-		////////////////////
 
 		//double range = M_PI/2.0/45.0;
 		for(int c=0;c<outerContour.size();c++)
@@ -87,10 +85,8 @@ namespace cmp {
 			atanAngle=(deltaX)*1.0/(deltaY);
 			actAngle =atan(atanAngle);
 
-			////////////////////////////
 			actAngles.push_back(actAngle);
 			actLenghts.push_back(actLength);
-			/////////////////////////////
 
 			if( actAngle < (fabs (M_PI/2.0-range)))
 			{
@@ -101,10 +97,11 @@ namespace cmp {
 				}
 			}
 		}
-		/////////////////////////////////////////
+
 		vector<bool>longestEdgeConditions;
 		bool longestEdgeCondition;
 
+		// condition to filter shorter edges
 		for(int c=0;c<outerContour.size();c++)
 		{
 			if( actLenghts[c] >= ( maxLength - edgeRatio * maxLength )) longestEdgeCondition = true;
@@ -112,11 +109,13 @@ namespace cmp {
 			longestEdgeConditions.push_back(longestEdgeCondition);
 		}
 
+		// function to filter values by similiar angle
 		filterValuesBySimiliarAngle(actLenghts,actAngles,actLenghts2,actAngles2, longestEdgeConditions);
 
+		// counting edges filtered by filterValuesBySimiliarAngle
 		for(int c=0;c<outerContour.size();c++) if( ( actLenghts2[c] != 0 ) && (actLenghts[c] >= ( maxLength - edgeRatio * maxLength ) ) ) probMeasure1++;
-		///////////////////////////////////////////////
 
+		// ?????
 		probMeasure2 = probMeasure2 / maxLength;
 
 
