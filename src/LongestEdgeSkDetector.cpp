@@ -138,13 +138,9 @@ double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::
 			atanAngle=(deltaX)*1.0/(deltaY);
 			actAngle =atan(atanAngle);
 			if(actLength >= ( maxLength - edgeRatio * maxLength ))
-			{
 				color = cv::Scalar( 0, 255, 0 );
-			}
 			if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-			{
 				cv::line(drawing, outerContour[j], outerContour[index], color, 1, 0);
-			}
 
 		}
 

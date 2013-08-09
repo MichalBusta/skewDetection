@@ -35,15 +35,13 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	MeasuresHist ret;
 	ret.classificator = classificator;
 
-	/////////////////////////////// Calculation for LongestEdgeSkDetector
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	double goodTriesCountOfEdgesInBin[10];
-	for(int g = 0; g < 10; g++) goodTriesCountOfEdgesInBin[g] = 0;
+
+	double goodTriesCount[10];
+	for(int g = 0; g < 10; g++) goodTriesCount[g] = 0;
 	
-	//histMeasure1 aka number of edges in range
-	int histMeasure1Count[10]; 
+	int histMeasure1Count[10];
 	int histMeasure2Count[10];
-	double totalCountOfEdgesInBin[10];
+	double totalCountInBin[10];
 
 	for(int i = 0; i < 10; i++)
 	{
@@ -51,24 +49,24 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		ret.histMeasure2[i] = 0;
 		histMeasure1Count[i] = 0;
 		histMeasure2Count[i] = 0;
-		totalCountOfEdgesInBin[i] = 0;
+		totalCountInBin[i] = 0;
 	}
 
-	double maxLength = 0;
-	double minLength = DBL_MAX;
+	double maxValue = 0;
+	double minValue = DBL_MAX;
 
-	//max length of edges in range
+	//max and min values in range
 	for(size_t i = 0; i < results.size(); i++)
 	{
 		if(results[i].classificator != classificator)
 			continue;
 
-		maxLength = MAX( results[i].measure2, maxLength);
-		minLength = MIN( results[i].measure2, minLength);
+		maxValue = MAX( results[i].measure2, maxValue);
+		minValue = MIN( results[i].measure2, minValue);
 	}
 
 	double binSize = 0;
-	binSize = (maxLength - minLength)  / 10;
+	binSize = (maxValue - minValue)  / 10;
 
 	int index = 0;
 	int totalCount = 0;
@@ -84,7 +82,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		boxNo = MAX(boxNo, 0);
 		histMeasure1Count[boxNo]++;
 
-		index = ( (int) ((results[i].measure2 - minLength) / binSize) );
+		index = ( (int) ((results[i].measure2 - minValue) / binSize) );
 		index = MIN(index, 9);
 		index = MAX(index, 0);
 		histMeasure2Count[index]++;
@@ -92,34 +90,22 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 
 		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
-			goodTriesCountOfEdgesInBin[boxNo]++;
-			totalCountOfEdgesInBin[index] += 1;
+			goodTriesCount[boxNo]++;
+			totalCountInBin[index] += 1;
 		}
 	}
 
-	double triesRatio = 0;
 	for(int t = 0; t < 10; t++)
 	{
 		if(histMeasure1Count[t] > 0)
-		{
-			triesRatio = goodTriesCountOfEdgesInBin[t] / histMeasure1Count[t] * 100;
-			ret.histMeasure1[t] = triesRatio;
-		}else
+			ret.histMeasure1[t] = goodTriesCount[t] / histMeasure1Count[t] * 100;
+		else 
 			ret.histMeasure1[t] = 0;
 	}
 
-	double averageLengthRatio = 0;
-	double averageLengthOfEdgesInRange[10];
-	for(int i = 0; i < 10; i++) averageLengthOfEdgesInRange[i] = 0;
-
 	for(int i = 0; i < 10; i++)
-	{
 		if(histMeasure2Count[i] > 0)
-			averageLengthOfEdgesInRange[i] = totalCountOfEdgesInBin[i] / histMeasure2Count[i] * 100;
-
-		ret.histMeasure2[i] = averageLengthOfEdgesInRange[i];
-
-	}
+			ret.histMeasure2[i] = totalCountInBin[i] / histMeasure2Count[i] * 100;
 
 
 	//if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
@@ -180,7 +166,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                    valueSuffix: ''\n";
     outStream << "                }\n";
     outStream << "            }, {\n";
-    outStream << "                name: 'Measure2: % of samples in bin ',\n";
+    outStream << "                name: 'Measure2: % of samples in bin " << minValue << "," << maxValue << " ',\n";
     outStream << "                color: '#FFFF00',\n";
     outStream << "                type: 'column',\n";
     outStream << "                data: [";

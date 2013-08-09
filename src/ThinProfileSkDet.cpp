@@ -251,6 +251,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	index = MAX(index, this->probabilities.size() - 1);
 	lastDetectionProbability = probabilities[index];
 
+
 	if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
 
 	return angle;

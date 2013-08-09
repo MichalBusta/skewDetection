@@ -26,6 +26,15 @@ VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int h
 	// TODO Auto-generated constructor stub
 
 	hist = new double [int(180/histColWidth)];
+
+	probabilities.push_back(0.25);
+	probabilities.push_back(0.43);
+	probabilities.push_back(0.57);
+	probabilities.push_back(0.69);
+	probabilities.push_back(0.81);
+	probabilities.push_back(0.89);
+	probabilities.push_back(0.95);
+
 }
 
 VerticalDomSkDet::~VerticalDomSkDet() {
@@ -91,9 +100,17 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		resLen += hist[j];
 	}
-	cv::imshow("Histogram", histogram);
+	//cv::imshow("Histogram", histogram);
 
-	this->lastDetectionProbability = resLen/totalLen;
+	double minValue = 0.0151;
+	double maxValue = 0.1333;
+
+
+	int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
+	index = MAX(0, index);
+	index = MIN(0, probabilities.size());
+
+	this->lastDetectionProbability = probabilities[index];
 	this->probMeasure2 = this->lastDetectionProbability;
 
 	if(debugImage != NULL)
