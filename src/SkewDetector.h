@@ -52,7 +52,7 @@ namespace cmp
 		/** probality measure 1 */
 		int probMeasure1;
 		/** probality measure 2 */
-		int probMeasure2;
+		double probMeasure2;
 	};
 
 	/**

@@ -166,7 +166,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
     outStream << "                    valueSuffix: ''\n";
     outStream << "                }\n";
     outStream << "            }, {\n";
-    outStream << "                name: 'Measure2: % of samples in bin ',\n";
+    outStream << "                name: 'Measure2: % of samples in bin " << minValue << "," << maxValue << " ',\n";
     outStream << "                color: '#FFFF00',\n";
     outStream << "                type: 'column',\n";
     outStream << "                data: [";

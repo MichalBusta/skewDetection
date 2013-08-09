@@ -41,8 +41,6 @@ public:
 	//% of profile width 
 	double profilesRange;
 
-	double middleAngle;
-
 	bool returnMiddleAngle;
 	
 	std::vector<double> probabilities;

@@ -30,6 +30,8 @@ namespace cmp{
 		int ignoreAngle;
 		/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
 		int correctAngle;
+
+		std::vector<double> probabilities;
 	};
 
 }//namespace cmp

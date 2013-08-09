@@ -26,6 +26,14 @@ namespace cmp{
 		// TODO Auto-generated constructor stub
 
 		hist = new double [int(180/histColWidth)];
+		probabilities.push_back(0.25);
+		probabilities.push_back(0.43);
+		probabilities.push_back(0.57);
+		probabilities.push_back(0.69);
+		probabilities.push_back(0.81);
+		probabilities.push_back(0.89);
+		probabilities.push_back(0.95);
+
 	}
 
 	VerticalDomSkDet::~VerticalDomSkDet() {
@@ -83,6 +91,8 @@ namespace cmp{
 				totalLen += hist[i];
 			}
 		}
+
+		/*
 		for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
 		{
 			int j = i;
@@ -90,10 +100,19 @@ namespace cmp{
 			if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
 
 			resLen += hist[j];
-		}
-		cv::imshow("Histogram", histogram);
+		}*/
+		//cv::imshow("Histogram", histogram);
+		resLen = hist[maxI];
 
-		this->lastDetectionProbability = resLen/totalLen;
+		double minValue = 0.0151;
+		double maxValue = 0.1333;
+
+
+		int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
+		index = MAX(0, index);
+		index = MIN(0, probabilities.size());
+
+		this->lastDetectionProbability = probabilities[index];
 
 		probMeasure2 = resLen/totalLen;
 
