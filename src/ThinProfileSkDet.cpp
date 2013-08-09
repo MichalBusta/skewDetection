@@ -150,14 +150,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
 		{
-			/*ThinPrDetection det;
-				det.width = width;
-				det.angle = ang;
-				det.vector = tmpVector;
-				det.point1 = tmpPoint;
-				det.point2 = tmpPoint2;
-				detections.push_back(det);*/
-			
 			// noting all information about profiles from our angle range
 			widths.push_back(width);
 			angles.push_back(ang);
