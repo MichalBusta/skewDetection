@@ -78,9 +78,6 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 	//std::vector<ThinPrDetection> detections;
 
-	double greatestAngle;
-	double smallestAngle;
-
 	vector<double>widths;
 	vector<double>angles;
 	vector<Point2d>PointsForWiderProfiles;
@@ -88,6 +85,7 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	vector<Point2d>VectorsForWiderProfiles;
 	vector<double>thinProfiles;
 
+	// using method of rotating calipers to find thin profiles
 	while(rotated_angle < M_PI)
 	{
 		int p_a_1 = p_a + 1;
@@ -159,7 +157,8 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 				det.point1 = tmpPoint;
 				det.point2 = tmpPoint2;
 				detections.push_back(det);*/
-
+			
+			// noting all information about profiles from our angle range
 			widths.push_back(width);
 			angles.push_back(ang);
 			PointsForWiderProfiles.push_back(tmpPoint);
@@ -177,42 +176,31 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 		}
 	}
 
+	// max width of profiles
 	double thinProfilesRange = min_width * ( profilesRange + 1 );
+	
 	probMeasure1 = 0;
 	probMeasure2 = 0;
-	greatestAngle =  -M_PI;
-	smallestAngle = M_PI;
 
 
-	//////////////////////////////////
-	vector<double> widths2;
-	vector<double> angles2;
+	// filtering thin profiles that are closer than ANGLE_TOLERANCE to other profile
+	vector<double>widths2;
+	vector<double>angles2;
 
 	filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
-
+	
+	// counting profiles filtered by filterValuesBySimiliarAngle
 	for(int c=0;c<widths.size();c++)
 		if( ( widths2[c] != 0 ) && ( widths2[c] <= thinProfilesRange ) )
 			probMeasure2++;
 
-	//////////////////////////////////
 
-
+	// counting all profiles in thinProfilesRange
 	for(int c=0;c<widths.size();c++)
-	{
-
 		if( (widths[c] <= thinProfilesRange ))
-		{
 			probMeasure1++;
-			if( angles[c] > greatestAngle ) greatestAngle = angles[c];
-			if( angles[c] < smallestAngle ) smallestAngle = angles[c];
-		}
-		else widths[c] = 0;
 
-		thinProfiles.push_back(widths[c]);
-
-	}
-
-	middleAngle = ( greatestAngle + smallestAngle ) / 2;
+	
 
 #ifdef VERBOSE
 	std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
@@ -237,26 +225,27 @@ double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		//cmp::filterContour(contours[0]);
 
+		// drawing the thiniest profile
 		for(int i=0;i<hull.size();i++)
 		{
 			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 255 ), 2);
 		}
-		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 255, 0 ), 2);
-		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 255, 0 ), 2);
+		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 2);
+		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 0, 255 ), 2);
 
 		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 
-
+		// drawing other filtered profiles
 		for(int i=0;i<widths.size();i++)
 		{
-			if( thinProfiles[i] > min_width )
+			if( ( widths2[i] != 0 ) && ( widths2[i] <= thinProfilesRange ) )
 			{
 				if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
 
 
 				cv::Point2f middleVector, middlePoint;
-				cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
-				cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 0, 255 ), 1);
+				cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
+				cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
 				cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 0, 0, 255 ), 1);
 			}
 		}

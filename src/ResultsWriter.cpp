@@ -35,13 +35,15 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	MeasuresHist ret;
 	ret.classificator = classificator;
 
-	double goodTriesWithNoOfEdges[10];
-	for(int g = 0; g < 10; g++) goodTriesWithNoOfEdges[g] = 0;
+	/////////////////////////////// Calculation for LongestEdgeSkDetector
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	double goodTriesCountOfEdgesInBin[10];
+	for(int g = 0; g < 10; g++) goodTriesCountOfEdgesInBin[g] = 0;
 	
 	//histMeasure1 aka number of edges in range
 	int histMeasure1Count[10]; 
 	int histMeasure2Count[10];
-	double totalEdgesLengthInRange[10];
+	double totalCountOfEdgesInBin[10];
 
 	for(int i = 0; i < 10; i++)
 	{
@@ -49,7 +51,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 		ret.histMeasure2[i] = 0;
 		histMeasure1Count[i] = 0;
 		histMeasure2Count[i] = 0;
-		totalEdgesLengthInRange[i] = 0;
+		totalCountOfEdgesInBin[i] = 0;
 	}
 
 	double maxLength = 0;
@@ -90,8 +92,8 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 
 		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
 		{
-			goodTriesWithNoOfEdges[boxNo]++;
-			totalEdgesLengthInRange[index] += 1;
+			goodTriesCountOfEdgesInBin[boxNo]++;
+			totalCountOfEdgesInBin[index] += 1;
 		}
 	}
 
@@ -100,7 +102,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	{
 		if(histMeasure1Count[t] > 0)
 		{
-			triesRatio = goodTriesWithNoOfEdges[t] / histMeasure1Count[t] * 100;
+			triesRatio = goodTriesCountOfEdgesInBin[t] / histMeasure1Count[t] * 100;
 			ret.histMeasure1[t] = triesRatio;
 		}else
 			ret.histMeasure1[t] = 0;
@@ -113,7 +115,7 @@ MeasuresHist ResultsWriter::writeDetectorMeasure(std::vector<EvaluationResult>& 
 	for(int i = 0; i < 10; i++)
 	{
 		if(histMeasure2Count[i] > 0)
-			averageLengthOfEdgesInRange[i] = totalEdgesLengthInRange[i] / histMeasure2Count[i] * 100;
+			averageLengthOfEdgesInRange[i] = totalCountOfEdgesInBin[i] / histMeasure2Count[i] * 100;
 
 		ret.histMeasure2[i] = averageLengthOfEdgesInRange[i];
 
