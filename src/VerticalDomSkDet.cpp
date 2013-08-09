@@ -95,6 +95,8 @@ namespace cmp{
 
 		this->lastDetectionProbability = resLen/totalLen;
 
+		probMeasure2 = resLen/totalLen;
+
 		if(debugImage != NULL)
 		{
 			Mat& drawing =  *debugImage;
