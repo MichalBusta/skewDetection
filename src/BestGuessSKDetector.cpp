@@ -1,9 +1,9 @@
 /*
- * BestGuessSKDetector.cpp
- *
- *  Created on: Jul 26, 2013
- *      Author: Michal Busta
- */
+* BestGuessSKDetector.cpp
+*
+*  Created on: Jul 26, 2013
+*      Author: Michal Busta
+*/
 
 #include "BestGuessSKDetector.h"
 #include "SkewDetection.h"
@@ -36,6 +36,7 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 	size_t bestDetIndex = -1;
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
+
 		cv::Mat dbgImage;
 		cv::Mat img = mask.clone();
 		angles.push_back( this->detectors[i]->detectSkew( img, lineK, &dbgImage) );

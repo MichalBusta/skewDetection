@@ -34,6 +34,7 @@ namespace cmp{
 		std::vector<double> probabilities;
 	};
 
-}//namespace cmp
+}
+//namespace cmp
 
 #endif /* VERTICALDOMSKDET_H_ */
