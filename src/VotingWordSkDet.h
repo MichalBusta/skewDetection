@@ -17,7 +17,7 @@
 
 namespace cmp {
     
-    class VotingWordSkDet : public CountourWordSkewDetector
+    class VotingWordSkDet : public ContourWordSkewDetector
     {
     public:
         

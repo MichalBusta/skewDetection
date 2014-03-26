@@ -31,14 +31,14 @@ namespace cmp{
         cv::Ptr<ContourSkewDetector> localDetector;
         
     };
-    class CountourWordSkewDetector : public WordSkewDetector
+    class ContourWordSkewDetector : public WordSkewDetector
     {
     public:
+        
+        ContourWordSkewDetector(cv::Ptr<SkewDetector> detector);
+        virtual ~ContourWordSkewDetector();
        
         virtual double detectSkew( std::vector<cv::Mat>& masks, double  lineK,cv::Mat* debugImage = NULL) =0;
-        
-        CountourWordSkewDetector();
-        virtual ~CountourWordSkewDetector();
         
         std::vector<double> angles;
         
