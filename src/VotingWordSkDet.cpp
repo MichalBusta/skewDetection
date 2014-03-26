@@ -12,8 +12,8 @@
 
 namespace cmp
 {
-    VotingWordSkDet::VotingWordSkDet(cv::Ptr<SkewDetector> detector):
-    CountourWordSkewDetector(detector(detector))
+    VotingWordSkDet::VotingWordSkDet(cv::Ptr<SkewDetector> detector) :
+    CountourWordSkewDetector( detector )
     {
         
     }
