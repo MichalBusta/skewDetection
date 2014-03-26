@@ -96,9 +96,7 @@ int main( int argc, char **argv)
         masks.push_back(imgRec);
 	}
     
-    cv::Mat debugImage = masks[0];
-    double skew = WordSkewDetectors[wordDetector]->detectSkew(masks, 1.0, &debugImage);
-    std::cout << "Detected skew is: " << skew << std::endl;
+    cv::Mat debugImage;
 
 }
 

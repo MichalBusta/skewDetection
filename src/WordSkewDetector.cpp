@@ -9,7 +9,7 @@
 #include "WordSkewDetector.h"
 
 namespace cmp {
-
+    
     WordSkewDetector::WordSkewDetector(cv::Ptr<SkewDetector> detector)
     {
         this->localDetector = detector;
@@ -19,14 +19,14 @@ namespace cmp {
         
     }
     
-    double ContourWordSkewDetector::detectSkew(std::vector<cv::Mat>& masks, double lineK, cv::Mat* debugImage)
+    double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, cv::Rect bBox, cv::Mat* debugImage)
     {
         std::vector<double> probs;
         
-        int noImg = masks.size();
+        int noImg = blobs.size();
         for (int i = 0; i<noImg; i++)
         {
-            angles.push_back(localDetector->detectSkew(masks[i], lineK, debugImage));
+            angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, debugImage));
             probs.push_back(localDetector->lastDetectionProbability);
         }
         return computeAngle(angles, probs);
