@@ -24,7 +24,6 @@ namespace cmp{
         WordSkewDetector(cv::Ptr<SkewDetector> detector);
         virtual ~WordSkewDetector();
         
-        virtual double detectSkew( const std::vector<cv::Mat> masks, double  lineK, const cv::Mat* debugImage = NULL) =0;
         
     protected:
         
@@ -38,13 +37,13 @@ namespace cmp{
         ContourWordSkewDetector(cv::Ptr<SkewDetector> detector);
         virtual ~ContourWordSkewDetector();
        
-        virtual double detectSkew( std::vector<cv::Mat>& masks, double  lineK,cv::Mat* debugImage = NULL) =0;
+        virtual double detectSkew( std::vector<cv::Mat>& masks, double  lineK,cv::Mat* debugImage = NULL);
         
         std::vector<double> angles;
         
     protected:
         
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities);
+        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities)=0;
     };
 }
 #endif /* defined(__SkewDetection__WordSkewDetector__) */
