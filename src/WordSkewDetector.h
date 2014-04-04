@@ -18,8 +18,15 @@
 namespace cmp{
 
     struct Blob{
+        
         cv::Mat mask;
         cv::Rect bBox;
+        
+        Blob(cv::Mat mask, cv::Rect bBox = cv::Rect()){
+            this->mask = mask;
+            this->bBox = bBox;
+            
+        };
     };
     
     class WordSkewDetector

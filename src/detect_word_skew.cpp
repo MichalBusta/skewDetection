@@ -43,6 +43,8 @@ static void help()
 
 int main( int argc, char **argv)
 {
+    double angle;
+    
 	if(argc < 2)
 	{
 		help();
@@ -79,12 +81,12 @@ int main( int argc, char **argv)
 		CV_Error( CV_StsBadArg, "Unsupported detector number" );
     }
     
-    
     std::string filePath = IOUtils::GetFileNameWithoutExtension(argv[1]);
     
     std::vector<std::string> files = IOUtils::GetFilesInDirectory(filePath, ".png", true);
     
     std::vector<cv::Mat> masks;
+    cv::Mat debugImg = cv::imread(argv[1]);
     
 	for(size_t i = 0; i < files.size(); i++)
 	{
@@ -93,10 +95,9 @@ int main( int argc, char **argv)
 		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
         //invert image, so ink is white
 		cv::Mat imgRec = ~img;
+        std::vector<Blob> blobs;
+        
         masks.push_back(imgRec);
-	}
     
-    cv::Mat debugImage;
-
+    }
 }
-
