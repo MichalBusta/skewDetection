@@ -57,10 +57,10 @@ namespace cmp
         sortedAngles = angles;
         std::sort(sortedAngles.begin(), sortedAngles.end());
         
-        //calcuulate gradients
+        //calculate the gradients
         for(int i =0; i < sortedAngles.size()-1; i++)
         {
-            grad.push_back(std::abs(sortedAngles[i]-sortedAngles[i+1]));
+            grad.push_back(std::abs(sortedAngles[i+1]-sortedAngles[i]));
         }
         
         //match probs with sorted angles
@@ -72,13 +72,16 @@ namespace cmp
         for (int i=0; i<sortedAngles.size(); i++) {
             int val = sortedAngles[i];
             
-            for (int i2 = 0; i2< angles.size(); i2++) {
-                if(angles[i2] == val && isAssigned[i2] == false){
+            int i2=0;
+            bool control =true;
+            while (control){
+                if(angles[i2] == val && isAssigned[i2] == false) {
                     sortedProbs.push_back(probabilities[i2]);
                     isAssigned[i2] = true;
+                    control = false;
                 }
+                i2++;
             }
-            
         }
         
         //group similar values

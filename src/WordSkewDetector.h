@@ -49,7 +49,7 @@ namespace cmp{
         ContourWordSkewDetector(cv::Ptr<SkewDetector> detector);
         virtual ~ContourWordSkewDetector();
        
-        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Rect bBox, cv::Mat* debugImage = NULL);
+        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage = NULL);
         
         std::vector<double> angles;
         

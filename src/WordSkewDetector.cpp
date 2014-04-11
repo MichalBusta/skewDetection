@@ -19,7 +19,7 @@ namespace cmp {
         
     }
     
-    double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, cv::Rect bBox, cv::Mat* debugImage)
+    double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage)
     {
         std::vector<double> probs;
         
