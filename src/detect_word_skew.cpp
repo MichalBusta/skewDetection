@@ -98,4 +98,6 @@ int main( int argc, char **argv)
         
     }
     skew = WordSkewDetectors[wordDetector]->detectSkew(blobs, 0.0, &debugImg);
+    
+    std::cout << "Detected skew is: " << skew << std::endl;
 }

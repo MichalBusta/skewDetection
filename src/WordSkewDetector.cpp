@@ -14,10 +14,19 @@ namespace cmp {
     {
         this->localDetector = detector;
     }
+    WordSkewDetector::~WordSkewDetector(){
+        
+    }
     
     ContourWordSkewDetector::ContourWordSkewDetector(cv::Ptr<SkewDetector> detector):WordSkewDetector(detector){
         
     }
+    
+    ContourWordSkewDetector::~ContourWordSkewDetector(){
+        
+    }
+    
+    
     
     double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage)
     {
