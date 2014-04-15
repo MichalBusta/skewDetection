@@ -20,7 +20,7 @@ using namespace std;
 #endif
 #   include <libgen.h>
 #   include <unistd.h>
-#   include <ext/stdio_filebuf.h>
+//#   include <ext/stdio_filebuf.h>
 #   include <sys/wait.h>
 #	include <sys/stat.h>
 #	include <unistd.h>
