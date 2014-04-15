@@ -30,22 +30,22 @@ int main( int argc, char **argv)
 		help();
 		return -1;
 	}
-
+    
 	SkewEvaluator evaluator( argv[2], false, true );
-
+    
 	/** LR Longest Edge */
 	/**
-	//evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.005, false), "LF-0.005" );
-	/** LR Longest Edge */
+     //evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.005, false), "LF-0.005" );
+     /** LR Longest Edge */
 	/**
-	for (double precision = 0.005; precision <= 0.4; precision += 0.005)
-	{
-	std::stringstream ignoreAngleToStr;
-	ignoreAngleToStr << precision;
-	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
-	}
-
-	/**/
+     for (double precision = 0.005; precision <= 0.4; precision += 0.005)
+     {
+     std::stringstream ignoreAngleToStr;
+     ignoreAngleToStr << precision;
+     evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
+     }
+     
+     /**/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenters" );
 	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
@@ -53,17 +53,17 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdgeSkDetector" );
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDomSkDet" );
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );
-
+    
 	/*
-	evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
-	evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
-
-	evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
-
-	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
-
-
+     evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
+     evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
+     
+     evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
+     
+     evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
+    
+    
 	evaluator.evaluate( argv[1] );
-
+    
 	return 0;
 }

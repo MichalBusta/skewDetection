@@ -45,6 +45,7 @@ namespace cmp
 		* @return the skew angle in radians
 		*/
 		virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL ) = 0;
+        
 
 		/** the measure of "how sure" the detector is about the result */
 		double lastDetectionProbability;

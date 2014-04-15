@@ -129,7 +129,6 @@ namespace cmp
 			cv::circle(drawing, BR, 4, Scalar( 0, 255, 0 ), 1);
 		}
 
-
 		//y-souradnice je opacne
 		return -angle;
 	}

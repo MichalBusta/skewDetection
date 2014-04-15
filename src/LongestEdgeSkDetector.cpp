@@ -30,7 +30,6 @@ namespace cmp {
 	double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
 	{
 		std::vector<cv::Point>& outerContour = contours[0];
-
 		probMeasure1 = 0;
 		probMeasure2 = 0;
 
@@ -56,7 +55,7 @@ namespace cmp {
 			deltaY = outerContour[index2].y - outerContour[c].y;
 			QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
 			actLength = sqrt(QactLength);
-			atanAngle=(deltaX)*1.0/(deltaY);
+			atanAngle=(deltaX)/(deltaY);
 			actAngle =atan(atanAngle);
 
 			if( (actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )

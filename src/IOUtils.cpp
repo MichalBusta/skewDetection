@@ -131,7 +131,7 @@ namespace cmp
 
 		glob_t p;
 		glob(fullSearch.c_str(), GLOB_TILDE, NULL, &p);
-		for (uint i=0; i<p.gl_pathc; ++i) {
+		for (size_t i=0; i<p.gl_pathc; ++i) {
 			if(returnFullPath)
 				files.push_back( p.gl_pathv[i] );
 			else
@@ -191,8 +191,8 @@ namespace cmp
 		vector<string> files;
 
 		glob_t p;
-		glob(fullSearch.c_str(), GLOB_TILDE|GLOB_ONLYDIR, NULL, &p);
-		for (uint i=0; i<p.gl_pathc; ++i) {
+		glob(fullSearch.c_str(), GLOB_TILDE, NULL, &p);
+		for (size_t i=0; i<p.gl_pathc; ++i) {
 			if(returnFullPath)
 				files.push_back( p.gl_pathv[i] );
 			else
