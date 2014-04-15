@@ -7,3 +7,8 @@
 //
 
 #include "HistogramWordSkDet.h"
+
+namespace cmp
+{
+    
+}
