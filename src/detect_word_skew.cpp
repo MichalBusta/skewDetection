@@ -18,12 +18,13 @@
 #include "WordSkewDetector.h"
 #include "SkewDetection.h"
 #include "IOUtils.h"
+#include "DiscreteVotingWordSkDet.h"
 
 using namespace cmp;
 
 static void help()
 {
-	std::cout << "\nRuns skew detection \n Call:\n ./detect_skew input_direcoty [detectorNo]\n\n";
+	std::cout << "\nRuns skew detection \n Call:\n ./detect_word_skew input_file [detectorNo]\n\n";
 	std::cout << "	Available detectors:";
     
     std::cout << "		0 - Mock Skew Detector\n";
@@ -60,7 +61,7 @@ int main( int argc, char **argv)
 	}
     
     std::vector<cv::Ptr<SkewDetector> > detectors;
-    detectors.push_back( new MockSkewDetector() );
+    detectors.push_back( new BestGuessSKDetector() );
 	detectors.push_back( new ThinProfileSkDet() );
 	detectors.push_back( new CentersSkDet() );
 	detectors.push_back( new VerticalDomSkDet() );
@@ -74,18 +75,12 @@ int main( int argc, char **argv)
 		CV_Error( CV_StsBadArg, "Unsupported detector number" );
 	}
     
-	std::vector<cv::Ptr<ContourWordSkewDetector> > WordSkewDetectors;
-	WordSkewDetectors.push_back(new VotingWordSkDet(detectors[detector]));
-    
-    if(wordDetector > WordSkewDetectors.size())
-    {
-		CV_Error( CV_StsBadArg, "Unsupported detector number" );
-    }
+	cv::Ptr<ContourWordSkewDetector> WordSkewDetector = new DiscreteVotingWordSkDet(detectors[detector]);
     
     cv::Mat debugImg = cv::imread(argv[1]);
     std::string filePath = IOUtils::RemoveExtension(argv[1]);
-    
-    std::vector<std::string> files = IOUtils::GetFilesInDirectory(filePath, ".png", true);
+    std::cout << "Reading data directory: " << filePath << std::endl;
+    std::vector<std::string> files = IOUtils::GetFilesInDirectory(filePath, "*.png", true);
     
 	for(size_t i = 0; i < files.size(); i++)
 	{
@@ -97,7 +92,19 @@ int main( int argc, char **argv)
         blobs.push_back(*new Blob(imgRec));
         
     }
-    skew = WordSkewDetectors[wordDetector]->detectSkew(blobs, 0.0, &debugImg);
+    skew = WordSkewDetector->detectSkew(blobs, 0.0, &debugImg);
+    cv::Mat wrapped;
+    cv::Mat warp_mat( 2, 3, CV_32FC1 );
+    warp_mat.at<float>(0, 0) = 1.0f;
+    warp_mat.at<float>(1, 1) = 1.0f;
+    warp_mat.at<float>(0, 1) = (float) skew;
+    warp_mat.at<float>(0, 2) = 0;
+    warp_mat.at<float>(1, 2) = 0;
+
+    warpAffine( debugImg, wrapped, warp_mat, debugImg.size() );
+
+    cv::imshow("Wrapped Image", wrapped);
+    cv::waitKey(0);
     
     std::cout << "Detected skew is: " << skew << std::endl;
 }

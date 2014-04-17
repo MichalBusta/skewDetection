@@ -8,7 +8,8 @@ option (BUILD_DOC "Build the documentation" OFF)
 #Find opencv
 find_package( OpenCV REQUIRED )
 
-#add_definitions("-std=c++0x")
+
+add_definitions("-std=c++0x")
 
 if (USE_OPENMP)
     add_definitions("-DDO_PARALLEL")

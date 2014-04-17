@@ -67,8 +67,10 @@ namespace cmp
       /*  size_t noOfGroups = 10;
         std::vector<double> tempVect;
         std::vector<std::vector<double> > groups;
+        groups.resize(noOfGroups);
         std::vector<double> sortedProbs;
         std::vector<double> groupProbs;
+        groupProbs.resize(noOfGroups);
         std::vector<bool> isAssigned;
  
         int max, min;
