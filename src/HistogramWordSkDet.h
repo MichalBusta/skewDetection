@@ -21,13 +21,16 @@ namespace cmp {
     {
     public:
         
-        HistogramWordSkDet(cv::Ptr<SkewDetector> detector);
+        HistogramWordSkDet();
         virtual ~HistogramWordSkDet();
         
     protected:
         
         virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities);
         
+        virtual double detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage);
+        
+        cv::Mat combineMasks(std::vector<Blob>& blobs);
     };
 }
 

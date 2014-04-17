@@ -23,7 +23,48 @@ namespace cmp
     
     double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities)
     {
-        size_t noOfGroups = 10;
+        
+
+        size_t noOfGroups=10;
+        size_t groupRange;
+        int min=angles[0], max =0;
+        int minIndex;
+        int maxProb = 0;
+        int iterator;
+        int sum=0;
+        int angle;
+        
+        std::vector<std::vector<double> > groups;
+        std::vector<double> groupProbs;
+        groups.resize(noOfGroups);
+        
+        for (int i =0; i <angles.size(); i++) {
+            if (angles[i]>max) max = angles[i];
+            if (min<angles[i]) min = angles[i];
+        }
+        groupRange = (max-min)/noOfGroups;
+        minIndex = min/groupRange;
+        
+        
+        for (int i=0; i<angles.size(); i++) {
+            int index = (angles[i]/groupRange)+minIndex;
+            groups[index].push_back(angles[i]);
+            groupProbs[index] += probabilities[i];
+        }
+        
+        for (int i =0; i <groupProbs.size(); i++) {
+            if (maxProb < groupProbs[i]) {
+                maxProb = groupProbs[i];
+                iterator=i;
+            }
+        }
+        for (int i=0; i<groups[iterator].size(); i++) {
+            sum += groups[iterator][i];
+        }
+        
+        angle=sum/groups[iterator].size();
+        
+      /*  size_t noOfGroups = 10;
         std::vector<double> tempVect;
         std::vector<std::vector<double> > groups;
         std::vector<double> sortedProbs;
@@ -73,7 +114,7 @@ namespace cmp
         int multiplier = 1;
         for (int i = 0; i < tempVect.size(); i++) {
             
-            if (tempVect[i]<(multiplier*groupRange)) {
+            if (tempVect[i]<=(multiplier*groupRange)) {
                 groups[multiplier].push_back(tempVect[i]);
                 groupProbs[multiplier] += sortedProbs[i];
             }
@@ -98,6 +139,7 @@ namespace cmp
             sum += groups[highestProbIterator][i];
         }
         angle = sum/groups[highestProbIterator].size();
-        return angle;
+       */
+       return angle;
     }
 }

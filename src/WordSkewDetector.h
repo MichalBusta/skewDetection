@@ -33,13 +33,8 @@ namespace cmp{
     {
     public:
         
-        WordSkewDetector(cv::Ptr<SkewDetector> detector);
+        WordSkewDetector();
         virtual ~WordSkewDetector();
-        
-        
-    protected:
-        
-        cv::Ptr<ContourSkewDetector> localDetector;
         
     };
     class ContourWordSkewDetector : public WordSkewDetector
@@ -54,6 +49,8 @@ namespace cmp{
         std::vector<double> angles;
         
     protected:
+        
+        cv::Ptr<ContourSkewDetector> localDetector;
         
         virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities)=0;
     };

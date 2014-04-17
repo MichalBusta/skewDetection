@@ -10,16 +10,18 @@
 
 namespace cmp {
     
-    WordSkewDetector::WordSkewDetector(cv::Ptr<SkewDetector> detector)
+    WordSkewDetector::WordSkewDetector()
     {
-        this->localDetector = detector;
+
     }
     WordSkewDetector::~WordSkewDetector(){
         
     }
-    
-    ContourWordSkewDetector::ContourWordSkewDetector(cv::Ptr<SkewDetector> detector):WordSkewDetector(detector){
         
+    ContourWordSkewDetector::ContourWordSkewDetector(cv::Ptr<SkewDetector> detector):WordSkewDetector()
+    {
+        this->localDetector = detector;
+
     }
     
     ContourWordSkewDetector::~ContourWordSkewDetector(){
