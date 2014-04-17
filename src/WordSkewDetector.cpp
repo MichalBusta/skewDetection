@@ -7,6 +7,8 @@
 //
 
 #include "WordSkewDetector.h"
+#include <opencv2/highgui/highgui.hpp>
+
 
 namespace cmp {
     
@@ -35,17 +37,19 @@ namespace cmp {
         std::vector<double> probs;
         
         int noImg = blobs.size();
-        for (int i = 0; i<noImg; i++){
-            
-            if(blobs[i].bBox.width != 0 && blobs[i].bBox.width != 0){
-                cv::Mat tempDebug = debugImage->operator()(blobs[i].bBox);
-                angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK,&tempDebug));
-                probs.push_back(localDetector->lastDetectionProbability);
-            }
-            else{
-                angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK));
-                probs.push_back(localDetector->lastDetectionProbability);
-            }
+        for (int i = 0; i<noImg; i++)
+        {
+        	cv::Mat* tempDebugPtr = NULL;
+        	cv::Mat tempDebug;
+        	if( debugImage != NULL )
+        		tempDebugPtr = &tempDebug;
+
+        	angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, tempDebugPtr));
+#ifdef VERBOSE
+        	cv::imshow("temp", *tempDebugPtr);
+        	cv::waitKey(0);
+#endif
+        	probs.push_back(localDetector->lastDetectionProbability);
 
         }
         return computeAngle(angles, probs);

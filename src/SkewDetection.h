@@ -16,6 +16,7 @@
 #include "LRLongestEdge.h"
 #include "BestGuessSKDetector.h"
 
+#define VERBOSE 1
 
 
 #endif /* SKEWDETECTION_H_ */

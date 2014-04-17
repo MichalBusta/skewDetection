@@ -50,7 +50,7 @@ namespace cmp{
         
     protected:
         
-        cv::Ptr<ContourSkewDetector> localDetector;
+        cv::Ptr<SkewDetector> localDetector;
         
         virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities)=0;
     };

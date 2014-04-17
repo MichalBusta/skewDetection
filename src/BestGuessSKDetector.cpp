@@ -8,6 +8,10 @@
 #include "BestGuessSKDetector.h"
 #include "SkewDetection.h"
 
+#include <opencv2/highgui/highgui.hpp>
+
+#include <iostream>
+
 namespace cmp
 {
 
@@ -47,10 +51,15 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
 		}
 	}
+	cv::imshow("temp", bestDebugImage);
+	cv::waitKey(0);
 	this->lastDetectionProbability = bestProb;
 	if(debugImage != NULL)
 		*debugImage = bestDebugImage;
 
+#ifdef VERBOSE
+	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
+#endif
 	return angles[bestDetIndex];
 
 }

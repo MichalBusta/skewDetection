@@ -86,19 +86,20 @@ int main( int argc, char **argv)
 	{
         cv::Mat tmp = cv::imread( files[i], cv::IMREAD_GRAYSCALE );
         cv::Mat img;
-		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
+		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0) );
         //invert image, so ink is white
-		cv::Mat imgRec = ~img;
-        blobs.push_back(*new Blob(imgRec));
+        blobs.push_back( Blob(img) );
         
     }
     skew = WordSkewDetector->detectSkew(blobs, 0.0, &debugImg);
     cv::Mat wrapped;
     cv::Mat warp_mat( 2, 3, CV_32FC1 );
     warp_mat.at<float>(0, 0) = 1.0f;
-    warp_mat.at<float>(1, 1) = 1.0f;
-    warp_mat.at<float>(0, 1) = (float) skew;
+    float skewValue = (float) tan(skew);
+    warp_mat.at<float>(0, 1) = skewValue;
     warp_mat.at<float>(0, 2) = 0;
+    warp_mat.at<float>(1, 0) = 0;
+    warp_mat.at<float>(1, 1) = 1.0f;
     warp_mat.at<float>(1, 2) = 0;
 
     warpAffine( debugImg, wrapped, warp_mat, debugImg.size() );
