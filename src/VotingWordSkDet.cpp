@@ -24,6 +24,9 @@ namespace cmp
     
     double VotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities){
         
+    	//sanity check
+    	if(angles.size() == 0)
+    		cvError(CV_StsError, "VotingWordSkDet::computeAngle", "vector angles has zero length", __FILE__, __LINE__);
         
         //get highest certainty
         /*int maxProb =0;
@@ -40,7 +43,7 @@ namespace cmp
         int end=0;
         int max =0;
         int maximum =0;
-        int iterator;
+        int iterator = 0;
         int sum = 0;
         
         bool isGroup = false;

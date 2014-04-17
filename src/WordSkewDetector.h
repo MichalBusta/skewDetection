@@ -39,7 +39,7 @@ namespace cmp{
         
     protected:
         
-        cv::Ptr<ContourSkewDetector> localDetector;
+        cv::Ptr<SkewDetector> localDetector;
         
     };
     class ContourWordSkewDetector : public WordSkewDetector
