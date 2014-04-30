@@ -54,7 +54,7 @@ namespace cmp{
         
         cv::Ptr<ContourSkewDetector> localDetector;
         
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability)=0;
+        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, cv::Mat* debugImage = NULL)=0;
     };
 }
 #endif /* defined(__SkewDetection__WordSkewDetector__) */

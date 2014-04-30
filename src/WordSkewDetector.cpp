@@ -75,7 +75,7 @@ namespace cmp {
         	cv::waitKey(0);
 #endif
     	}
-    	double angle = computeAngle(angles, probs, probability);
+    	double angle = computeAngle(angles, probs, probability, debugImage);
 #ifdef VERBOSE
     	std::cout << "Detected skew angle is: " << angle << " with prob.: " << probability << std::endl;
 #endif
