@@ -31,24 +31,25 @@ namespace cmp
         double maxProb = 0;
         int iterator;
         double sum=0;
+        double maxAngle =90;
+        double minAngle =45;
         double angle;
         
         std::vector<std::vector<double> > groups;
-        groups.resize(noOfGroups);
+        groups.resize(noOfGroups*2);
         std::vector<double> groupProbs;
-        groupProbs.resize(noOfGroups);
+        groupProbs.resize(noOfGroups*2);
         
-        for (int i =0; i <angles.size(); i++) {
+       /* for (int i =0; i <angles.size(); i++) {
         	max = MAX(max, angles[i]);
         	min = MIN(min, angles[i]);
-        }
-        groupRange = (max-min) / (noOfGroups);
+        }*/
+        groupRange = (maxAngle-minAngle) / (noOfGroups);
         
         
         for (int i=0; i<angles.size(); i++) {
             int index =  (int) floor( (angles[i] - min ) / groupRange);
-            index = MIN(index, noOfGroups - 1);
-            assert( index >= 0 );
+            index += noOfGroups;
             groups[index].push_back(angles[i]);
             groupProbs[index] += probabilities[i];
         }
