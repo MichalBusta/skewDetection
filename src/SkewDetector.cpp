@@ -129,7 +129,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 		contours[0] = apCont;
 	}
 
-	return detectSkew(mask, contours, hierarchy, debugImage );
+	return detectSkew(contours[0], debugImage );
 }
 
 } /* namespace cmp */

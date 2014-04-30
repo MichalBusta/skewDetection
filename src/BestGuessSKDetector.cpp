@@ -15,7 +15,7 @@
 namespace cmp
 {
 
-BestGuessSKDetector::BestGuessSKDetector()
+BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
 {
 	detectors.push_back( new VerticalDomSkDet());
 	weights.push_back(1.0);
@@ -51,8 +51,6 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
 		}
 	}
-	cv::imshow("temp", bestDebugImage);
-	cv::waitKey(0);
 	this->lastDetectionProbability = bestProb;
 	if(debugImage != NULL)
 		*debugImage = bestDebugImage;
@@ -62,6 +60,39 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 #endif
 	return angles[bestDetIndex];
 
+}
+
+double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+{
+	double bestProb = 0;
+	std::vector<double> angles;
+	size_t bestDetIndex = -1;
+	cv::Mat img;
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(outerContour);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
+	}
+
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
+		{
+			bestDetIndex = i;
+			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
+		}
+	}
+	this->lastDetectionProbability = bestProb;
+
+#ifdef VERBOSE
+	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
+#endif
+	return angles[bestDetIndex];
 }
 
 } /* namespace cmp */

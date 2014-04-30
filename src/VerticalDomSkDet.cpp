@@ -19,6 +19,8 @@ using namespace cv;
 #include "VerticalDomSkDet.h"
 #include "SkewDetector.h"
 
+#define VERBOSE 1
+
 namespace cmp{
 
 
@@ -41,10 +43,8 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 	delete [] hist;
 }
 
-double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
+double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage)
 {
-	std::vector<cv::Point> contour = contours[0];
-
 	memset (hist, 0, int(180/histColWidth) * sizeof(double));
 
 	cv::Point prev = contour.back();
@@ -100,7 +100,10 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 
 		resLen += hist[j];
 	}
-	//cv::imshow("Histogram", histogram);
+#ifdef VERBOSE
+	cv::imshow("Histogram", histogram);
+	cv::waitKey(0);
+#endif
 
 	double minValue = 0.0151;
 	double maxValue = 0.1333;
@@ -116,10 +119,13 @@ double VerticalDomSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vecto
 	if(debugImage != NULL)
 	{
 		Mat& drawing =  *debugImage;
-		drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+		cv::Rect bbox = cv::boundingRect(contour);
+		drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
 
 		Scalar color = Scalar( 255, 255, 255 );
-		drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+		std::vector<std::vector<cv::Point> > contours;
+		contours.push_back(contour);
+		drawContours( drawing, contours, 0, color, 1, 8);
 
 		for (size_t i = 0; i < contour.size(); i++)
 		{

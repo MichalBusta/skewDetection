@@ -40,13 +40,10 @@ namespace cmp
 
 	}
 
-	double ThinProfileSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
+	double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage )
 	{
-
-		if (contours[0].size() < 3) return 0;
-		//cmp::filterContour(contours[0]);
 		vector<Point> hull;
-		convexHull( contours[0], hull );
+		convexHull( contour, hull );
 
 		int topMost = 0;
 		int bottomMost = 0;
@@ -214,10 +211,13 @@ namespace cmp
 			if(debugImage != NULL)
 			{
 				Mat& drawing =  *debugImage;
-				drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+				cv::Rect bbox = cv::boundingRect(contour);
+				drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
 
 				Scalar color = Scalar( 255, 255, 255 );
-				drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+				std::vector<std::vector<cv::Point> > contours;
+				contours.push_back(contour);
+				drawContours( drawing, contours, 0, color, 1, 8);
 
 				//cmp::filterContour(contours[0]);
 

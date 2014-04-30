@@ -81,7 +81,7 @@ namespace cmp
 		* @param debugImage
 		* @return
 		*/
-		virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL ) = 0;
+		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL ) = 0;
 
 		static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 

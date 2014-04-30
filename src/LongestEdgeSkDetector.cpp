@@ -27,9 +27,8 @@ namespace cmp {
 		// TODO Auto-generated destructor stub
 	}
 
-	double LongestEdgeSkDetector::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage)
+	double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage)
 	{
-		std::vector<cv::Point>& outerContour = contours[0];
 		probMeasure1 = 0;
 		probMeasure2 = 0;
 
@@ -118,9 +117,12 @@ namespace cmp {
 		if(debugImage != NULL)
 		{
 			Mat& drawing =  *debugImage;
-			drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+			cv::Rect bbox = cv::boundingRect(outerContour);
+			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
 			Scalar color = Scalar( 255, 255, 255 );
-			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+			std::vector<std::vector<cv::Point> > contours;
+			contours.push_back(outerContour);
+			drawContours( drawing, contours, 0, color, 1, 8);
 
 			int index;
 			for(size_t j = 0; j < outerContour.size(); j++)

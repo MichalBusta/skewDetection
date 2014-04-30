@@ -37,11 +37,10 @@ namespace cmp
 		// TODO Auto-generated destructor stub
 	}
 
-	double LeftRightHullSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
+	double LeftRightHullSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
 	{
-		vector<Point>& outerContour = contours[0];
-
-		int topMost = mask.rows;
+		cv::Rect bbox = cv::boundingRect(outerContour);
+		int topMost = bbox.height;
 		int bottomMost = 0;
 		float angle;
 
@@ -64,9 +63,9 @@ namespace cmp
 		addEdgeThickness = letterSize * precision;
 
 		//ziskani souradnic X
-		int TLX = mask.cols;
+		int TLX = bbox.width;
 		int TRX = 0;
-		int BLX = mask.cols;
+		int BLX = bbox.width;
 		int BRX = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -90,9 +89,9 @@ namespace cmp
 
 		//pomocne body pro vztvareni usecek
 		Point P1(0, topMost + addEdgeThickness);
-		Point P2(mask.rows, topMost + addEdgeThickness);
+		Point P2(bbox.height, topMost + addEdgeThickness);
 		Point P3(0, bottomMost - addEdgeThickness);
-		Point P4(mask.rows, bottomMost - addEdgeThickness);
+		Point P4(bbox.height, bottomMost - addEdgeThickness);
 
 		int deltaX=0, deltaY=0;
 		if(isRight)
@@ -110,10 +109,13 @@ namespace cmp
 		if(debugImage != NULL)
 		{
 			Mat& drawing =  *debugImage;
-			drawing =  Mat::zeros( mask.size(), CV_8UC3 );
 
-			Scalar color = Scalar( 255, 255, 255 ); 
-			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+
+			Scalar color = Scalar( 255, 255, 255 );
+			std::vector<std::vector<cv::Point> > contours;
+			contours.push_back(outerContour);
+			drawContours( drawing, contours, 0, color, 1, 8);
 
 			for(int i=0;i<outerContour.size();i++)
 			{
