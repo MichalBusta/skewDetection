@@ -17,7 +17,7 @@ namespace cmp{
 		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.022, int histColWidth = 1, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3);
 		virtual ~VerticalDomSkDet();
 
-		virtual double detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage = NULL);
+		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
 
 		double* hist;
 		/** sirka binu histogramu ve stupnich */

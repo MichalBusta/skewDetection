@@ -28,15 +28,11 @@ namespace cmp
 		// TODO Auto-generated destructor stub
 	}
 
-	double CentersSkDet::detectSkew( const cv::Mat& mask, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, cv::Mat* debugImage )
+	double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
 	{
-
-		if (contours[0].size() < 3) return 0;
-
-		std::vector<cv::Point>& outerContour = contours[0];
-
 		//ziskani souradnic Y
-		int topPoint = mask.rows;
+		cv::Rect bbox = cv::boundingRect(outerContour);
+		int topPoint = bbox.height;
 		int bottomPoint = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -57,9 +53,9 @@ namespace cmp
 		addEdgeThickness = letterSize * precision;
 
 		//ziskani souradnic X
-		int TLX = mask.cols;
+		int TLX = bbox.width;
 		int TRX = 0;
-		int BLX = mask.cols;
+		int BLX = bbox.width;
 		int BRX = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -82,9 +78,9 @@ namespace cmp
 
 		//pomocne body pro vztvareni usecek
 		Point P1(0, topPoint + addEdgeThickness);
-		Point P2(mask.cols, topPoint + addEdgeThickness);
+		Point P2(bbox.width, topPoint + addEdgeThickness);
 		Point P3(0, bottomPoint - addEdgeThickness);
-		Point P4(mask.cols, bottomPoint - addEdgeThickness);
+		Point P4(bbox.width, bottomPoint - addEdgeThickness);
 
 		/*Point P1(0, topPoint + 100*precision);
 		Point P2(mask.cols, topPoint + 100*precision);
@@ -105,9 +101,11 @@ namespace cmp
 		if(debugImage != NULL)
 		{
 			Mat& drawing =  *debugImage;
-			drawing =  Mat::zeros( mask.size(), CV_8UC3 );
+			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
 			Scalar color = Scalar( 255, 255, 255 );
-			drawContours( drawing, contours, 0, color, 1, 8, hierarchy, 0, Point() );
+			std::vector<std::vector<cv::Point> > contours;
+			contours.push_back(outerContour);
+			drawContours( drawing, contours, 0, color, 1, 8);
 
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
