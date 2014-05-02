@@ -51,10 +51,10 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
         
         for(int i1 =0; i1 <range; i1++){
             if (idx+i1<noOfGroups-1) {
-                groupProbs[idx+i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((i1-sigma)*(i1-sigma))/((2*delta)*(2*delta)));
+                groupProbs[idx+i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((i1-sigma)*(i1-sigma))/(2*(delta*delta)));
             }
             if (idx-i1>0 && i1!=0) {
-                groupProbs[idx-i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((-i1-sigma)*(-i1-sigma))/((2*delta)*(2*delta)));
+                groupProbs[idx-i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((-i1-sigma)*(-i1-sigma))/(2*(delta*delta)));
             }
 
         }
@@ -75,7 +75,7 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     
     int histWidth =500;
     int histHeight = 300;
-    int colWidth = 1;
+    int colWidth = 5;
     
     histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
     int graphWidth =noOfGroups*colWidth;
