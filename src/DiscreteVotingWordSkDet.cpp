@@ -32,7 +32,6 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
 	double maxProb = 0;
 	double allProb = 0;
 	int iterator;
-	double sum=0;
 	double angle;
     double sigma =0;
     double delta =1;
@@ -40,26 +39,24 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     cv::Mat histogram;
     
     
-	std::vector<std::vector<double> > groups;
-	groups.resize(noOfGroups);
-	std::vector<double> groupProbs;
-	groupProbs.resize(noOfGroups);
+    std::vector<double> groupProbs;
+ 	groupProbs.resize(noOfGroups);
 	groupRange = (max-min) / (noOfGroups);
-
+ 
 
 	for (int i=0; i<angles.size(); i++) {
 		int idx =  (int) floor( (angles[i] - min ) / groupRange);
 		idx = MIN(idx, noOfGroups - 1);
 		assert( idx >= 0 );
-		groups[idx].push_back(angles[i]);
         
-        for(int i1 =0; i1 >range; i1++){
-            if (i+i1<noOfGroups-1) {
-                groupProbs[i+i1] += 1/(delta*sqrt(2*M_PI))*pow(M_E, -((i-sigma)*(i-sigma))/((2*delta)*(2*delta)));
+        for(int i1 =0; i1 <range; i1++){
+            if (idx+i1<noOfGroups-1) {
+                groupProbs[idx+i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((i1-sigma)*(i1-sigma))/((2*delta)*(2*delta)));
             }
-            if (i-i1>0 && i1!=0) {
-                groupProbs[i-i1] += 1/(delta*sqrt(2*M_PI))*pow(M_E, -((-i-sigma)*(-i-sigma))/((2*delta)*(2*delta)));
+            if (idx-i1>0 && i1!=0) {
+                groupProbs[idx-i1] += probabilities[i1]*1/(delta*sqrt(2*M_PI))*pow(M_E, -((-i1-sigma)*(-i1-sigma))/((2*delta)*(2*delta)));
             }
+
         }
 		allProb += probabilities[i];
 	}
@@ -71,23 +68,39 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
 		}
 	}
 
-	for (int i=0; i<groups[iterator].size(); i++) {
-		sum += groups[iterator][i];
-	}
-
-	angle=sum/groups[iterator].size();
+	angle= iterator*groupRange+min;
 	probability = maxProb / allProb;
     
     //draw the histogram
     
+    int histWidth =500;
+    int histHeight = 300;
+    int colWidth = 1;
     
-    histogram = cv::Mat::zeros(maxProb, noOfGroups, CV_8UC3);
+    histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
+    int graphWidth =noOfGroups*colWidth;
+    int sidebarWidth = (histWidth-graphWidth)/2;
+    
+    cv::rectangle(histogram, cv::Point(0,0), cv::Point(sidebarWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+    cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0), cv::Point(histWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+    
     for (int i =0; i <noOfGroups; i++) {
 
-        cv::line(histogram, cv::Point(i, 0), cv::Point(i, groupProbs[i]), cv::Scalar(255,0,0));
+        cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
+    }
+    
+    if(debugImage != NULL)
+    {
+        cv::Mat& draw = *debugImage;
+        int x = tan(angle)*debugImage->rows;
+        cv::line( draw, cv::Point(0,0), cv::Point(x, debugImage->cols),cv::Scalar(0,255,0));
+        
+        cv::imshow("DebugImage", draw);
     }
     
     cv::imshow("Histogram", histogram);
+    cv::waitKey(0);
+
     
 	return angle;
     }
