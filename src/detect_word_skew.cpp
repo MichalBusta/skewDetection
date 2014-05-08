@@ -53,7 +53,7 @@ int main( int argc, char **argv)
     int wordDetector =0;
     double skew;
     std::vector<Blob> blobs;
-    std::vector<cv::Mat*> images;
+    std::vector<cv::Mat> images;
     
 	if( argc > 2 )
 	{
@@ -90,8 +90,7 @@ int main( int argc, char **argv)
 		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0) );
         //invert image, so ink is white
         blobs.push_back( Blob(img) );
-        images.push_back(&img);
-        
+        images.push_back(tmp);
         
     }
     skew = WordSkewDetector->detectSkew(blobs, 0.0, images);

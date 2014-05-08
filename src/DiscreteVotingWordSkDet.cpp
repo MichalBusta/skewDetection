@@ -22,7 +22,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat*>& images, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat>& images, cv::Mat* debugImage)
 {
 
 	probability = 0;
@@ -39,7 +39,6 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     double resolution =0.4;
     int maxImgHeight=0;
     int headerHeight;
-    int headerRows=1;
     std::vector< std::vector<cv::Mat> > rowImages;;
     cv::Mat histogram;
     
@@ -80,24 +79,24 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     
     //get max debugimg height
     
-    
     for (size_t i = 0; i<images.size(); i++) {
-        maxImgHeight = MAX(images[i]->rows, maxImgHeight);
+        maxImgHeight = MAX(images[i].rows, maxImgHeight);
     }
     
-    
+    //calculate number of images per row
     int rowSize =0;
     int rowIdx =0;
+    rowImages.resize(1);
     for (size_t i =0; i<images.size(); i++) {
         
-        if (rowSize +=images[i]->cols > 500) {
-            rowSize +=images[i]->cols;
-            rowImages[rowIdx].push_back(*images[i]);
+        if (rowSize +=images[i].cols < 500) {
+            rowSize +=images[i].cols;
+            rowImages[rowIdx].push_back(images[i]);
         }
         else{
             
             rowIdx++;
-            rowImages.reserve(rowIdx);
+            rowImages.resize(rowIdx+1);
             rowSize=0;
         }
         
@@ -134,10 +133,21 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
         int rowWidth=0;
         for (size_t i1=0; i1<rowImages[i].size(); i1++) {
             
-            cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
-            cv::Mat roiImg;
-            roiImg=histogram(roi);
-            rowImages[i][i1].copyTo(roiImg);
+            /*cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
+            cv::Mat temp;
+            
+            rowImages[i][i1].convertTo(temp, CV_8UC3);
+            temp.copyTo(histogram(roi));*/
+            
+            for (size_t x =0; x<rowImages[i][i1].cols; x++) {
+                for (size_t y =0; y<rowImages[i][i1].rows; y++) {
+                    histogram.at<uchar>(x+rowWidth, y) = rowImages[i][i1].at<uchar>(x , y);
+                }
+            }
+            
+            cv::line(histogram, cv::Point(rowWidth+5,0), cv::Point(rowWidth+5,maxImgHeight), cv::Scalar(255,0,0));
+            
+            cv::line(histogram, cv::Point(rowWidth+5+maxImgHeight*atan(probabilities[i1]),0), cv::Point(rowWidth+5,maxImgHeight), cv::Scalar(0,255,0));
             
             rowWidth += rowImages[i][i1].cols;
         }

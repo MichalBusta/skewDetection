@@ -34,26 +34,26 @@ namespace cmp {
     
     
     
-    double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, std::vector<cv::Mat*>& debugImages)
+    double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, std::vector<cv::Mat>& debugImages)
     {
         std::vector<double> probs;
         std::vector<double> angles;
         int noImg = blobs.size();
         for (int i = 0; i<noImg; i++)
         {
-        	angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, debugImages[i]));
+        	angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK ));
 #ifdef VERBOSE
         	cv::imshow("temp", *tempDebugPtr);
         	cv::waitKey(0);
 #endif
         	probs.push_back(localDetector->lastDetectionProbability);
-
+            cv::imshow("test", debugImages[i]);
         }
         double probability = 0;
         return computeAngle(angles, probs, probability, debugImages);
     }
 
-    double ContourWordSkewDetector::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, std::vector<cv::Mat*>& debugImages)
+    double ContourWordSkewDetector::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, std::vector<cv::Mat>& debugImages)
     {
     	std::vector<double> probs;
     	std::vector<double> angles;
@@ -63,7 +63,7 @@ namespace cmp {
     		cv::Mat tempDebug;
     		debugImage = &tempDebug;
 #endif
-    		angles.push_back(localDetector->detectSkew(*contours[i], debugImages[i]));
+    		angles.push_back(localDetector->detectSkew(*contours[i]));
     		probs.push_back(localDetector->lastDetectionProbability);
 #ifdef VERBOSE
         	cv::imshow("temp", tempDebug);

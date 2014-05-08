@@ -26,7 +26,7 @@ namespace cmp {
         
     protected:
         
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat*>& images,cv::Mat* debugImage = NULL);
+        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat>& images,cv::Mat* debugImage = NULL);
     };
 }
 
