@@ -22,7 +22,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat*>& images, cv::Mat* debugImage)
 {
 
 	probability = 0;
@@ -37,6 +37,10 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     double delta =1;
     int range=10;
     double resolution =0.4;
+    int maxImgHeight=0;
+    int headerHeight;
+    int headerRows=1;
+    std::vector< std::vector<cv::Mat> > rowImages;;
     cv::Mat histogram;
     
     
@@ -72,24 +76,74 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
 	angle= iterator*groupRange+min;
 	probability = maxProb / allProb;
     
+    //the drawing part
+    
+    //get max debugimg height
+    
+    
+    for (size_t i = 0; i<images.size(); i++) {
+        maxImgHeight = MAX(images[i]->rows, maxImgHeight);
+    }
+    
+    
+    int rowSize =0;
+    int rowIdx =0;
+    for (size_t i =0; i<images.size(); i++) {
+        
+        if (rowSize +=images[i]->cols > 500) {
+            rowSize +=images[i]->cols;
+            rowImages[rowIdx].push_back(*images[i]);
+        }
+        else{
+            
+            rowIdx++;
+            rowImages.reserve(rowIdx);
+            rowSize=0;
+        }
+        
+    }
+    
+    headerHeight = maxImgHeight*(rowIdx+1);
+    
     //draw the histogram
     
+    int headerbuffer =20;
     int histWidth =500;
     int histHeight = 300;
+    int totalHeaderHeight = headerbuffer+headerHeight;
     int colWidth = 5;
     
-    histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
+    histogram = cv::Mat::zeros(histHeight+totalHeaderHeight, histWidth, CV_8UC3);
     int graphWidth =noOfGroups*colWidth;
     int sidebarWidth = (histWidth-graphWidth)/2;
     
-    cv::rectangle(histogram, cv::Point(0,0), cv::Point(sidebarWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
-    cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0), cv::Point(histWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+    //drawing tbe header buffer
+    cv::rectangle(histogram, cvPoint(0, totalHeaderHeight), cvPoint(histWidth, headerHeight), cv::Scalar(213,213,213),CV_FILLED);
+    //drawing the sidebars
+    cv::rectangle(histogram, cv::Point(0,0+headerbuffer+headerHeight), cv::Point(sidebarWidth,histHeight+totalHeaderHeight), cv::Scalar(213,213,213), CV_FILLED);
+    cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0+headerbuffer+headerHeight), cv::Point(histWidth,histHeight+totalHeaderHeight), cv::Scalar(213,213,213), CV_FILLED);
     
+    //drawing the graph
     for (int i =0; i <noOfGroups; i++) {
 
-        cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
+        cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
+    }
+    //drawing the debug images from detectors
+    
+    for (size_t i =0; i<rowImages.size(); i++) {
+        int rowWidth=0;
+        for (size_t i1=0; i1<rowImages[i].size(); i1++) {
+            
+            cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
+            cv::Mat roiImg;
+            roiImg=histogram(roi);
+            rowImages[i][i1].copyTo(roiImg);
+            
+            rowWidth += rowImages[i][i1].cols;
+        }
     }
     
+    //the debug image
     if(debugImage != NULL)
     {
         cv::Mat& draw = *debugImage;
@@ -102,7 +156,7 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     cv::imshow("Histogram", histogram);
     cv::waitKey(0);
 
-    
 	return angle;
+    
     }
 }
