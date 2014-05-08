@@ -136,12 +136,12 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
             /*cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
             cv::Mat temp;
             
-            rowImages[i][i1].convertTo(temp, CV_8UC3);
-            temp.copyTo(histogram(roi));*/
-            
+            rowImages[i][i1].convertTo(temp, histogram.type());
+            temp.copyTo(histogram(roi));
+            */
             for (size_t x =0; x<rowImages[i][i1].cols; x++) {
                 for (size_t y =0; y<rowImages[i][i1].rows; y++) {
-                    histogram.at<uchar>(x+rowWidth, y) = rowImages[i][i1].at<uchar>(x , y);
+                    histogram.at<uchar>(y, x+rowWidth) = rowImages[i][i1].at<uchar>(y , x);
                 }
             }
             
