@@ -8,8 +8,9 @@
 
 #include "DiscreteVotingWordSkDet.h"
 #include "WordSkewDetector.h"
-#include "stdlib.h"
 #include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+
 
 namespace cmp
 {
@@ -22,7 +23,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat>& images, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat> debugImages, cv::Mat* debugImage)
 {
 
 	probability = 0;
@@ -79,19 +80,19 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     
     //get max debugimg height
     
-    for (size_t i = 0; i<images.size(); i++) {
-        maxImgHeight = MAX(images[i].rows, maxImgHeight);
+    for (size_t i = 0; i<debugImages.size(); i++) {
+        maxImgHeight = MAX(debugImages[i].rows, maxImgHeight);
     }
     
     //calculate number of images per row
     int rowSize =0;
     int rowIdx =0;
     rowImages.resize(1);
-    for (size_t i =0; i<images.size(); i++) {
+    for (size_t i =0; i<debugImages.size(); i++) {
         
-        if (rowSize +=images[i].cols < 500) {
-            rowSize +=images[i].cols;
-            rowImages[rowIdx].push_back(images[i]);
+        if (rowSize +=debugImages[i].cols < 500) {
+            rowSize +=debugImages[i].cols;
+            rowImages[rowIdx].push_back(debugImages[i]);
         }
         else{
             
@@ -133,21 +134,15 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
         int rowWidth=0;
         for (size_t i1=0; i1<rowImages[i].size(); i1++) {
             
-            /*cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
+            cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
             cv::Mat temp;
             
-            rowImages[i][i1].convertTo(temp, histogram.type());
-            temp.copyTo(histogram(roi));
-            */
-            for (size_t x =0; x<rowImages[i][i1].cols; x++) {
-                for (size_t y =0; y<rowImages[i][i1].rows; y++) {
-                    histogram.at<uchar>(y, x+rowWidth) = rowImages[i][i1].at<uchar>(y , x);
-                }
-            }
+            std::cout << "Type 1 " << rowImages[i][i1].type() << " " << rowImages[i][i1].empty() <<  std::endl;
             
-            cv::line(histogram, cv::Point(rowWidth+5,0), cv::Point(rowWidth+5,maxImgHeight), cv::Scalar(255,0,0));
-            
-            cv::line(histogram, cv::Point(rowWidth+5+maxImgHeight*atan(probabilities[i1]),0), cv::Point(rowWidth+5,maxImgHeight), cv::Scalar(0,255,0));
+            imshow("ts", rowImages[i][i1]);
+            cv::waitKey(0);
+            std::cout << "Type 1 " << histogram.type() << std::endl;
+            rowImages[i][i1].copyTo(histogram(roi));
             
             rowWidth += rowImages[i][i1].cols;
         }
@@ -156,16 +151,10 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     //the debug image
     if(debugImage != NULL)
     {
-        cv::Mat& draw = *debugImage;
-        int x = tan(angle)*debugImage->rows;
-        cv::line( draw, cv::Point(0,0), cv::Point(x, debugImage->cols),cv::Scalar(0,255,0));
-        
-        cv::imshow("DebugImage", draw);
+        debugImage = &histogram;
+        cv::imshow("Histogram", *debugImage);
+        cv::waitKey(0);
     }
-    
-    cv::imshow("Histogram", histogram);
-    cv::waitKey(0);
-
 	return angle;
     
     }

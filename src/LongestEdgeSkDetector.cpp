@@ -122,12 +122,20 @@ namespace cmp {
 			Scalar color = Scalar( 255, 255, 255 );
 			std::vector<std::vector<cv::Point> > contours;
 			contours.push_back(outerContour);
-			drawContours( drawing, contours, 0, color, 1, 8);
-
 			int index;
+            int min_Y;
+            int min_X;
+            
+            
+            for (size_t i=0; i<outerContour.size(); i++) {
+                MIN(min_Y, outerContour[i].y);
+                MIN(min_X, outerContour[i].x);
+            }
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
-				cv::circle(drawing, outerContour[j], 2, cv::Scalar(0, 255, 255), 1);
+                
+                cv::line(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), cv::Point(outerContour[j+1].x-min_X,outerContour[j+1].y-min_Y), color);
+				cv::circle(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), 2, cv::Scalar(0, 255, 255), 1);
 				int index = j+1;
 				if(index >=  outerContour.size())
 					index = 0;
@@ -141,16 +149,15 @@ namespace cmp {
 				if(actLength >= ( maxLength - edgeRatio * maxLength ))
 					color = cv::Scalar( 0, 255, 0 );
 				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-					cv::line(drawing, outerContour[j], outerContour[index], color, 1, 0);
+					cv::line(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), color, 1, 0);
 
 			}
-
 			index = counter + 1;
 			if(counter==outerContour.size()-1)
 				index = 0;
-			cv::line(drawing, outerContour[counter], outerContour[index], cv::Scalar( 0, 0, 255 ), 1, 0);
-			cv::circle(drawing, outerContour[counter], 4, cv::Scalar( 0, 0, 255 ), 1, 0);
-			cv::circle(drawing, outerContour[index], 4, cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::line(drawing,cv::Point(outerContour[counter].x-min_X,outerContour[counter].y-min_Y), cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::circle(drawing, cv::Point(outerContour[counter].x-min_X,outerContour[counter].y-min_Y), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::circle(drawing, cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
 		}
 
 		int index = (int) (probMeasure2 - 1);
