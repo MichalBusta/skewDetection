@@ -13,6 +13,7 @@
 
 namespace cmp
 {
+
 DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(cv::Ptr<SkewDetector> detector) : ContourWordSkewDetector(detector)
 {
 
@@ -72,37 +73,35 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
 	angle= iterator*groupRange+min;
 	probability = maxProb / allProb;
     
-    //draw the histogram
-    
-    int histWidth =500;
-    int histHeight = 300;
-    int colWidth = 5;
-    
-    histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
-    int graphWidth =noOfGroups*colWidth;
-    int sidebarWidth = (histWidth-graphWidth)/2;
-    
-    cv::rectangle(histogram, cv::Point(0,0), cv::Point(sidebarWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
-    cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0), cv::Point(histWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
-    
-    for (int i =0; i <noOfGroups; i++) {
+	//draw the histogram
+	if(debugImage != NULL)
+	{
+		int histWidth =500;
+		int histHeight = 300;
+		int colWidth = 5;
 
-        cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
-    }
-    
-    if(debugImage != NULL)
-    {
-        cv::Mat& draw = *debugImage;
-        int x = tan(angle)*debugImage->rows;
-        cv::line( draw, cv::Point(0,0), cv::Point(x, debugImage->cols),cv::Scalar(0,255,0));
-        
-        cv::imshow("DebugImage", draw);
-    }
-    
-    cv::imshow("Histogram", histogram);
-    cv::waitKey(0);
+		histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
+		int graphWidth =noOfGroups*colWidth;
+		int sidebarWidth = (histWidth-graphWidth)/2;
 
+		cv::rectangle(histogram, cv::Point(0,0), cv::Point(sidebarWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+		cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0), cv::Point(histWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+
+		for (int i =0; i <noOfGroups; i++) {
+
+			cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
+		}
+
+		cv::Mat& draw = *debugImage;
+		int x = tan(angle)*debugImage->rows;
+		cv::line( draw, cv::Point(0,0), cv::Point(x, debugImage->cols),cv::Scalar(0,255,0));
+
+		cv::imshow("DebugImage", draw);
+		cv::imshow("Histogram", histogram);
+		cv::waitKey(0);
+	}
     
 	return angle;
-    }
 }
+
+}//namespace cmp
