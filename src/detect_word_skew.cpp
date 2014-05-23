@@ -52,6 +52,8 @@ int main( int argc, char **argv)
 	int detector = 0;
     int wordDetector =0;
     double skew;
+    cv::Mat debugImage;
+    cv::Mat dbgImage;
     std::vector<Blob> blobs;
     
 	if( argc > 2 )
@@ -91,7 +93,10 @@ int main( int argc, char **argv)
         blobs.push_back( Blob(img) );
         
     }
-    skew = WordSkewDetector->detectSkew(blobs, 0.0, &debugImg);
+    
+    
+    skew = WordSkewDetector->detectSkew(blobs, 0.0, &dbgImage);
+
     cv::Mat wrapped;
     cv::Mat warp_mat( 2, 3, CV_32FC1 );
     warp_mat.at<float>(0, 0) = 1.0f;

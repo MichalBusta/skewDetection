@@ -8,8 +8,9 @@
 
 #include "DiscreteVotingWordSkDet.h"
 #include "WordSkewDetector.h"
-#include "stdlib.h"
 #include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+
 
 namespace cmp
 {
@@ -23,7 +24,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat> debugImages, cv::Mat* debugImage)
 {
 
 	probability = 0;
@@ -38,6 +39,9 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     double delta =1;
     int range=10;
     double resolution =0.4;
+    int maxImgHeight=0;
+    int headerHeight;
+    std::vector< std::vector<cv::Mat> > rowImages;;
     cv::Mat histogram;
     
     
@@ -72,6 +76,35 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
 
 	angle= iterator*groupRange+min;
 	probability = maxProb / allProb;
+    
+    //the drawing part
+    
+    //get max debugimg height
+    
+    for (size_t i = 0; i<debugImages.size(); i++) {
+        maxImgHeight = MAX(debugImages[i].rows, maxImgHeight);
+    }
+    
+    //calculate number of images per row
+    int rowSize =0;
+    int rowIdx =0;
+    rowImages.resize(1);
+    for (size_t i =0; i<debugImages.size(); i++) {
+        
+        if (rowSize +=debugImages[i].cols < 500) {
+            rowSize +=debugImages[i].cols;
+            rowImages[rowIdx].push_back(debugImages[i]);
+        }
+        else{
+            
+            rowIdx++;
+            rowImages.resize(rowIdx+1);
+            rowSize=0;
+        }
+        
+    }
+    
+    headerHeight = maxImgHeight*(rowIdx+1);
     
 	//draw the histogram
 	if(debugImage != NULL)

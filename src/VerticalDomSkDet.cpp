@@ -125,19 +125,28 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 		Scalar color = Scalar( 255, 255, 255 );
 		std::vector<std::vector<cv::Point> > contours;
 		contours.push_back(contour);
-		drawContours( drawing, contours, 0, color, 1, 8);
-
+        
+        int miny;
+        int minx;
+        //get contour max
+        for (size_t i=0; i<contour.size(); i++) {
+            miny = MIN(contour[i].y, miny);
+            minx = MIN(contour[i].x, minx);
+        }
+        
 		for (size_t i = 0; i < contour.size(); i++)
 		{
 			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
-
-			cv::circle(drawing, contour[i], 2, Scalar( 0, 0, 255 ), 1);
-
+            
+			cv::circle(drawing, cv::Point(contour[i].x - minx,contour[i].y - miny), 2, Scalar( 0, 0, 255 ), 1);
+            
+            cv::line(drawing, cv::Point(contour[i].x - minx,contour[i].y - miny), cv::Point(contour[i2].x - minx,contour[i2].y- miny), color);
+            
 			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
 			if (ang < 0) ang = ang + M_PI;
 			if (abs(ang-(maxI*histColWidth+histColWidth/2)*M_PI/180) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, contour[i], contour[i2], Scalar( 0, 255, 0 ), 1);
+				cv::line(drawing, cv::Point(contour[i].x - minx,contour[i].y- miny), Point(contour[i2].x - minx,contour[i2].y- miny), Scalar( 0, 255, 0 ), 1);
 			}
 		}
 	}

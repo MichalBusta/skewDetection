@@ -36,7 +36,7 @@ namespace cmp{
         WordSkewDetector();
         virtual ~WordSkewDetector();
         
-        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage = NULL) = 0;
+        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL) = 0;
 
     };
     class ContourWordSkewDetector : public WordSkewDetector
@@ -46,15 +46,15 @@ namespace cmp{
         ContourWordSkewDetector(cv::Ptr<ContourSkewDetector> detector);
         virtual ~ContourWordSkewDetector();
        
-        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage = NULL);
+        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL);
         
-        virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage = NULL);
+        virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
 
     protected:
         
         cv::Ptr<ContourSkewDetector> localDetector;
         
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, cv::Mat* debugImage = NULL)=0;
+        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat> debugImages, cv::Mat* debugImage = NULL)=0;
     };
 }
 #endif /* defined(__SkewDetection__WordSkewDetector__) */

@@ -45,6 +45,8 @@ namespace cmp
         int maximum =0;
         int iterator = 0;
         int sum = 0;
+        int lastVal=0;
+        int secondLastVal =0;
         
         bool isGroup = false;
         
@@ -89,18 +91,18 @@ namespace cmp
         
         //group similar values
         for (int i =0; i<grad.size(); i++) {
-            if (max<grad[i] && !isGroup) {
-                max = grad[i];
-                begin = i;
-                isGroup = true;
-            }
-            else if (max>grad[i] && isGroup) {
-                continue;
-            }
-            else if (max<grad[i] && isGroup) {
-                max = grad[i];
-                end = i-1;
+            
+            secondLastVal=lastVal;
+            lastVal = grad[i];
+            
+            if (!isGroup && grad[i]>0) {
+                isGroup =true;
+                begin=i;
                 
+            }
+            
+            else if (secondLastVal < lastVal > grad[i] || grad[1] ==0) {
+                end=i-1;
                 std::vector<double> tempVector;
                 int totalProb=0;
                 
@@ -115,8 +117,8 @@ namespace cmp
                 tempVector.clear();
                 
                 begin =i;
-                
             }
+            
         }
         //return the avg of the group with the highest total certainty
         
