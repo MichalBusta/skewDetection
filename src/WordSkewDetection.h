@@ -2,7 +2,7 @@
 //  WordSkewDetection.h
 //  SkewDetection
 //
-//  Created by David Helekal on 26/03/14.
+//  Created by David Helekal on 30/05/14.
 //
 //
 
@@ -10,8 +10,7 @@
 #define SkewDetection_WordSkewDetection_h
 
 #include "WordSkewDetector.h"
-#include "VotingWordSkDet.h"
-
+#include "DiscreteVotingWordSkDet.h"
 
 
 #endif

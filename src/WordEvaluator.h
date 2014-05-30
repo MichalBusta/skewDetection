@@ -14,10 +14,29 @@
 #include <iostream>
 #include "SkewDetection.h"
 #include "WordSkewDetection.h"
+#include <fstream>
+#include "IOUtils.h"
 
 #endif /* defined(__SkewDetection__WordEvaluator__) */
 namespace cmp
 {
+    struct Result
+    {
+        double angle;
+        
+        bool isWrong;
+        
+        cv::Mat debugImg;
+        
+        double probability;
+        
+        Result(double angle, bool isWrong, cv::Mat debugImg, double probability) : angle(angle), isWrong(isWrong), debugImg(debugImg), probability(probability)
+        {
+            
+        }
+        
+    };
+    
     class WordEvaluator
     {
     public:
@@ -28,14 +47,26 @@ namespace cmp
         
         void run();
         
+        void evaluateWord(std::string wordDir);
+        
         void addWordDetector(cv::Ptr<WordSkewDetector> detector);
     
     private:
         
-        void createFileStructure(std::string outputDir);
+        std::vector<std::string> splitString(const std::string &inputString, char delim);
+        
+        void createFileStructure(std::string outputFolder);
         
         void writeResults(std::string outputFolder);
         
-        void getContours();
+        std::string outputDirectory;
+        
+        int numberOfFiles;
+        std::vector<Result> results;
+        std::vector<double> reference;
+        std::vector<bool> failed;
+        std::vector<std::string> wordImages;
+        std::vector<std::string> directories;
+        
     };
 }
