@@ -32,6 +32,7 @@ file(GLOB lib_srcs "src/*.cpp")
 LIST(REMOVE_ITEM lib_srcs "src/run_evaluation.cpp")
 LIST(REMOVE_ITEM lib_srcs "src/detect_skew.cpp")
 LIST(REMOVE_ITEM lib_srcs "src/detect_word_skew.cpp")
+LIST(REMOVE_ITEM lib_srcs "src/word_skew_evaluator.cpp")
 
 add_library(skewDetection
     ${lib_srcs}
@@ -43,6 +44,13 @@ add_library(skewDetection
 add_executable(run_evaluation "src/run_evaluation.cpp")
 
 target_link_libraries (run_evaluation     
+    skewDetection
+    ${OpenCV_LIBS}
+)
+
+add_executable(word_skew_evaluator "src/word_skew_evaluator.cpp")
+
+target_link_libraries (word_skew_evaluator
     skewDetection
     ${OpenCV_LIBS}
 )
