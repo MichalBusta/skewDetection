@@ -107,8 +107,9 @@ namespace cmp {
             }
             words.push_back(temp);
         }
+        
+        
     }
-    
     
     //string splitting method
     
@@ -125,6 +126,7 @@ namespace cmp {
     
     void WordEvaluator::addWordDetector(cv::Ptr<WordSkewDetector> detector)
     {
+        detectors.push_back(detector);
         
     }
     

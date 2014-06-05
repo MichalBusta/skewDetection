@@ -61,6 +61,7 @@ namespace cmp
         
         std::string outputDirectory;
         
+        std::vector<cv::Ptr<WordSkewDetector> > detectors;
         int numberOfFiles;
         std::vector<Result> results;
         std::vector<double> reference;
