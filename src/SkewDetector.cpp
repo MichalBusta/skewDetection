@@ -44,7 +44,7 @@ void ContourSkewDetector::filterValuesBySimiliarAngle(
 	}
 }
 
-SkewDetector::SkewDetector() : lastDetectionProbability(0.5), probMeasure1(0), probMeasure2(0)
+SkewDetector::SkewDetector() : lastDetectionProbability(0.5), probMeasure1(0.5), probMeasure2(0.5)
 {
 	// TODO Auto-generated constructor stub
 

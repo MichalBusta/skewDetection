@@ -14,6 +14,7 @@
 
 namespace cmp
 {
+
 DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(cv::Ptr<SkewDetector> detector) : ContourWordSkewDetector(detector)
 {
 
@@ -105,57 +106,35 @@ double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::ve
     
     headerHeight = maxImgHeight*(rowIdx+1);
     
-    //draw the histogram
-    
-    int headerbuffer =20;
-    int histWidth =500;
-    int histHeight = 300;
-    int totalHeaderHeight = headerbuffer+headerHeight;
-    int colWidth = 5;
-    
-    histogram = cv::Mat::zeros(histHeight+totalHeaderHeight, histWidth, CV_8UC3);
-    int graphWidth =noOfGroups*colWidth;
-    int sidebarWidth = (histWidth-graphWidth)/2;
-    
-    //drawing tbe header buffer
-    cv::rectangle(histogram, cvPoint(0, totalHeaderHeight), cvPoint(histWidth, headerHeight), cv::Scalar(213,213,213),CV_FILLED);
-    //drawing the sidebars
-    cv::rectangle(histogram, cv::Point(0,0+headerbuffer+headerHeight), cv::Point(sidebarWidth,histHeight+totalHeaderHeight), cv::Scalar(213,213,213), CV_FILLED);
-    cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0+headerbuffer+headerHeight), cv::Point(histWidth,histHeight+totalHeaderHeight), cv::Scalar(213,213,213), CV_FILLED);
-    
-    //drawing the graph
-    for (int i =0; i <noOfGroups; i++) {
+	//draw the histogram
+	if(debugImage != NULL)
+	{
+		int histWidth =500;
+		int histHeight = 300;
+		int colWidth = 5;
 
-        cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
-    }
-    //drawing the debug images from detectors
+		histogram = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
+		int graphWidth =noOfGroups*colWidth;
+		int sidebarWidth = (histWidth-graphWidth)/2;
+
+		cv::rectangle(histogram, cv::Point(0,0), cv::Point(sidebarWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+		cv::rectangle(histogram, cv::Point(histWidth-sidebarWidth,0), cv::Point(histWidth,histHeight), cv::Scalar(213,213,213), CV_FILLED);
+
+		for (int i =0; i <noOfGroups; i++) {
+
+			cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
+		}
+
+		cv::Mat& draw = *debugImage;
+		int x = tan(angle)*debugImage->rows;
+		cv::line( draw, cv::Point(0,0), cv::Point(x, debugImage->cols),cv::Scalar(0,255,0));
+
+		cv::imshow("DebugImage", draw);
+		cv::imshow("Histogram", histogram);
+		cv::waitKey(0);
+	}
     
-    for (size_t i =0; i<rowImages.size(); i++) {
-        int rowWidth=0;
-        for (size_t i1=0; i1<rowImages[i].size(); i1++) {
-            
-            cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
-            cv::Mat temp;
-            
-            std::cout << "Type 1 " << rowImages[i][i1].type() << " " << rowImages[i][i1].empty() <<  std::endl;
-            
-            imshow("ts", rowImages[i][i1]);
-            cv::waitKey(0);
-            std::cout << "Type 1 " << histogram.type() << std::endl;
-            rowImages[i][i1].copyTo(histogram(roi));
-            
-            rowWidth += rowImages[i][i1].cols;
-        }
-    }
-    
-    //the debug image
-    if(debugImage != NULL)
-    {
-        debugImage = &histogram;
-        cv::imshow("Histogram", *debugImage);
-        cv::waitKey(0);
-    }
 	return angle;
-    
-    }
 }
+
+}//namespace cmp
