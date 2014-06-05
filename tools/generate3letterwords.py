@@ -6,7 +6,7 @@ from xml.dom.minidom import Document
 class FontTestWriter:
     'The font test suite writer'
     
-    forbidden = ["ttf-japanese", "Kacst", "Kedage", "lohit", "Mallige", "mry", "msam", "OpenSymbol", "ori", "Pothana", "Saab", "Untitled", "Vemana", "wasy", "esint", "cmex", "cmr", "Balker", "msbm", "rsfs", "cmsy", "cmmi10" ]
+    forbidden = ["ttf-japanese", "Kacst", "Kedage", "lohit", "Mallige", "mry", "msam", "OpenSymbol", "ori", "Pothana", "Saab", "Untitled", "Vemana", "wasy", "esint", "cmex", "cmr", "Balker", "msbm", "rsfs", "cmsy", "cmmi10", "Symbol", 'Wingdings' ]
     
     fonts = []
     capitals = []
@@ -197,7 +197,7 @@ if not os.path.exists(outputDir):
 
 tempWord =""
 
-wordlist = open('/Users/davidhelekal/Desktop/3wordlist.txt')
+wordlist = open('/datagrid/personal/TextSpotter/fonts/dict/3wordList.txt')
 wordString = wordlist.read()
 
 words = wordString.split()
