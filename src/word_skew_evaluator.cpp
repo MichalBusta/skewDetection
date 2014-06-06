@@ -6,6 +6,9 @@
 */
 
 #include <iostream>
+#include "SkewDetection.h"
+#include "WordSkewDetection.h"
+#include "WordEvaluator.h"
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -22,6 +25,10 @@ int main( int argc, char **argv)
 	{
 		help();
 		return -1;
-	}
+    }
+    
+    cmp::WordEvaluator eval = *new cmp::WordEvaluator(argv[2],argv[1],true);
+    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(new cmp::BestGuessSKDetector), "DiscreteVoting");
+    eval.run();
     
 }

@@ -7,11 +7,12 @@
 //
 
 #include "WordEvaluator.h"
+#include <opencv2/highgui/highgui.hpp>
 namespace cmp {
     
-    WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, std::string *referenceFile, bool writeData) : outputDirectory(outputDir){
+    WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, bool writeData, std::string *referenceFile) : outputDirectory(outputDir){
         
-        wordImages = IOUtils::GetFilesInDirectory(inputDir,"*.png", true);
+        wordImages = IOUtils::GetFilesInDirectory(inputDir,"*", true);
         
         //if the reference file is supplied, set the reference vector the given data
         if (referenceFile!=NULL)
@@ -43,18 +44,19 @@ namespace cmp {
         createFileStructure(outputDirectory);
         
         for (size_t i=0; i<directories.size(); i++) {
-            evaluateWord(directories[i]);
+            evaluateWord(directories[i], i);
         }
     }
     
-    void WordEvaluator::evaluateWord(std::string wordDir)
+    void WordEvaluator::evaluateWord(std::string wordDir, int idx)
     {
+        std::cout<<wordDir;
         //vector containing lines of image data from the suplied text file
         std::vector<std::vector<std::string> > imageData;
         //the output vector
         std::vector<std::vector<std::string> > words;
         //vector containing the path to the text file (is a vector only due to return type)
-        std::vector<std::string> dataFilePath;
+        std::string dataFilePath;
         //vector containing line data
         std::vector<std::string> lines;
         //vector containing the length of word lines
@@ -66,8 +68,8 @@ namespace cmp {
         //index for iterating through lines
         int index=0;
         
-        dataFilePath = IOUtils::GetFilesInDirectory(wordDir, "*.txt",true);
-        textdatafile.open(dataFilePath[0]);
+        dataFilePath = wordDir+"/"+IOUtils::Basename(wordDir)+".txt";
+        textdatafile.open(dataFilePath);
         
         while (getline(textdatafile, line)) {
             lines.push_back(line);
@@ -85,7 +87,7 @@ namespace cmp {
             }
             
             //if the line contains the line header
-            if (lines[i]=="LINES")
+            if (lines[i]=="LINES:")
             {
                 isLine=true;
                 continue;
@@ -109,6 +111,38 @@ namespace cmp {
         }
         
         
+        for (size_t i=0; i<detectors.size(); i++) {
+            
+            std::string dirPath=outputDirectory+"/"+detectorIDs[i]+"/"+IOUtils::Basename(wordDir);
+            IOUtils::CreateDir(dirPath);
+            
+            for (size_t i1=0; i1<words.size(); i1++) {
+                std::vector<Blob> imgs;
+                double angle;
+                cv::Mat debugImage;
+                bool isWrong =true;
+
+                
+                for (size_t i2=0; i2<words[i1].size(); i2++) {
+                    cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2], CV_LOAD_IMAGE_GRAYSCALE);
+
+                    imgs.push_back(*new Blob(tempImg));
+                }
+                angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
+                
+                if (angle == reference[idx]) {
+                    isWrong = false;
+                }
+                Result tempResult =*new Result(angle, isWrong, debugImage);
+                results.push_back(tempResult);
+                
+                std::stringstream imageName;
+                imageName << dirPath<< "/" << IOUtils::Basename(wordDir) << i1 <<".jpeg";
+                
+                saveResult(imageName.str(), tempResult);
+                
+            }
+        }
     }
     
     //string splitting method
@@ -124,9 +158,10 @@ namespace cmp {
         return outputString;
     }
     
-    void WordEvaluator::addWordDetector(cv::Ptr<WordSkewDetector> detector)
+    void WordEvaluator::addWordDetector(cv::Ptr<WordSkewDetector> detector, std::string detectorID)
     {
         detectors.push_back(detector);
+        detectorIDs.push_back(detectorID);
         
     }
     
@@ -134,7 +169,11 @@ namespace cmp {
     
     void WordEvaluator::createFileStructure(std::string outputFolder)
     {
-        for (size_t i=0; i<directories.size(); i++) {
+        for (size_t i=0; i<detectorIDs.size(); i++) {
+            std::string directoryPath;
+            directoryPath=outputFolder;
+            directoryPath += "/"+detectorIDs[i];
+            IOUtils::CreateDir(directoryPath);
             
         }
     }
@@ -144,6 +183,11 @@ namespace cmp {
     void WordEvaluator::writeResults(std::string outputFolder)
     {
         
+    }
+    
+    void WordEvaluator::saveResult(std::string outputDir, cmp::Result result)
+    {
+        cv::imwrite(outputDir, result.debugImg);
     }
     
     

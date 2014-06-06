@@ -19,7 +19,6 @@ using namespace cv;
 #include "VerticalDomSkDet.h"
 #include "SkewDetector.h"
 
-#define VERBOSE 1
 
 namespace cmp{
 

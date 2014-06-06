@@ -28,9 +28,7 @@ namespace cmp
         
         cv::Mat debugImg;
         
-        double probability;
-        
-        Result(double angle, bool isWrong, cv::Mat debugImg, double probability) : angle(angle), isWrong(isWrong), debugImg(debugImg), probability(probability)
+        Result(double angle, bool isWrong, cv::Mat debugImg) : angle(angle), isWrong(isWrong), debugImg(debugImg)
         {
             
         }
@@ -41,33 +39,36 @@ namespace cmp
     {
     public:
         
-        WordEvaluator(std::string outputDir, std::string inputDir, std::string *referenceFile = NULL, bool writeData=true);
+        WordEvaluator(std::string outputDir, std::string inputDir, bool writeData=true,std::string *referenceFile = NULL);
         
         virtual ~WordEvaluator();
         
         void run();
         
-        void evaluateWord(std::string wordDir);
-        
-        void addWordDetector(cv::Ptr<WordSkewDetector> detector);
+        void addWordDetector(cv::Ptr<WordSkewDetector> detector, std::string detectorID);
     
     private:
         
         std::vector<std::string> splitString(const std::string &inputString, char delim);
         
+        void evaluateWord(std::string wordDir, int idx);
+        
         void createFileStructure(std::string outputFolder);
         
         void writeResults(std::string outputFolder);
         
+        void saveResult(std::string outputDir, Result result);
         std::string outputDirectory;
         
         std::vector<cv::Ptr<WordSkewDetector> > detectors;
+        std::vector<std::string> detectorIDs;
         int numberOfFiles;
         std::vector<Result> results;
         std::vector<double> reference;
         std::vector<bool> failed;
         std::vector<std::string> wordImages;
         std::vector<std::string> directories;
+        
         
     };
 }
