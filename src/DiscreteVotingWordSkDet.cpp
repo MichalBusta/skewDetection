@@ -170,8 +170,13 @@ namespace cmp
 #endif
                 std::cout << "Type 1 " << histogram.type() << std::endl;
                 
-                rowImages[i][i1].copyTo(histogram(roi));
-                rowWidth += rowImages[i][i1].cols;
+                try {
+                    rowImages[i][i1].copyTo(histogram(roi));
+                    
+                } catch (...) {
+                    
+                }
+                    rowWidth += rowImages[i][i1].cols;
             }
         }
         

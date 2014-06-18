@@ -46,6 +46,7 @@ namespace cmp {
         for (size_t i=0; i<directories.size(); i++) {
             evaluateWord(directories[i], i);
         }
+        writeResults(outputDirectory);
     }
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
@@ -133,7 +134,7 @@ namespace cmp {
                 if (angle == reference[idx]) {
                     isWrong = false;
                 }
-                Result tempResult =*new Result(angle, isWrong, debugImage);
+                Result tempResult =*new Result(angle, isWrong, debugImage, IOUtils::Basename(wordDir));
                 results.push_back(tempResult);
                 
                 std::stringstream imageName;
@@ -182,11 +183,25 @@ namespace cmp {
     
     void WordEvaluator::writeResults(std::string outputFolder)
     {
-        
+        std::cout << "writing results...";
+        std::ofstream outputFile;
+        outputFolder+="/Output.txt";
+        outputFile.open(outputFolder);
+        if (outputFile.is_open()) {
+            for (size_t t=0; t<results.size(); t++) {
+                if (results[t].isWrong) {
+                    outputFile << results[t].imgName <<" " << results[t].angle << " incorrect skew.\n";
+                }
+                else{
+                    /*8outputFile  << results[t].imgName <<" " << results[t].angle << " correct skew.\n";*/
+                }
+            }
+        }
     }
     
     void WordEvaluator::saveResult(std::string outputDir, cmp::Result result)
     {
+        
         cv::imwrite(outputDir, result.debugImg);
     }
     

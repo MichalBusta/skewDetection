@@ -28,7 +28,9 @@ namespace cmp
         
         cv::Mat debugImg;
         
-        Result(double angle, bool isWrong, cv::Mat debugImg) : angle(angle), isWrong(isWrong), debugImg(debugImg)
+        std::string imgName;
+        
+        Result(double angle, bool isWrong, cv::Mat debugImg, std::string imgName) : angle(angle), isWrong(isWrong), debugImg(debugImg), imgName(imgName)
         {
             
         }
