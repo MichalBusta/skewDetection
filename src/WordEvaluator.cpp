@@ -121,6 +121,7 @@ namespace cmp {
                 std::vector<Blob> imgs;
                 double angle;
                 cv::Mat debugImage;
+                double tolerance = 0.06;
                 bool isWrong =true;
 
                 
@@ -131,7 +132,7 @@ namespace cmp {
                 }
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
                 
-                if (angle == reference[idx]) {
+                if (tolerance > fabs(angle-reference[idx])) {
                     isWrong = false;
                 }
                 Result tempResult =*new Result(angle, isWrong, debugImage, IOUtils::Basename(wordDir));
