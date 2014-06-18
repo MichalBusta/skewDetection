@@ -127,7 +127,7 @@ namespace cmp {
                 for (size_t i2=0; i2<words[i1].size(); i2++) {
                     cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2], CV_LOAD_IMAGE_GRAYSCALE);
 
-                    imgs.push_back(*new Blob(tempImg));
+                    imgs.push_back(Blob(tempImg));
                 }
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
                 
@@ -190,7 +190,7 @@ namespace cmp {
         if (outputFile.is_open()) {
             for (size_t t=0; t<results.size(); t++) {
                 if (results[t].isWrong) {
-                    outputFile << results[t].imgName <<" " << results[t].angle << " incorrect skew.\n";
+                    outputFile << results[t].imgName <<" "<< results[t].angle << " incorrect skew.\n";
                 }
                 else{
                     /*8outputFile  << results[t].imgName <<" " << results[t].angle << " correct skew.\n";*/
