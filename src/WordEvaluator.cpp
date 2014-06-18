@@ -12,7 +12,7 @@ namespace cmp {
     
     WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, bool writeData, std::string *referenceFile) : outputDirectory(outputDir){
         
-        wordImages = IOUtils::GetFilesInDirectory(inputDir,"*", true);
+        wordImages = IOUtils::GetFilesInDirectory(inputDir,"*.png", true);
         
         //if the reference file is supplied, set the reference vector the given data
         if (referenceFile!=NULL)
@@ -123,7 +123,6 @@ namespace cmp {
                 cv::Mat debugImage;
                 double tolerance = 0.06;
                 bool isWrong =true;
-
                 
                 for (size_t i2=0; i2<words[i1].size(); i2++) {
                     cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2], CV_LOAD_IMAGE_GRAYSCALE);
@@ -135,7 +134,7 @@ namespace cmp {
                 if (tolerance > fabs(angle-reference[idx])) {
                     isWrong = false;
                 }
-                Result tempResult =*new Result(angle, isWrong, debugImage, IOUtils::Basename(wordDir));
+                Result tempResult(angle, isWrong, debugImage, IOUtils::Basename(wordDir));
                 results.push_back(tempResult);
                 
                 std::stringstream imageName;
