@@ -117,9 +117,10 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 
 	if(debugImage != NULL)
 	{
+        int scalefactor = 4;
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
-		drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+		drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
 
 		Scalar color = Scalar( 255, 255, 255 );
 		std::vector<std::vector<cv::Point> > contours;
@@ -137,15 +138,15 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 		{
 			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
             
-			cv::circle(drawing, cv::Point(contour[i].x - minx,contour[i].y - miny), 2, Scalar( 0, 0, 255 ), 1);
+			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
             
-            cv::line(drawing, cv::Point(contour[i].x - minx,contour[i].y - miny), cv::Point(contour[i2].x - minx,contour[i2].y- miny), color);
+            cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), cv::Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), color);
             
 			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
 			if (ang < 0) ang = ang + M_PI;
 			if (abs(ang-(maxI*histColWidth+histColWidth/2)*M_PI/180) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, cv::Point(contour[i].x - minx,contour[i].y- miny), Point(contour[i2].x - minx,contour[i2].y- miny), Scalar( 0, 255, 0 ), 1);
+				cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y- miny)*scalefactor), Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
 			}
 		}
 	}

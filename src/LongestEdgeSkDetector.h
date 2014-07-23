@@ -14,6 +14,8 @@ namespace cmp {
 
 class LongestEdgeSkDetector : public ContourSkewDetector {
 public:
+    
+    int brd =80;
 
 	LongestEdgeSkDetector(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.028, double ignoreAngle = IGNORE_ANGLE, double edgeRatio = 0.2);
 

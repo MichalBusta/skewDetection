@@ -183,7 +183,7 @@ namespace cmp
         //the debug image
         if(debugImage != NULL)
         {
-            debugImage = &histogram;
+            *debugImage = histogram;
 #ifdef VERBOSE
             
             cv::imshow("Histogram", *debugImage);

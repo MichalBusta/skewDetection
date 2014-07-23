@@ -18,6 +18,8 @@ namespace cmp{
 		virtual ~VerticalDomSkDet();
 
 		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
+        
+        int brd = 20;
 
 		double* hist;
 		/** sirka binu histogramu ve stupnich */

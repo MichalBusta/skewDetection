@@ -111,7 +111,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 	std::vector<cv::Vec4i> hierarchy;
 
 	/** find the contour */
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, approximatioMethod, cv::Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
 
 	if( contours.size() == 0)
 		return 0;
@@ -125,7 +125,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 		int size = MIN(rect.width, rect.height);
 		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
-		approxPolyDP(contours[0], apCont, absEpsilon, true);
+		approxPolyDP(contours[0], apCont, 0.0, true);
 		contours[0] = apCont;
 	}
 

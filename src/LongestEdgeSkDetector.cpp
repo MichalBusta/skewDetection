@@ -116,9 +116,11 @@ namespace cmp {
 
 		if(debugImage != NULL)
 		{
-			Mat& drawing =  *debugImage;
+            int scalefactor=8;
+            cv::Mat drawing;
 			cv::Rect bbox = cv::boundingRect(outerContour);
-			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+			drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
+            *debugImage = drawing;
 			Scalar color = Scalar( 255, 255, 255 );
 			std::vector<std::vector<cv::Point> > contours;
 			contours.push_back(outerContour);
@@ -134,8 +136,8 @@ namespace cmp {
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
                 
-                cv::line(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), cv::Point(outerContour[j+1].x-min_X,outerContour[j+1].y-min_Y), color);
-				cv::circle(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), 2, cv::Scalar(0, 255, 255), 1);
+                cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor,(outerContour[j].y-min_Y)*scalefactor), cv::Point((outerContour[j+1].x-min_X)*scalefactor,(outerContour[j+1].y-min_Y)*scalefactor), color);
+				cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor,(outerContour[j].y-min_Y)*scalefactor), 2, cv::Scalar(0, 255, 255), 1);
 				int index = j+1;
 				if(index >=  outerContour.size())
 					index = 0;
@@ -149,17 +151,18 @@ namespace cmp {
 				if(actLength >= ( maxLength - edgeRatio * maxLength ))
 					color = cv::Scalar( 0, 255, 0 );
 				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-					cv::line(drawing, cv::Point(outerContour[j].x-min_X,outerContour[j].y-min_Y), cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), color, 1, 0);
+					cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor,(outerContour[j].y-min_Y)*scalefactor), cv::Point((outerContour[index].x-min_X)*scalefactor,(outerContour[index].y-min_Y)*scalefactor), color, 1, 0);
 
 			}
 			index = counter + 1;
 			if(counter==outerContour.size()-1)
 				index = 0;
-			cv::line(drawing,cv::Point(outerContour[counter].x-min_X,outerContour[counter].y-min_Y), cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), cv::Scalar( 0, 0, 255 ), 1, 0);
-			cv::circle(drawing, cv::Point(outerContour[counter].x-min_X,outerContour[counter].y-min_Y), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
-			cv::circle(drawing, cv::Point(outerContour[index].x-min_X,outerContour[index].y-min_Y), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor,(outerContour[counter].y-min_Y)*scalefactor), cv::Point((outerContour[index].x-min_X)*scalefactor,(outerContour[index].y-min_Y)*scalefactor), cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor,(outerContour[counter].y-min_Y)*scalefactor), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
+			cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor,(outerContour[index].y-min_Y)*scalefactor), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
 		}
-
+        
+        
 		int index = (int) (probMeasure2 - 1);
 		index = MIN(index, this->probabilities.size() - 1);
 		lastDetectionProbability = probabilities[index];
