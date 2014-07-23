@@ -27,8 +27,8 @@ int main( int argc, char **argv)
 		return -1;
     }
     
-    cmp::WordEvaluator eval = *new cmp::WordEvaluator(argv[2],argv[1],true);
-    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(new cmp::BestGuessSKDetector), "DiscreteVoting");
+    cmp::WordEvaluator eval(argv[2],argv[1],true);
+    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(new cmp::BestGuessSKDetector()), "DiscreteVoting");
     eval.run();
     
 }

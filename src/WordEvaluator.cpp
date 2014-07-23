@@ -124,14 +124,13 @@ namespace cmp {
                 double tolerance = 0.06;
                 bool isWrong =true;
                 
-                for (size_t i2=0; i2<words[i1].size(); i2++) {
+                for (size_t i2=0; i2<words[i1].size(); i2++)
+                {
                     cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2], CV_LOAD_IMAGE_GRAYSCALE);
-                   
                     tempImg = tempImg>128;
                     cv::copyMakeBorder(tempImg, tempImg, 5, 5,5,5, cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
-                //cv::imshow("test", tempImg);
-                // cv::waitKey(0);
-                    
+                    //cv::imshow("test", tempImg);
+                    //cv::waitKey(0);
                     imgs.push_back(Blob(tempImg));
                 }
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);

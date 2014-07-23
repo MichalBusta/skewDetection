@@ -19,7 +19,7 @@ namespace cmp{
 
 		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
         
-        int brd = 20;
+
 
 		double* hist;
 		/** sirka binu histogramu ve stupnich */
@@ -32,6 +32,8 @@ namespace cmp{
 		int ignoreAngle;
 		/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
 		int correctAngle;
+		/** debug purpose - add border around the letter **/
+		int borderForVis;
 
 		std::vector<double> probabilities;
 	};

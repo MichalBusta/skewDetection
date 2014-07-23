@@ -36,6 +36,8 @@ VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int h
 	probabilities.push_back(0.89);
 	probabilities.push_back(0.95);
 
+	borderForVis = 20;
+
 }
 
 VerticalDomSkDet::~VerticalDomSkDet() {
@@ -104,7 +106,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	cv::waitKey(0);
 #endif
 
-	double minValue = 0.0151;
+	double minValue = 0.0151; //TODO what is the value
 	double maxValue = 0.1333;
 
 
@@ -120,14 +122,14 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
         int scalefactor = 4;
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
-		drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
+		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
 
 		Scalar color = Scalar( 255, 255, 255 );
 		std::vector<std::vector<cv::Point> > contours;
 		contours.push_back(contour);
         
-        int miny;
-        int minx;
+        int miny = INT_MAX;
+        int minx = INT_MAX;
         //get contour max
         for (size_t i=0; i<contour.size(); i++) {
             miny = MIN(contour[i].y, miny);

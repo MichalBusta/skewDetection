@@ -38,7 +38,6 @@ add_library(skewDetection
     ${lib_srcs}
 )
 
-
 #----------------Main programs -------------------------------------------------
 
 add_executable(run_evaluation "src/run_evaluation.cpp")

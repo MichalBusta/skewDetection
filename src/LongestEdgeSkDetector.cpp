@@ -119,16 +119,15 @@ namespace cmp {
             int scalefactor=8;
             cv::Mat drawing;
 			cv::Rect bbox = cv::boundingRect(outerContour);
+
+			int brd = 20;
 			drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
             *debugImage = drawing;
 			Scalar color = Scalar( 255, 255, 255 );
 			std::vector<std::vector<cv::Point> > contours;
 			contours.push_back(outerContour);
-			int index;
-            int min_Y;
-            int min_X;
-            
-            
+            int min_Y = INT_MAX;
+            int min_X = INT_MAX;
             for (size_t i=0; i<outerContour.size(); i++) {
                 MIN(min_Y, outerContour[i].y);
                 MIN(min_X, outerContour[i].x);
@@ -154,8 +153,8 @@ namespace cmp {
 					cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor,(outerContour[j].y-min_Y)*scalefactor), cv::Point((outerContour[index].x-min_X)*scalefactor,(outerContour[index].y-min_Y)*scalefactor), color, 1, 0);
 
 			}
-			index = counter + 1;
-			if(counter==outerContour.size()-1)
+			int index = counter + 1;
+			if(counter == outerContour.size() - 1 )
 				index = 0;
 			cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor,(outerContour[counter].y-min_Y)*scalefactor), cv::Point((outerContour[index].x-min_X)*scalefactor,(outerContour[index].y-min_Y)*scalefactor), cv::Scalar( 0, 0, 255 ), 1, 0);
 			cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor,(outerContour[counter].y-min_Y)*scalefactor), 4, cv::Scalar( 0, 0, 255 ), 1, 0);
