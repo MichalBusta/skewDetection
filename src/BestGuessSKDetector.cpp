@@ -74,8 +74,8 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 		int size = MIN(rect.width, rect.height);
 		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
-		//approxPolyDP(outerContour, apCont, absEpsilon, true);
-		//outerContour = apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
 	}
 
 	for(size_t i = 0; i < this->detectors.size(); i++)
