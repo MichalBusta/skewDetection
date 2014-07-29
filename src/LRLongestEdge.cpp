@@ -101,7 +101,7 @@ namespace cmp
 		else 
 		{
 		this->lastDetectionProbability = entropy;
-		}/**/
+		}**/
 
 		this->lastDetectionProbability = MIN(maxLen/(contour[bottomMost].y - contour[topMost].y), 1.0);
 

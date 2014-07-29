@@ -36,7 +36,7 @@ VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int h
 	probabilities.push_back(0.89);
 	probabilities.push_back(0.95);
 
-	borderForVis = 20;
+	borderForVis = 10;
 
 }
 
@@ -119,7 +119,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 
 	if(debugImage != NULL)
 	{
-        int scalefactor = 4;
+        int scalefactor = 2;
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );

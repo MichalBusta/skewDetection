@@ -116,11 +116,11 @@ namespace cmp {
 
 		if(debugImage != NULL)
 		{
-            int scalefactor=8;
+            int scalefactor=2;
             cv::Mat drawing;
 			cv::Rect bbox = cv::boundingRect(outerContour);
 
-			int brd = 20;
+			int brd = 10;
 			drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
             *debugImage = drawing;
 			Scalar color = Scalar( 255, 255, 255 );

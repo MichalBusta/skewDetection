@@ -33,7 +33,7 @@ namespace cmp
         double min = -M_PI_2, max = M_PI_2;
         double maxProb = 0;
         double allProb = 0;
-        int iterator;
+        int iterator=0;
         double angle;
         double sigma =0;
         double delta =1;

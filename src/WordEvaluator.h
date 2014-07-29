@@ -64,7 +64,6 @@ namespace cmp
         
         std::vector<cv::Ptr<WordSkewDetector> > detectors;
         std::vector<std::string> detectorIDs;
-        int numberOfFiles;
         std::vector<Result> results;
         std::vector<double> reference;
         std::vector<bool> failed;
