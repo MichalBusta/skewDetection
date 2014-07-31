@@ -46,8 +46,13 @@ namespace cmp {
         for (size_t i=0; i<directories.size(); i++) {
             evaluateWord(directories[i], i);
         }
-        writeResults(outputDirectory);
+        saveResults(outputDirectory);
     }
+    
+    typedef std::map<std::string, double>::iterator itt2;
+    
+    static bool sortMap (itt2 it1, itt2 it2) {return(it1->second < it2->second);};
+
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
     {
@@ -129,6 +134,7 @@ namespace cmp {
                 std::vector<std::string> letters;
                 std::string font;
                 std::string imageName;
+                double angleDifference;
                 
                 for (size_t i2=0; i2<words[i1].size(); i2++)
                 {
@@ -142,21 +148,24 @@ namespace cmp {
                 }
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
                 
-                if (tolerance > fabs(angle-reference[idx])) {
+                angleDifference = angle-reference[idx];
+                
+                if (tolerance > fabs(angleDifference)) {
                     isWrong = false;
+                    
                 }
                 
                 imageName =IOUtils::Basename(wordDir);
                 
                 font = splitString(imageName, '-')[0];
                 
-                Result tempResult(angle, isWrong, debugImage, imageName,letters,font);
+                Result tempResult(angle, angleDifference, isWrong, debugImage, imageName,letters,font);
                 results.push_back(tempResult);
                 
                 std::stringstream imageFileName;
                 imageFileName << dirPath<< "/" << imageName << i1 <<".jpeg";
                 
-                saveResult(imageFileName.str(), tempResult);
+                saveDebugImg(imageFileName.str(), tempResult);
                 
             }
         }
@@ -203,13 +212,31 @@ namespace cmp {
         }
     }
     
-    //write results to the output folder & json
     
-    void WordEvaluator::writeResults(std::string outputFolder)
+    void WordEvaluator::createLayout(std::ofstream& outputFile){
+        outputFile << "<!DOCTYPE html>" << "\n"
+        <<"<html>" << "\n"
+        <<"<head>" << "\n"
+        <<"<style>" << "\n"
+        <<"table,th,td" << "\n"
+        <<"{"<< "\n"
+        <<"border:"<<"1px"<<" "<< "solid"<<" "<< "black" << ";"<< "\n"
+        <<"border-collapse:collapse"<< ";" << "\n"
+        <<"}"<< "\n"
+        <<"th,td"<< "\n"
+        <<"{"<< "\n"
+        <<"padding:"<<"5px"<<";"<< "\n"
+        <<"</style>"<< "\n"
+        <<"</head>"<< "\n";
+        
+    }
+    //write results to the output folder & json
+
+    void WordEvaluator::saveResults(std::string outputFolder)
     {
         std::cout << "writing results...";
         std::ofstream outputFile;
-        outputFolder+="/Output.txt";
+        /*outputFolder+="/Output.txt";
         outputFile.open(outputFolder);
         if (outputFile.is_open()) {
             for (size_t t=0; t<results.size(); t++) {
@@ -217,15 +244,72 @@ namespace cmp {
                     outputFile << results[t].imgName <<" "<< results[t].angle << " incorrect skew.\n";
                 }
                 else{
-                    /*outputFile  << results[t].imgName <<" " << results[t].angle << " correct skew.\n";*/
+                    outputFile  << results[t].imgName <<" " << results[t].angle << " correct skew.\n";
                 }
             }
         }
+            */
         
+        //preparing the file strucuture...
+        std::map<std::string, Result> resultMap;
+        std::map<std::string, std::map<std::string, double> >  fontMap;
+        std::map<std::string, std::map<std::string, double> > letterMap;
+        std::map<std::string, std::map<std::string, std::map<std::string, double> > >catMaps;
+        
+        for (int i=0; i<results.size(); i++) {
+            resultMap[results[i].imgName]=results[i];
+        }
+        
+        for (auto iterator=resultMap.begin(); iterator!=resultMap.end(); ++iterator)
+        {
+            std::vector<std::string> letters = iterator->second.letters;
+            std::string font = iterator->second.fontName;
+            for (int i1 =0; i1<letters.size(); i1++)
+            {
+                    letterMap[letters[i1]][iterator->second.imgName] = iterator->second.angleDifference;
+            }
+                letterMap[font][iterator->second.imgName] = iterator->second.angleDifference;
+            
+            //load all the category vectors into catMaps
+            catMaps["Letter"] = letterMap;
+            catMaps["Font"] = fontMap;
+            
+        }
+        
+        //writing into the html file
+        
+        outputFile.open(outputFolder+"/"+"index.htm");
+        
+        createLayout(outputFile);
+        
+        outputFile << "<body>" << "\n"
+        << "<table style = \" "<< "width:500px"<< "\"" << ">" << "\n";
+        
+        std::vector<std::string > catNames;
+        for (auto iterator=catMaps.begin(); iterator != catMaps.end();++iterator) {
+            catNames.push_back(iterator->first);
+            //sort the map by descending error
+            auto iterator2 = iterator->second.begin();
+            
+    
+        }
+        //create table headings
+        outputFile << "<tr>"  << "\n";
+        outputFile << "<th>" << "</th>" << "\n";
+        for (std::string name : catNames) {
+            outputFile << "<th>" << name << "</h>" << "\n";
+            std::cout<< name;
+           
+        }
+        
+        //write the results
+        
+        outputFile.close();
         
     }
     
-    void WordEvaluator::saveResult(std::string outputDir, cmp::Result result)
+    
+    void WordEvaluator::saveDebugImg(std::string outputDir, cmp::Result result)
     {
         cv::imwrite(outputDir, result.debugImg);
         if(result.isWrong){

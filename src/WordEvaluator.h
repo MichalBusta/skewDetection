@@ -24,6 +24,8 @@ namespace cmp
     {
         double angle;
         
+        double angleDifference;
+        
         bool isWrong;
         
         cv::Mat debugImg;
@@ -34,7 +36,11 @@ namespace cmp
         
         std::string fontName;
         
-        Result(double angle, bool isWrong, cv::Mat debugImg, std::string imgName,std::vector<std::string> letters, std::string fontName) : angle(angle), isWrong(isWrong), debugImg(debugImg), imgName(imgName), letters(letters), fontName(fontName)
+        Result(double angle, double angleDifference, bool isWrong, cv::Mat debugImg, std::string imgName,std::vector<std::string> letters, std::string fontName) : angle(angle), angleDifference(angleDifference), isWrong(isWrong), debugImg(debugImg), imgName(imgName), letters(letters), fontName(fontName)
+        {
+            
+        }
+        Result()
         {
             
         }
@@ -67,9 +73,11 @@ namespace cmp
         
         void createFileStructure(std::string outputFolder);
         
-        void writeResults(std::string outputFolder);
+        void saveResults(std::string outputFolder);
         
-        void saveResult(std::string outputDir, Result result);
+        void createLayout(std::ofstream& outputFile);
+        
+        void saveDebugImg(std::string outputDir, Result result);
         std::string outputDirectory;
         
         std::vector<cv::Ptr<WordSkewDetector> > detectors;
@@ -79,6 +87,7 @@ namespace cmp
         std::vector<bool> failed;
         std::vector<std::string> wordImages;
         std::vector<std::string> directories;
+        
         
         
     };
