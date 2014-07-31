@@ -95,6 +95,7 @@ namespace cmp
 		int approximatioMethod;
 		/** the constant in approximation method @see cv::approxPolyDP */
 		double epsilon;
+        const double scalefactor;
 	};
 
 

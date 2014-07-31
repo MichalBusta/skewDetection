@@ -119,7 +119,6 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 
 	if(debugImage != NULL)
 	{
-        int scalefactor = 2;
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );

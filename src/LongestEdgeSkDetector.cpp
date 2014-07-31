@@ -116,7 +116,6 @@ namespace cmp {
 
 		if(debugImage != NULL)
 		{
-            int scalefactor=2;
             cv::Mat drawing;
 			cv::Rect bbox = cv::boundingRect(outerContour);
 

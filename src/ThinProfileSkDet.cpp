@@ -22,6 +22,7 @@ using namespace cv;
 
 namespace cmp
 {
+    int brd=10;
 
 	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool returnMiddleAngle) :
 		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
@@ -210,13 +211,49 @@ namespace cmp
 
 			if(debugImage != NULL)
 			{
+                
 				Mat& drawing =  *debugImage;
 				cv::Rect bbox = cv::boundingRect(contour);
-				drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+				drawing =  Mat::zeros( scalefactor*bbox.height+brd, scalefactor*bbox.width+brd, CV_8UC3 );
 
 				Scalar color = Scalar( 255, 255, 255 );
 				std::vector<std::vector<cv::Point> > contours;
 				contours.push_back(contour);
+                
+                //scale up the contours
+                for (size_t i=0; i<contours.size(); i++) {
+                    for (size_t p=0; p<contours[i].size(); p++) {
+                        contours[i][p].x *=scalefactor;
+                        contours[i][p].y *=scalefactor;
+                    }
+                }
+                //scale up the hulls
+                for (size_t i=0; i<hull.size(); i++) {
+                    hull[i].x *=scalefactor;
+                    hull[i].y *=scalefactor;
+                }
+                //scale up the point vectors
+                for (size_t i=0; i<PointsForWiderProfiles.size(); i++) {
+                    PointsForWiderProfiles[i].x *=scalefactor;
+                    PointsForWiderProfiles[i].y*=scalefactor;
+                }
+                for (size_t i=0; i<PointsForWiderProfiles2.size(); i++) {
+                    PointsForWiderProfiles2[i].x *=scalefactor;
+                    PointsForWiderProfiles2[i].y*=scalefactor;
+                }
+                for (size_t i=0; i<VectorsForWiderProfiles.size(); i++) {
+                    VectorsForWiderProfiles[i].x *=scalefactor;
+                    VectorsForWiderProfiles[i].y*=scalefactor;
+                    
+                }
+                //...and the points
+                resPoint.x *=scalefactor;
+                resPoint.y *=scalefactor;
+                resPoint2.x *=scalefactor;
+                resPoint2.y *=scalefactor;
+                resVector.x *=scalefactor;
+                resVector.y *= scalefactor;
+                
 				drawContours( drawing, contours, 0, color, 1, 8);
 
 				//cmp::filterContour(contours[0]);

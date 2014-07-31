@@ -151,6 +151,15 @@ namespace cmp
                 cv::rectangle(histogram, cv::Point(i*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point(colWidth*i+colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight*groupProbs[i]), cv::Scalar(0,0,255),CV_FILLED);
             }
         }
+        //drawing the scale
+        
+        cv::line(histogram, cv::Point((noOfGroups/2)*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point((noOfGroups/2)*colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight+1), cv::Scalar(75,255,60));
+        cv::line(histogram, cv::Point((noOfGroups/2+1)*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point((noOfGroups/2+1)*colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight+1), cv::Scalar(75,255,60));
+        cv::line(histogram, cv::Point((noOfGroups/4)*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point((noOfGroups/4)*colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight+1), cv::Scalar(40,50,40));
+          cv::line(histogram, cv::Point((noOfGroups/4*3+1)*colWidth+sidebarWidth, histHeight+totalHeaderHeight), cv::Point((noOfGroups/4*3+1)*colWidth+sidebarWidth, histHeight+totalHeaderHeight-histHeight+1), cv::Scalar(40,50,40));
+
+        
+        
         //drawing the debug images from detectors
         
         for (size_t i =0; i<rowImages.size(); i++) {
@@ -160,7 +169,7 @@ namespace cmp
                 
                 std::cout << rowWidth << std::endl;
                 std::cout << rowImages[i][i1].cols << std::endl;
-                cv::Rect roi =cv::Rect(rowWidth,maxImgHeight*i,rowImages[i][i1].cols,rowImages[i][i1].rows);
+                cv::Rect roi =cv::Rect(rowWidth,(maxImgHeight*i)+(maxImgHeight-rowImages[i][i1].rows),rowImages[i][i1].cols,rowImages[i][i1].rows);
                 cv::Mat temp;
                 
                 std::cout << "Type 1 " << rowImages[i][i1].type() << " " << rowImages[i][i1].empty() <<  std::endl;

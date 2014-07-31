@@ -92,7 +92,7 @@ void ContourSkewDetector::getBigestContour(
  * @param approximatioMethod the approximation method
  * @param epsilon if value > 0, the polygon
  */
-ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon ) : SkewDetector(), approximatioMethod( approximatioMethod ), epsilon(epsilon)
+ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon ) : SkewDetector(), approximatioMethod( approximatioMethod ), epsilon(epsilon), scalefactor(2)
 {
 
 }
@@ -111,7 +111,7 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 	std::vector<cv::Vec4i> hierarchy;
 
 	/** find the contour */
-	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+	findContours( mask, contours, hierarchy, CV_RETR_EXTERNAL, approximatioMethod, cv::Point(0, 0) );
 
 	if( contours.size() == 0)
 		return 0;

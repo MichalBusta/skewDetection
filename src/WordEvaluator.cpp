@@ -55,7 +55,7 @@ namespace cmp {
         //vector containing lines of image data from the suplied text file
         std::vector<std::vector<std::string> > imageData;
         //the output vector
-        std::vector<std::vector<std::string> > words;
+        std::vector<std::vector<ImageData> > words;
         //vector containing the path to the text file (is a vector only due to return type)
         std::string dataFilePath;
         //vector containing line data
@@ -103,9 +103,12 @@ namespace cmp {
         //create a words vector, containing vectors with each letter
         
         for (size_t i=0; i<lineIndices.size(); i++) {
-            std::vector<std::string> temp;
+            std::vector<ImageData> temp;
+            ImageData tempData;
             for (size_t i1 =0; i1 <lineIndices[i]; i1++) {
-                temp.push_back(imageData[index][5]);
+                tempData.imgName = imageData[index][5];
+                tempData.letter = imageData[index][6];
+                temp.push_back(tempData);
                 index++;
             }
             words.push_back(temp);
@@ -123,28 +126,37 @@ namespace cmp {
                 cv::Mat debugImage;
                 double tolerance = 0.06;
                 bool isWrong =true;
+                std::vector<std::string> letters;
+                std::string font;
+                std::string imageName;
                 
                 for (size_t i2=0; i2<words[i1].size(); i2++)
                 {
-                    cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2], CV_LOAD_IMAGE_GRAYSCALE);
+                    cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2].imgName, CV_LOAD_IMAGE_GRAYSCALE);
                     tempImg = tempImg>128;
                     cv::copyMakeBorder(tempImg, tempImg, 5, 5,5,5, cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
                     //cv::imshow("test", tempImg);
                     //cv::waitKey(0);
                     imgs.push_back(Blob(tempImg));
+                    letters.push_back(words[i1][i2].letter);
                 }
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
                 
                 if (tolerance > fabs(angle-reference[idx])) {
                     isWrong = false;
                 }
-                Result tempResult(angle, isWrong, debugImage, IOUtils::Basename(wordDir));
+                
+                imageName =IOUtils::Basename(wordDir);
+                
+                font = splitString(imageName, '-')[0];
+                
+                Result tempResult(angle, isWrong, debugImage, imageName,letters,font);
                 results.push_back(tempResult);
                 
-                std::stringstream imageName;
-                imageName << dirPath<< "/" << IOUtils::Basename(wordDir) << i1 <<".jpeg";
+                std::stringstream imageFileName;
+                imageFileName << dirPath<< "/" << imageName << i1 <<".jpeg";
                 
-                saveResult(imageName.str(), tempResult);
+                saveResult(imageFileName.str(), tempResult);
                 
             }
         }
@@ -174,6 +186,14 @@ namespace cmp {
     
     void WordEvaluator::createFileStructure(std::string outputFolder)
     {
+        //create a separate directory for storage of debug images returned by detectors with incorrect result
+        std::string directoryPath;
+        directoryPath=outputFolder;
+        directoryPath+= "/";
+        directoryPath+="Failed";
+        IOUtils::CreateDir(directoryPath);
+        
+        //create a directory for each word
         for (size_t i=0; i<detectorIDs.size(); i++) {
             std::string directoryPath;
             directoryPath=outputFolder;
@@ -201,11 +221,17 @@ namespace cmp {
                 }
             }
         }
+        
+        
     }
     
     void WordEvaluator::saveResult(std::string outputDir, cmp::Result result)
     {
         cv::imwrite(outputDir, result.debugImg);
+        if(result.isWrong){
+            cv::imwrite(outputDirectory+"/Failed"+"/"+result.imgName+".png", result.debugImg);
+        }
+   
     }
     
     

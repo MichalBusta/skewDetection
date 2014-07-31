@@ -30,10 +30,20 @@ namespace cmp
         
         std::string imgName;
         
-        Result(double angle, bool isWrong, cv::Mat debugImg, std::string imgName) : angle(angle), isWrong(isWrong), debugImg(debugImg), imgName(imgName)
+        std::vector<std::string> letters;
+        
+        std::string fontName;
+        
+        Result(double angle, bool isWrong, cv::Mat debugImg, std::string imgName,std::vector<std::string> letters, std::string fontName) : angle(angle), isWrong(isWrong), debugImg(debugImg), imgName(imgName), letters(letters), fontName(fontName)
         {
             
         }
+        
+    };
+    struct ImageData
+    {
+        std::string imgName;
+        std::string letter;
         
     };
     
