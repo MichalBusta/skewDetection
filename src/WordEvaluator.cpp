@@ -10,6 +10,9 @@
 #include <opencv2/highgui/highgui.hpp>
 namespace cmp {
     
+    typedef std::map<std::string, statisticalResult>::iterator statMapIterator;
+    bool sortStatMap(const statMapIterator it1, const statMapIterator it2){ return(it1->second.statMap.begin()->second <it2->second.statMap.begin()->second );};
+    
     WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, bool writeData, std::string *referenceFile) : outputDirectory(outputDir){
         
         wordImages = IOUtils::GetFilesInDirectory(inputDir,"*.png", true);
@@ -49,12 +52,9 @@ namespace cmp {
         saveResults(outputDirectory);
     }
     
-    typedef std::map<std::string, std::map<std::string, double> >::iterator itt1;
-    typedef std::map<std::string, double>::iterator itt2;
-    typedef std::map<std::string, statisticalResult>::iterator itt3;
+ 
+    static bool sortResultVector (Result res1, Result res2) {return (res1.angleDifference<res2.angleDifference);};
     
-    static bool sortResMap(itt2 it1, itt2 it2) {return(it1->second < it2->second);};
-    static bool sortCatMap(itt3 it1, itt3 it2) {return (it1->second.statMap.begin()->second < it2->second.statMap.begin()->second);};
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
     {
@@ -161,7 +161,7 @@ namespace cmp {
                 
                 font = splitString(imageName, '-')[0];
                 
-                Result tempResult(angle, angleDifference, isWrong, debugImage, imageName,letters,font);
+                Result tempResult(angle, std::fabs(angleDifference), isWrong, debugImage, imageName,letters,font);
                 results.push_back(tempResult);
                 
                 std::stringstream imageFileName;
@@ -253,31 +253,69 @@ namespace cmp {
             */
         
         //preparing the file strucuture...
-        std::map<std::string, Result> resultMap;
-        std::vector<std::string> fontMapKeys;
-        std::map<std::string, std::map<std::string, double> > fontMap;
-        std::vector<std::string> letterMapKeys;
-        std::map<std::string, std::map<std::string, double> > letterMap;
-        std::map<std::string, std::map<std::string, std::map<std::string, double> >>catMaps;
         
-        for (int i=0; i<results.size(); i++) {
-            resultMap[results[i].imgName]=results[i];
+        std::map<std::string,std::map<std::string,std::vector<Result> > > iteratingMap;
+        std::map<std::string,std::vector<Result>> fontMap;
+        std::map<std::string,statisticalResult> sortedFontMap;
+        
+        std::map<std::string, std::vector<std::string>> keyOrders;
+        
+        std::map<std::string,std::vector<Result>> letterMap;
+        std::map<std::string,statisticalResult> sortedLetterMap;
+        
+        std::map<std::string, std::map<std::string, statisticalResult > > sortedResultMap;
+        //load up the category vectors
+        
+        for (Result r : results) {
+            
+            for (std::string letter : r.letters) {
+                letterMap[letter].push_back(r);
+            }
+            fontMap[r.fontName].push_back(r);
         }
         
-        for (auto iterator=resultMap.begin(); iterator!=resultMap.end(); ++iterator)
-        {
-            std::vector<std::string> letters = iterator->second.letters;
-            std::string font = iterator->second.fontName;
-            for (int i1 =0; i1<letters.size(); i1++)
-            {
-                    letterMap[letters[i1]][iterator->second.imgName] = iterator->second.angleDifference;
+        //load up the interatingMap
+        
+        iteratingMap["letters"] = letterMap;
+        iteratingMap["fonts"] = fontMap;
+        
+        //sort the vectors
+        
+        for (auto iterator1 = iteratingMap.begin(); iterator1!=iteratingMap.end(); ++iterator1) {
+            
+            std::map<std::string,statisticalResult> tempStatMap;
+            std::vector<statMapIterator> iterators;
+            for (auto iterator2 = iterator1->second.begin(); iterator2 != iterator1->second.end(); ++iterator2) {
+                //sort the vector
+                std::sort(iterator2->second.begin(),iterator2->second.end(), sortResultVector);
+                //and calculate the statistics
+                double mean;
+                std::map<std::string,double> statistics;
+                double sum = 0.0;
+                int count= 0;
+                for (Result r : iterator2->second ) {
+                    sum +=r.angleDifference;
+                    count++;
+                }
+                if (sum != 0) {
+                    mean=sum/count;
+                }
+                else mean =0;
+                statistics["mean"] = mean;
+                statisticalResult tempResult(iterator2->second, statistics);
+                tempStatMap[iterator2->first] = tempResult;
             }
-                fontMap[font][iterator->second.imgName] = iterator->second.angleDifference;
             
-            //load all the category vectors into catMaps
-            catMaps["Letter"] = letterMap;
-            catMaps["Font"] = fontMap;
+            for (auto iterator3 = tempStatMap.begin(); iterator3!=tempStatMap.end(); ++iterator3) {
+                iterators.push_back(iterator3);
+            }
+            std::sort(iterators.begin(), iterators.end(), sortStatMap);
             
+            for (statMapIterator iter: iterators) {
+               std::cout << iter->second.statMap.begin()->second<< "\n";
+                keyOrders[iterator1->first].push_back(iter->first);
+            }
+            sortedResultMap[iterator1->first] =tempStatMap;
         }
         
         //writing into the html file
@@ -287,85 +325,19 @@ namespace cmp {
         createLayout(outputFile);
         
         outputFile << "<body>" << "\n";
-        //itt1 iterator2;
-        std::map<std::string, std::map<std::string, statisticalResult> >
-        sortedCatMap;
         
-        //sort all maps by descending error
-        
-        for (auto iterator=catMaps.begin(); iterator != catMaps.end();++iterator) {
-            std::map<std::string,statisticalResult> tempStatResMap;
-            std::map<std::string,statisticalResult> tempStatResMapSorted;
-
-            for (auto iterator2 = iterator->second.begin(); iterator2!=iterator->second.end(); ++iterator2) {
-                std::vector<itt2> iters;
-                std::map<std::string,double> sortedTempResMap;
-                std::map<std::string,double> tempStatMap;
-                double mean =0.0;
-                double sum = 0.0;
-                int count =0;
-                //sorting the individual category sub-maps
-                for (auto iterator3 = iterator2->second.begin(); iterator3!=iterator2->second.end(); ++iterator3) {
-                    iters.push_back(iterator3);
-                }
-                 std::sort(iters.begin(), iters.end(), sortResMap);
-                //load values into a new, sorted map & calculate statistics
+        //creating the tables
+        for (auto iterator : sortedResultMap ) {
+            //writing the title
+            outputFile << "<h1>" << iterator.first << "</h1>" << "\n";
+            outputFile << "<tablestyle=" << "\"width:" << "500" <<"px\">"<< "\n";;
+            outputFile << "<tr>"<<"\n";
+            for (std::string categoryName : keyOrders[iterator.first]) {
                 
-                for (size_t t =0 ;t<iters.size(); t++) {
-                    sortedTempResMap[iters[t]->first] =iters[t]->second;
-                    sum+=iters[t]->second;
-                    count++;
-                }
-               
-                if (sum!=0) {
-                    mean =sum/count;
-                }
-                else mean =0.0;
-                
-                //load statistical results into the tempStatMap;
-                tempStatMap["mean"] = mean;
-                
-                //load tempStatMap & sortedTempResMap into tempResult;
-                statisticalResult tempResult(sortedTempResMap,tempStatMap);
-                
-                //load tempResult into tempStatResMap using the original category name as the key
-                tempStatResMap[iterator2->first] = tempResult;
+                outputFile << "<td>" <<categoryName << "</td>" <<"\n";
             }
-            //sort the entire category map by descending statistical measurements (mean error in this case)
-            std::vector<itt3> iters;
-            for (itt3 iterator3 = tempStatResMap.begin(); iterator3 != tempStatResMap.end(); ++iterator3) {
-                iters.push_back(iterator3);
-            }
-            std::sort(iters.begin(), iters.end(), sortCatMap);
-            
-            for (size_t t =0; t<iters.size(); t++){
-                std::string tempString = iters[t]->first;
-                auto tempSecond = iters[t]->second;
-                tempStatResMapSorted[tempString] = tempSecond;
-                
-            }
-            
-            sortedCatMap[iterator->first]= tempStatResMapSorted;
-            
+            outputFile<< "</tr>"<<"\n";
         }
-        
-        //write the results
-        
-        for (auto iterator = sortedCatMap.begin(); iterator!= sortedCatMap.end(); ++iterator) {
-             //writing the table heading
-            outputFile << "<h1>" << iterator->first << "</h1>"<< "\n";
-            
-            //writing the table itself
-            outputFile<< "<table style = \" "<< "width:500px"<< "\"" << ">" << "\n";
-
-            outputFile << "<tr>" << "\n";
-            for (auto iterator2 = iterator->second.begin(); iterator2 != iterator->second.end(); iterator2++) {
-                outputFile << "<th>" << iterator2->first << "</th>";
-            }
-            outputFile << "</tr>" << "\n";
-        }
-        
-        
         
         outputFile.close();
         

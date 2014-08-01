@@ -56,12 +56,11 @@ namespace cmp
     {
         //result struct used for displaying and sorting statistics. the first entry in the statMap will be used by the sorting algorithm
         //map containing all image results for select sub-category
-        std::map<std::string, double> imgResMap;
-        //map containing all statistical measuremnts for select sub-category
+        std::vector<Result> resultVector;        //map containing all statistical measuremnts for select sub-category
         std::map<std::string, double> statMap;
         
         
-        statisticalResult(std::map<std::string, double> imgResMap, std::map<std::string, double> statMap) : imgResMap(imgResMap),statMap(statMap)
+        statisticalResult(std::vector<Result> resultVector, std::map<std::string, double> statMap) : resultVector(resultVector),statMap(statMap)
         {
             
         }
@@ -71,11 +70,6 @@ namespace cmp
             
         }
     };
-    
-    struct less : std::binary_function <int,int,bool> {
-        bool operator() (const int& x, const int& y) const {return true;}
-    };
-
     
     class WordEvaluator
     {
