@@ -49,10 +49,12 @@ namespace cmp {
         saveResults(outputDirectory);
     }
     
+    typedef std::map<std::string, std::map<std::string, double> >::iterator itt1;
     typedef std::map<std::string, double>::iterator itt2;
+    typedef std::map<std::string, statisticalResult>::iterator itt3;
     
-    static bool sortMap (itt2 it1, itt2 it2) {return(it1->second < it2->second);};
-
+    static bool sortResMap(itt2 it1, itt2 it2) {return(it1->second < it2->second);};
+    static bool sortCatMap(itt3 it1, itt3 it2) {return (it1->second.statMap.begin()->second < it2->second.statMap.begin()->second);};
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
     {
@@ -252,9 +254,11 @@ namespace cmp {
         
         //preparing the file strucuture...
         std::map<std::string, Result> resultMap;
-        std::map<std::string, std::map<std::string, double> >  fontMap;
+        std::vector<std::string> fontMapKeys;
+        std::map<std::string, std::map<std::string, double> > fontMap;
+        std::vector<std::string> letterMapKeys;
         std::map<std::string, std::map<std::string, double> > letterMap;
-        std::map<std::string, std::map<std::string, std::map<std::string, double> > >catMaps;
+        std::map<std::string, std::map<std::string, std::map<std::string, double> >>catMaps;
         
         for (int i=0; i<results.size(); i++) {
             resultMap[results[i].imgName]=results[i];
@@ -268,7 +272,7 @@ namespace cmp {
             {
                     letterMap[letters[i1]][iterator->second.imgName] = iterator->second.angleDifference;
             }
-                letterMap[font][iterator->second.imgName] = iterator->second.angleDifference;
+                fontMap[font][iterator->second.imgName] = iterator->second.angleDifference;
             
             //load all the category vectors into catMaps
             catMaps["Letter"] = letterMap;
@@ -282,27 +286,86 @@ namespace cmp {
         
         createLayout(outputFile);
         
-        outputFile << "<body>" << "\n"
-        << "<table style = \" "<< "width:500px"<< "\"" << ">" << "\n";
+        outputFile << "<body>" << "\n";
+        //itt1 iterator2;
+        std::map<std::string, std::map<std::string, statisticalResult> >
+        sortedCatMap;
         
-        std::vector<std::string > catNames;
+        //sort all maps by descending error
+        
         for (auto iterator=catMaps.begin(); iterator != catMaps.end();++iterator) {
-            catNames.push_back(iterator->first);
-            //sort the map by descending error
-            auto iterator2 = iterator->second.begin();
+            std::map<std::string,statisticalResult> tempStatResMap;
+            std::map<std::string,statisticalResult> tempStatResMapSorted;
+
+            for (auto iterator2 = iterator->second.begin(); iterator2!=iterator->second.end(); ++iterator2) {
+                std::vector<itt2> iters;
+                std::map<std::string,double> sortedTempResMap;
+                std::map<std::string,double> tempStatMap;
+                double mean =0.0;
+                double sum = 0.0;
+                int count =0;
+                //sorting the individual category sub-maps
+                for (auto iterator3 = iterator2->second.begin(); iterator3!=iterator2->second.end(); ++iterator3) {
+                    iters.push_back(iterator3);
+                }
+                 std::sort(iters.begin(), iters.end(), sortResMap);
+                //load values into a new, sorted map & calculate statistics
+                
+                for (size_t t =0 ;t<iters.size(); t++) {
+                    sortedTempResMap[iters[t]->first] =iters[t]->second;
+                    sum+=iters[t]->second;
+                    count++;
+                }
+               
+                if (sum!=0) {
+                    mean =sum/count;
+                }
+                else mean =0.0;
+                
+                //load statistical results into the tempStatMap;
+                tempStatMap["mean"] = mean;
+                
+                //load tempStatMap & sortedTempResMap into tempResult;
+                statisticalResult tempResult(sortedTempResMap,tempStatMap);
+                
+                //load tempResult into tempStatResMap using the original category name as the key
+                tempStatResMap[iterator2->first] = tempResult;
+            }
+            //sort the entire category map by descending statistical measurements (mean error in this case)
+            std::vector<itt3> iters;
+            for (itt3 iterator3 = tempStatResMap.begin(); iterator3 != tempStatResMap.end(); ++iterator3) {
+                iters.push_back(iterator3);
+            }
+            std::sort(iters.begin(), iters.end(), sortCatMap);
             
-    
-        }
-        //create table headings
-        outputFile << "<tr>"  << "\n";
-        outputFile << "<th>" << "</th>" << "\n";
-        for (std::string name : catNames) {
-            outputFile << "<th>" << name << "</h>" << "\n";
-            std::cout<< name;
-           
+            for (size_t t =0; t<iters.size(); t++){
+                std::string tempString = iters[t]->first;
+                auto tempSecond = iters[t]->second;
+                tempStatResMapSorted[tempString] = tempSecond;
+                
+            }
+            
+            sortedCatMap[iterator->first]= tempStatResMapSorted;
+            
         }
         
         //write the results
+        
+        for (auto iterator = sortedCatMap.begin(); iterator!= sortedCatMap.end(); ++iterator) {
+             //writing the table heading
+            outputFile << "<h1>" << iterator->first << "</h1>"<< "\n";
+            
+            //writing the table itself
+            outputFile<< "<table style = \" "<< "width:500px"<< "\"" << ">" << "\n";
+
+            outputFile << "<tr>" << "\n";
+            for (auto iterator2 = iterator->second.begin(); iterator2 != iterator->second.end(); iterator2++) {
+                outputFile << "<th>" << iterator2->first << "</th>";
+            }
+            outputFile << "</tr>" << "\n";
+        }
+        
+        
         
         outputFile.close();
         
