@@ -8,10 +8,12 @@
 
 #include "WordEvaluator.h"
 #include <opencv2/highgui/highgui.hpp>
+#define sortingConstant "mean"
+
 namespace cmp {
     
     typedef std::map<std::string, statisticalResult>::iterator statMapIterator;
-    static bool sortStatMap(const statMapIterator it1, const statMapIterator it2){ return(it1->second.statMap["mean"]> it2->second.statMap["mean"] );};
+    static bool sortStatMap(const statMapIterator it1, const statMapIterator it2){ return(it1->second.statMap[sortingConstant]> it2->second.statMap[sortingConstant] );};
     static bool sortResultVector (Result res1, Result res2) {return (res1.angleDifference>res2.angleDifference);};
     
     WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, bool writeData, std::string *referenceFile) : outputDirectory(outputDir){
@@ -111,6 +113,7 @@ namespace cmp {
             std::vector<ImageData> temp;
             ImageData tempData;
             for (size_t i1 =0; i1 <lineIndices[i]; i1++) {
+
                 tempData.imgName = imageData[index][5];
                 tempData.letter = imageData[index][6];
                 temp.push_back(tempData);
@@ -255,8 +258,19 @@ namespace cmp {
         
         for (Result r : results) {
             
+            std::vector<std::string> letterVect;
+            bool containsLetter=false;
             for (std::string letter : r.letters) {
-                letterMap[letter].push_back(r);
+                
+                for (std::string ltr : letterVect) {
+                    if (ltr == letter) {
+                        containsLetter = true;
+                    }
+                }
+                letterVect.push_back(letter);
+                if (containsLetter == false) {
+                    letterMap[letter].push_back(r);
+                }
             }
             fontMap[r.fontName].push_back(r);
         }
@@ -345,7 +359,10 @@ namespace cmp {
                 //writing the 5 worst results
                 for (int c=0; c<numberOfDisplayedResults; c++ ) {
                     
+                    if (c<iterator.second[categoryName].resultVector.size()) {
+                        
                     outputFile << "<td>" << "<a href =\"" << "file://" <<outputDirectory<< "/" << detectorIDs[0] << "/" << iterator.second[categoryName].resultVector[c].imgName<< "/"<< iterator.second[categoryName].resultVector[c].imgName<<".png"<<"\"" <<">" << iterator.second[categoryName].resultVector[c].angleDifference << "</a>" << "</td>" <<"/n";
+                    }
                 }
                 outputFile << "</tr>" <<"\n";
                 

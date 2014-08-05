@@ -68,7 +68,7 @@ namespace cmp {
     		cv::Mat tempDebug;
     		debugImage = &tempDebug;
 #endif
-    		angles.push_back(localDetector->detectSkew(*contours[i]));
+    		angles.push_back(localDetector->detectSkew(*contours[i],debugImage));
     		probs.push_back(localDetector->lastDetectionProbability);
 #ifdef VERBOSE
         	cv::imshow("temp", tempDebug);
