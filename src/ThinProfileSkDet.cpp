@@ -176,10 +176,15 @@ namespace cmp
 		// filtering thin profiles that are closer than ANGLE_TOLERANCE to other profile
 		vector<double>widths2;
 		vector<double>angles2;
+        
+        assert(angles.size()==widths.size());
 
 		filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
 
 		// counting profiles filtered by filterValuesBySimiliarAngle
+        
+        assert(widths.size()==widths2.size());
+        
 		for(int c=0;c<widths.size();c++)
 			if( ( widths2[c] != 0 ) && ( widths2[c] <= thinProfilesRange ) )
 				probMeasure2++;
@@ -190,7 +195,7 @@ namespace cmp
 			if( (widths[c] <= thinProfilesRange ))
 			{
 				probMeasure1++;
-				greatestAngle = MAX(greatestAngle, angles[c]);
+                greatestAngle = MAX(greatestAngle, angles[c]);
 				smallestAngle = MIN(smallestAngle, angles[c]);
 			}
 
@@ -258,7 +263,7 @@ namespace cmp
 
 				//cmp::filterContour(contours[0]);
 
-				// drawing the thiniest profile
+				// drawing the thinnest profile
 				for(int i=0;i<hull.size();i++)
 				{
 					cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 255 ), 2);
@@ -283,15 +288,15 @@ namespace cmp
 					}
 				}
 			}
-
+        
 			int index = (probMeasure1 - 1);
 			index = MAX(index, this->probabilities.size() - 1);
 			lastDetectionProbability = probabilities[index];
 
 
-			if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
-
+        if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
+        
 			return angle;
-	}
+    }
 
 } /* namespace cmp */

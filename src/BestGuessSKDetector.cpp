@@ -17,12 +17,12 @@ namespace cmp
 
 BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
 {
-	detectors.push_back( new VerticalDomSkDet());
-	weights.push_back(1.0);
+	//detectors.push_back( new VerticalDomSkDet());
+	//weights.push_back(1.0);
 	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.1));
 	weights.push_back(1.0);
-	detectors.push_back( new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
-	weights.push_back(1.0);
+	//detectors.push_back( new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
+    //weights.push_back(1.0);
 	//detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
 	//weights.push_back(0.25);
 }

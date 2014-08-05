@@ -58,7 +58,7 @@ namespace cmp {
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
     {
-        std::cout<<wordDir;
+        //std::cout<<wordDir;
         //vector containing lines of image data from the suplied text file
         std::vector<std::vector<std::string> > imageData;
         //the output vector
@@ -298,7 +298,7 @@ namespace cmp {
                     sum +=r.angleDifference;
                     count++;
                 }
-                if (sum != 0) {
+                if (count != 0) {
                     mean=sum/count;
                 }
                 else mean =0;

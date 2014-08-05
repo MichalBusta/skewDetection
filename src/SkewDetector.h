@@ -20,7 +20,7 @@ namespace cmp
 	//the horizont threshold
 #define IGNORE_ANGLE 20
 
-#define ANGLE_TOLERANCE M_PI / 60.0
+#define ANGLE_TOLERANCE M_PI/60.0
 
 	//common functions
 
