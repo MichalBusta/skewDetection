@@ -152,7 +152,6 @@ namespace cmp {
 				if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
 					cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2),
 							cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color, 1, 0);
-
 			}
 			int index = counter + 1;
 			if(counter == outerContour.size() - 1 )

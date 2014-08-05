@@ -1,4 +1,12 @@
 
+BestGuessDetector parameter - display all debug images
+
+DiscreteVotingDetector - Display confidence bar next to every individual debug image
+
+Add all results to the html table
+
+Display Images Directly in the html table
+
 
 Longest edge detector: 
     - vizualizace: chyba zobrazeni poctu dlouhych car v rozsahu (zelena cara)

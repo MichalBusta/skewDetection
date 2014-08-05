@@ -139,7 +139,7 @@ namespace cmp {
                 for (size_t i2=0; i2<words[i1].size(); i2++)
                 {
                     cv::Mat tempImg = cv::imread(wordDir+"/"+words[i1][i2].imgName, CV_LOAD_IMAGE_GRAYSCALE);
-                    tempImg = tempImg>128;
+                    //tempImg = tempImg>128;
                     cv::copyMakeBorder(tempImg, tempImg, 5, 5,5,5, cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
                     //cv::imshow("test", tempImg);
                     //cv::waitKey(0);
@@ -276,7 +276,7 @@ namespace cmp {
                 //sort the vector
                 std::sort(iterator2->second.begin(),iterator2->second.end(), sortResultVector);
                 //and calculate the statistics
-                double mean;
+                double mean=0;
                 std::map<std::string,double> statistics;
                 double sum = 0.0;
                 int count= 0;
@@ -316,7 +316,8 @@ namespace cmp {
         for (auto iterator : sortedResultMap ) {
             //writing the title
             outputFile << "<h1>" << iterator.first << "</h1>" << "\n";
-            outputFile << "<tablestyle=" << "\"width:" << "500" <<"px\">"<< "\n";
+            outputFile << "<tablestyle=" << "\"width:" << "500" <<"px\">";
+            outputFile << "\n";
             outputFile << "<table>" << "\n";
             outputFile << "<tr>"<<"\n";
             

@@ -34,7 +34,7 @@ namespace cmp
         double maxProb = 0;
         double allProb = 0;
         int iterator=0;
-        double angle;
+        double angle=0;
         double sigma =0;
         double delta =1;
         int range=10;
@@ -47,6 +47,7 @@ namespace cmp
         
         std::vector<double> groupProbs;
         groupProbs.resize(noOfGroups);
+        std::fill(groupProbs.begin(), groupProbs.end(), 0);
         groupRange = (max-min) / (noOfGroups);
         
         
