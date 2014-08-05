@@ -166,18 +166,14 @@ namespace cmp
             int rowWidth=0;
             for (size_t i1=0; i1<rowImages[i].size(); i1++) {
                 
-                
-                std::cout << rowWidth << std::endl;
-                std::cout << rowImages[i][i1].cols << std::endl;
+
                 cv::Rect roi =cv::Rect(rowWidth,(maxImgHeight*i)+(maxImgHeight-rowImages[i][i1].rows),rowImages[i][i1].cols,rowImages[i][i1].rows);
                 cv::Mat temp;
                 
-                std::cout << "Type 1 " << rowImages[i][i1].type() << " " << rowImages[i][i1].empty() <<  std::endl;
 #ifdef VERBOSE
                 imshow("ts", rowImages[i][i1]);
                 cv::waitKey(0);
 #endif
-                std::cout << "Type 1 " << histogram.type() << std::endl;
                 
                 try {
                     rowImages[i][i1].copyTo(histogram(roi));

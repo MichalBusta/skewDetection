@@ -11,7 +11,8 @@
 namespace cmp {
     
     typedef std::map<std::string, statisticalResult>::iterator statMapIterator;
-    bool sortStatMap(const statMapIterator it1, const statMapIterator it2){ return(it1->second.statMap.begin()->second <it2->second.statMap.begin()->second );};
+    static bool sortStatMap(const statMapIterator it1, const statMapIterator it2){ return(it1->second.statMap["mean"]> it2->second.statMap["mean"] );};
+    static bool sortResultVector (Result res1, Result res2) {return (res1.angleDifference>res2.angleDifference);};
     
     WordEvaluator::WordEvaluator(std::string outputDir, std::string inputDir, bool writeData, std::string *referenceFile) : outputDirectory(outputDir){
         
@@ -51,9 +52,6 @@ namespace cmp {
         }
         saveResults(outputDirectory);
     }
-    
- 
-    static bool sortResultVector (Result res1, Result res2) {return (res1.angleDifference<res2.angleDifference);};
     
     
     void WordEvaluator::evaluateWord(std::string wordDir, int idx)
@@ -165,7 +163,7 @@ namespace cmp {
                 results.push_back(tempResult);
                 
                 std::stringstream imageFileName;
-                imageFileName << dirPath<< "/" << imageName << i1 <<".jpeg";
+                imageFileName << dirPath<< "/" << imageName <<".png";
                 
                 saveDebugImg(imageFileName.str(), tempResult);
                 
@@ -228,6 +226,7 @@ namespace cmp {
         <<"th,td"<< "\n"
         <<"{"<< "\n"
         <<"padding:"<<"5px"<<";"<< "\n"
+        <<"}"<<"\n"
         <<"</style>"<< "\n"
         <<"</head>"<< "\n";
         
@@ -238,20 +237,8 @@ namespace cmp {
     {
         std::cout << "writing results...";
         std::ofstream outputFile;
-        /*outputFolder+="/Output.txt";
-        outputFile.open(outputFolder);
-        if (outputFile.is_open()) {
-            for (size_t t=0; t<results.size(); t++) {
-                if (results[t].isWrong) {
-                    outputFile << results[t].imgName <<" "<< results[t].angle << " incorrect skew.\n";
-                }
-                else{
-                    outputFile  << results[t].imgName <<" " << results[t].angle << " correct skew.\n";
-                }
-            }
-        }
-            */
         
+        size_t numberOfDisplayedResults = 5;
         //preparing the file strucuture...
         
         std::map<std::string,std::map<std::string,std::vector<Result> > > iteratingMap;
@@ -312,7 +299,6 @@ namespace cmp {
             std::sort(iterators.begin(), iterators.end(), sortStatMap);
             
             for (statMapIterator iter: iterators) {
-               std::cout << iter->second.statMap.begin()->second<< "\n";
                 keyOrders[iterator1->first].push_back(iter->first);
             }
             sortedResultMap[iterator1->first] =tempStatMap;
@@ -330,13 +316,41 @@ namespace cmp {
         for (auto iterator : sortedResultMap ) {
             //writing the title
             outputFile << "<h1>" << iterator.first << "</h1>" << "\n";
-            outputFile << "<tablestyle=" << "\"width:" << "500" <<"px\">"<< "\n";;
+            outputFile << "<tablestyle=" << "\"width:" << "500" <<"px\">"<< "\n";
+            outputFile << "<table>" << "\n";
             outputFile << "<tr>"<<"\n";
-            for (std::string categoryName : keyOrders[iterator.first]) {
-                
-                outputFile << "<td>" <<categoryName << "</td>" <<"\n";
+            
+            //writing the header row
+            outputFile << "<td>" << "</td>" <<"\n";
+            
+            for (auto iterator2 : iterator.second.begin()->second.statMap) {
+                outputFile << "<td>" << iterator2.first << "</td>" <<"\n";
             }
-            outputFile<< "</tr>"<<"\n";
+            for (int c =0; c<numberOfDisplayedResults; c++) {
+                outputFile << "<td>" << "Worst Result " <<(c+1) << "</td>"<<"\n";
+            }
+            outputFile << "</tr>"<<"\n";
+            
+            
+            //writing the results rows
+            for (std::string categoryName : keyOrders[iterator.first]) {
+                outputFile << "<tr>" <<"\n";
+                outputFile << "<td>" << categoryName <<"</td>"<<"\n";
+                
+                //writing the statistics
+                for (auto iterator2 : iterator.second[categoryName].statMap) {
+                    outputFile << "<td>" << iterator2.second << "</td>" <<"\n";
+                }
+                //writing the 5 worst results
+                for (int c=0; c<numberOfDisplayedResults; c++ ) {
+                    
+                    outputFile << "<td>" << "<a href =\"" << "file://" <<outputDirectory<< "/" << detectorIDs[0] << "/" << iterator.second[categoryName].resultVector[c].imgName<< "/"<< iterator.second[categoryName].resultVector[c].imgName<<".png"<<"\"" <<">" << iterator.second[categoryName].resultVector[c].angleDifference << "</a>" << "</td>" <<"/n";
+                }
+                outputFile << "</tr>" <<"\n";
+                
+            }
+            
+            outputFile << "</table>" << "\n";
         }
         
         outputFile.close();
