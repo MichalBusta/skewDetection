@@ -149,6 +149,7 @@ namespace cmp {
                     imgs.push_back(Blob(tempImg));
                     letters.push_back(words[i1][i2].letter);
                 }
+                assert(letters.size()==imgs.size());
                 angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
                 
                 angleDifference = angle-reference[idx];

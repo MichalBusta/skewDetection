@@ -40,7 +40,7 @@ namespace cmp
         int range=10;
         double resolution =0.4;
         int maxImgHeight=0;
-        int headerHeight;
+        int headerHeight=0;
         std::vector< std::vector<cv::Mat> > rowImages;;
         cv::Mat histogram;
         

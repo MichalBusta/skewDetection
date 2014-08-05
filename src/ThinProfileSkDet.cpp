@@ -211,9 +211,6 @@ namespace cmp
 
 #endif
 
-
-
-
 			if(debugImage != NULL)
 			{
                 
@@ -289,14 +286,16 @@ namespace cmp
 				}
 			}
         
-			int index = (probMeasure1 - 1);
-			index = MAX(index, this->probabilities.size() - 1);
-			lastDetectionProbability = probabilities[index];
+        int index = (probMeasure1 - 1);
+        assert(this->probabilities.size()>0);
+        index = MIN(index, this->probabilities.size() - 1);
+        assert(index<probabilities.size());
+        lastDetectionProbability = probabilities[index];
 
 
         if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
         
-			return angle;
+        return angle;
     }
 
 } /* namespace cmp */
