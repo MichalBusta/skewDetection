@@ -17,16 +17,45 @@
 
 namespace cmp {
     
-    class DiscreteVotingWordSkDet : public ContourWordSkewDetector
+    
+    struct Blob1{
+        
+        cv::Mat mask;
+        cv::Rect bBox;
+        
+        Blob1(cv::Mat mask, cv::Rect bBox = cv::Rect()){
+            this->mask = mask;
+            this->bBox = bBox;
+            
+        };
+    };
+    
+    struct VisualisationData{
+        
+        std::vector<std::map<std::string, double> > confidenceData;
+        std::vector<std::map<std::string, cv::Mat> > imageData;
+        
+        VisualisationData(std::vector<std::map<std::string, double> > confidenceData, std::vector<std::map<std::string, cv::Mat> > imageData){
+            this->confidenceData = confidenceData;
+            this->imageData = imageData;
+        }
+    };
+    
+    class DiscreteVotingWordSkDet
     {
     public:
         
-        DiscreteVotingWordSkDet(cv::Ptr<SkewDetector> detector);
+        DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::map<std::string, cv::Scalar> detectorIDColours);
         virtual ~DiscreteVotingWordSkDet();
         
-    protected:
+        double detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL);
         
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat> debugImages, cv::Mat* debugImage = NULL);
+    private:
+        
+        std::map<std::string, cv::Scalar> detectorIDColours;
+        std::vector<std::string> detNames;
+        std::vector<cv::Ptr<SkewDetector> > detectors;
+        double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visData, cv::Mat* debugImage = NULL);
     };
 }
 

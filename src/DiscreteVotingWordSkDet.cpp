@@ -15,16 +15,60 @@
 
 namespace cmp
 {
-    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(cv::Ptr<SkewDetector> detector) : ContourWordSkewDetector(detector)
+    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::map<std::string, cv::Scalar> detectorIDColours)
     {
-        
+        this->detNames = detNames;
+        this->detectors = detectors;
+        this->detectorIDColours = detectorIDColours;
     }
     DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
     {
         
     }
     
-    double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, std::vector<cv::Mat> debugImages, cv::Mat* debugImage)
+    double DiscreteVotingWordSkDet::detectSkew(std::vector<Blob> &blobs, double lineK, cv::Mat* debugImage)
+    {
+        double confidence;
+        std::vector<double> angles;
+        std::vector<double> probabilities;
+        std::vector<std::map<std::string, double> > confidenceData;
+        std::vector<std::map<std::string, cv::Mat> > debugImages;
+        
+        for (size_t t=0; t<blobs.size(); t++) {
+            
+            std::map<std::string,cv::Mat> tempImgMap;
+            std::map<std::string,double> tempConfidenceMap;
+            std::vector<double> detectorConfidence;
+            double bestDetection=0;
+            int bestIndex;
+            for (size_t t1=0; t1<detectors.size(); t1++) {
+                cv::Mat tempDebug;
+                double angle;
+                angle =detectors[t1]->detectSkew(blobs[t].mask, lineK, &tempDebug);
+                if (bestDetection<angle) {
+                    bestDetection=angle;
+                    bestIndex=t1;
+                }
+                
+                assert(bestIndex<detectorConfidence.size());
+                detectorConfidence.push_back(detectors[t1]->lastDetectionProbability);
+                
+                assert(t1<detNames.size());
+                tempImgMap[detNames[t1]] = tempDebug;
+                tempConfidenceMap[detNames[t1]] =detectors[t1]->lastDetectionProbability;
+                
+                
+            }
+            probabilities.push_back(detectorConfidence[bestIndex]);
+            debugImages.push_back(tempImgMap);
+            angles.push_back(bestDetection);
+        }
+        
+        VisualisationData visData(confidenceData,debugImages);
+        return computeAngle(angles, probabilities, confidence, visData, debugImage);
+    }
+    
+    double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visData, cv::Mat* debugImage)
     {
         
         probability = 0;
@@ -80,43 +124,71 @@ namespace cmp
         
         //the drawing part
         
-        //get max debugimg height
-        
-        for (size_t i = 0; i<debugImages.size(); i++) {
-            maxImgHeight = MAX(debugImages[i].rows, maxImgHeight);
-        }
-        
-
-        
-        //draw the histogram
-        
         int headerbuffer =20;
         int histWidth =500;
         int histHeight = 300;
         int colWidth = 5;
         int confidenceBarWidth =8;
+        int confidenceBarSpacer =3;
         int imgBufferBar = 5;
+        int iDcircleRadius =2;
         cv::Scalar confidenceBarColor(50,90,45);
+        
+        //setting the detectorIDColours
+        
+        //get max debugimg height
+
+        for (size_t i = 0; i<visData.imageData.size(); i++) {
+            for (auto iterator = visData.imageData[i].begin(); iterator != visData.imageData[i].end(); ++iterator) {
+                maxImgHeight = MAX(iterator->second.rows, maxImgHeight);
+            }
+        }
+        
+        //drawing confidence bar into each debug image
+        
+        for (size_t i = 0; i<visData.imageData[i].size(); i++) {
+            for (auto iterator = visData.imageData[i].begin(); iterator != visData.imageData[i].end(); ++iterator) {
+                
+                //resizing the canvas and copying the debug image
+                cv::Mat tempImg = cv::Mat::zeros(maxImgHeight, iterator->second.cols+confidenceBarSpacer+confidenceBarWidth+iDcircleRadius+1,CV_8UC3);
+                cv::Rect roi(0,0, iterator->second.cols, iterator->second.rows);
+                iterator->second.copyTo(tempImg);
+                
+                //drawing the bar itself
+                cv::rectangle(tempImg, cv::Point(iterator->second.cols+confidenceBarSpacer, 0), cv::Point(iterator->second.cols+confidenceBarSpacer+confidenceBarWidth,visData.confidenceData[i][iterator->first]*tempImg.rows), confidenceBarColor);
+                
+                //drawing the detector ID sign
+                
+                cv::circle(tempImg, cv::Point(tempImg.cols-iDcircleRadius,iDcircleRadius), iDcircleRadius, detectorIDColours[iterator->first]);
+                
+                iterator->second = tempImg;
+            }
+        }
+        
+        //draw the histogram
         
         //calculate number of images per row
         int rowSize =0;
         int rowIdx =0;
         rowImages.resize(1);
-        for (size_t i =0; i<debugImages.size(); i++) {
+        for (auto imgMap : visData.imageData) {
             
-            if (rowSize + debugImages[i].cols +(confidenceBarWidth*(i+1))+imgBufferBar < histWidth) {
-                rowSize += debugImages[i].cols;
-                rowSize += confidenceBarWidth*(i+1)+imgBufferBar;
-                rowImages[rowIdx].push_back(debugImages[i]);
-            }
-            else{
+            for (auto iterator : imgMap) {
+            
+                if (rowSize + iterator.second.cols +imgBufferBar < histWidth) {
+                    rowSize += iterator.second.cols;
+                    rowSize += imgBufferBar;
+                    rowImages[rowIdx].push_back(iterator.second);
+                }
+                else{
                 
-                rowIdx++;
-                rowImages.resize(rowIdx+1);
-                rowImages[rowIdx].push_back(debugImages[i]);
-                rowSize=debugImages[i].cols +(confidenceBarWidth*(i+1))+imgBufferBar;
-            }
+                    rowIdx++;
+                    rowImages.resize(rowIdx+1);
+                    rowImages[rowIdx].push_back(iterator.second);
+                    rowSize=iterator.second.cols+imgBufferBar;
+                }
             
+            }
         }
         
         headerHeight = maxImgHeight*(rowIdx+1);
