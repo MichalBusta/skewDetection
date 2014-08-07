@@ -166,7 +166,8 @@ namespace cmp {
 		int index = (int) (probMeasure2 - 1);
 		index = MIN(index, this->probabilities.size() - 1);
 		lastDetectionProbability = probabilities[index];
-
+        
+        assert(anglesCount>0);
 		if(probMeasure2 == 2)
 			return - (anglesSum / anglesCount);
 

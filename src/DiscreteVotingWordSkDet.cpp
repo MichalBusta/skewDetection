@@ -94,6 +94,9 @@ namespace cmp
         int histWidth =500;
         int histHeight = 300;
         int colWidth = 5;
+        int confidenceBarWidth =8;
+        int imgBufferBar = 5;
+        cv::Scalar confidenceBarColor(50,90,45);
         
         //calculate number of images per row
         int rowSize =0;
@@ -101,8 +104,9 @@ namespace cmp
         rowImages.resize(1);
         for (size_t i =0; i<debugImages.size(); i++) {
             
-            if (rowSize + debugImages[i].cols < histWidth) {
+            if (rowSize + debugImages[i].cols +(confidenceBarWidth*(i+1))+imgBufferBar < histWidth) {
                 rowSize += debugImages[i].cols;
+                rowSize += confidenceBarWidth*(i+1)+imgBufferBar;
                 rowImages[rowIdx].push_back(debugImages[i]);
             }
             else{
@@ -110,7 +114,7 @@ namespace cmp
                 rowIdx++;
                 rowImages.resize(rowIdx+1);
                 rowImages[rowIdx].push_back(debugImages[i]);
-                rowSize=debugImages[i].cols;
+                rowSize=debugImages[i].cols +(confidenceBarWidth*(i+1))+imgBufferBar;
             }
             
         }
@@ -164,6 +168,7 @@ namespace cmp
         //drawing the debug images from detectors
         
         for (size_t i =0; i<rowImages.size(); i++) {
+            int imageCount =0;
             int rowWidth=0;
             for (size_t i1=0; i1<rowImages[i].size(); i1++) {
                 
@@ -182,8 +187,13 @@ namespace cmp
                 } catch (...) {
                     
                 }
-                    rowWidth += rowImages[i][i1].cols;
+                //drawing the confidence bar;
+                
+                cv::rectangle(histogram, cv::Point(rowWidth+rowImages[i][i1].cols, maxImgHeight*(i+1)-1), cv::Point(rowWidth+rowImages[i][i1].cols+confidenceBarWidth, maxImgHeight*(i+1)-(probabilities[i]*maxImgHeight)-1), confidenceBarColor,CV_FILLED);
+                
+                    rowWidth += rowImages[i][i1].cols+(confidenceBarWidth*(i+1))+imgBufferBar;
             }
+            imageCount++;
         }
         
         //the debug image
