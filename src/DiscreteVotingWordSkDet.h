@@ -18,12 +18,12 @@
 namespace cmp {
     
     
-    struct Blob1{
+    struct Blob{
         
         cv::Mat mask;
         cv::Rect bBox;
         
-        Blob1(cv::Mat mask, cv::Rect bBox = cv::Rect()){
+        Blob(cv::Mat mask, cv::Rect bBox = cv::Rect()){
             this->mask = mask;
             this->bBox = bBox;
             
@@ -45,13 +45,14 @@ namespace cmp {
     {
     public:
         
-        DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::map<std::string, cv::Scalar> detectorIDColours);
+        DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames, std::vector<double> weights, std::map<std::string, cv::Scalar> detectorIDColours);
         virtual ~DiscreteVotingWordSkDet();
         
         double detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL);
         
     private:
         
+        std::vector<double> weights;
         std::map<std::string, cv::Scalar> detectorIDColours;
         std::vector<std::string> detNames;
         std::vector<cv::Ptr<SkewDetector> > detectors;

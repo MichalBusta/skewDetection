@@ -15,11 +15,16 @@
 
 namespace cmp
 {
-    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::map<std::string, cv::Scalar> detectorIDColours)
+    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::vector<double>weights,std::map<std::string, cv::Scalar> detectorIDColours)
     {
+
+        
         this->detNames = detNames;
         this->detectors = detectors;
+        this->weights = weights;
         this->detectorIDColours = detectorIDColours;
+        int noOfDetectors = detectors.size();
+        assert(detNames.size() == noOfDetectors && weights.size() ==noOfDetectors && detectorIDColours.size()==noOfDetectors);
     }
     DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
     {
@@ -40,18 +45,17 @@ namespace cmp
             std::map<std::string,double> tempConfidenceMap;
             std::vector<double> detectorConfidence;
             double bestDetection=0;
-            int bestIndex;
+            int bestIndex=0;
             for (size_t t1=0; t1<detectors.size(); t1++) {
                 cv::Mat tempDebug;
                 double angle;
                 angle =detectors[t1]->detectSkew(blobs[t].mask, lineK, &tempDebug);
-                if (bestDetection<angle) {
-                    bestDetection=angle;
+                if (bestDetection<detectors[t1]->lastDetectionProbability) {
+                    bestDetection=detectors[t1]->lastDetectionProbability;
                     bestIndex=t1;
                 }
                 
-                assert(bestIndex<detectorConfidence.size());
-                detectorConfidence.push_back(detectors[t1]->lastDetectionProbability);
+                detectorConfidence.push_back(detectors[t1]->lastDetectionProbability*weights[t1]);
                 
                 assert(t1<detNames.size());
                 tempImgMap[detNames[t1]] = tempDebug;
@@ -59,8 +63,10 @@ namespace cmp
                 
                 
             }
+            assert(bestIndex<detectorConfidence.size());
             probabilities.push_back(detectorConfidence[bestIndex]);
             debugImages.push_back(tempImgMap);
+            confidenceData.push_back(tempConfidenceMap);
             angles.push_back(bestDetection);
         }
         
@@ -68,9 +74,10 @@ namespace cmp
         return computeAngle(angles, probabilities, confidence, visData, debugImage);
     }
     
-    double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visData, cv::Mat* debugImage)
+    double DiscreteVotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visualisationInfo, cv::Mat* debugImage)
     {
         
+        VisualisationData visData =visualisationInfo;
         probability = 0;
         size_t noOfGroups=70;
         double groupRange;
@@ -131,7 +138,6 @@ namespace cmp
         int confidenceBarWidth =8;
         int confidenceBarSpacer =3;
         int imgBufferBar = 5;
-        int iDcircleRadius =2;
         cv::Scalar confidenceBarColor(50,90,45);
         
         //setting the detectorIDColours
@@ -146,22 +152,19 @@ namespace cmp
         
         //drawing confidence bar into each debug image
         
-        for (size_t i = 0; i<visData.imageData[i].size(); i++) {
-            for (auto iterator = visData.imageData[i].begin(); iterator != visData.imageData[i].end(); ++iterator) {
+        for (size_t i = 0; i<visData.imageData.size(); i++) {
+            
+            for (auto iterator : visData.imageData[i]) {
                 
                 //resizing the canvas and copying the debug image
-                cv::Mat tempImg = cv::Mat::zeros(maxImgHeight, iterator->second.cols+confidenceBarSpacer+confidenceBarWidth+iDcircleRadius+1,CV_8UC3);
-                cv::Rect roi(0,0, iterator->second.cols, iterator->second.rows);
-                iterator->second.copyTo(tempImg);
+                cv::Mat tempImg = cv::Mat::zeros(maxImgHeight, iterator.second.cols+confidenceBarSpacer+confidenceBarWidth,CV_8UC3);
+                cv::Rect roi(0,0, iterator.second.cols, maxImgHeight-iterator.second.rows);
+                iterator.second.copyTo(tempImg);
                 
                 //drawing the bar itself
-                cv::rectangle(tempImg, cv::Point(iterator->second.cols+confidenceBarSpacer, 0), cv::Point(iterator->second.cols+confidenceBarSpacer+confidenceBarWidth,visData.confidenceData[i][iterator->first]*tempImg.rows), confidenceBarColor);
+                cv::rectangle(tempImg, cv::Point(iterator.second.cols+confidenceBarSpacer, maxImgHeight), cv::Point(iterator.second.cols+confidenceBarSpacer+confidenceBarWidth,visData.confidenceData[i][iterator.first]*maxImgHeight), confidenceBarColor,CV_FILLED);
                 
-                //drawing the detector ID sign
-                
-                cv::circle(tempImg, cv::Point(tempImg.cols-iDcircleRadius,iDcircleRadius), iDcircleRadius, detectorIDColours[iterator->first]);
-                
-                iterator->second = tempImg;
+                iterator.second = tempImg;
             }
         }
         
@@ -261,9 +264,7 @@ namespace cmp
                 }
                 //drawing the confidence bar;
                 
-                cv::rectangle(histogram, cv::Point(rowWidth+rowImages[i][i1].cols, maxImgHeight*(i+1)-1), cv::Point(rowWidth+rowImages[i][i1].cols+confidenceBarWidth, maxImgHeight*(i+1)-(probabilities[i]*maxImgHeight)-1), confidenceBarColor,CV_FILLED);
-                
-                    rowWidth += rowImages[i][i1].cols+(confidenceBarWidth*(i+1))+imgBufferBar;
+                rowWidth += rowImages[i][i1].cols+(confidenceBarWidth*(i+1))+imgBufferBar;
             }
             imageCount++;
         }

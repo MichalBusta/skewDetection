@@ -188,7 +188,7 @@ namespace cmp {
         return outputString;
     }
     
-    void WordEvaluator::addWordDetector(cv::Ptr<WordSkewDetector> detector, std::string detectorID)
+    void WordEvaluator::addWordDetector(cv::Ptr<DiscreteVotingWordSkDet> detector, std::string detectorID)
     {
         detectors.push_back(detector);
         detectorIDs.push_back(detectorID);
