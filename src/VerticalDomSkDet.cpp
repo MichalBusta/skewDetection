@@ -115,13 +115,15 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	double maxValue = 0.1333;
 
 */
-//  int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
+/*  int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
     int index = resLen/totalLen;
 	index = MAX(0, index);
 	index = MIN(index, probabilities.size()-1);
     assert(index<probabilities.size());
     
 	this->lastDetectionProbability = probabilities[index];
+ */
+    this->lastDetectionProbability =resLen/totalLen;
 	this->probMeasure2 = this->lastDetectionProbability;
 
 	if(debugImage != NULL)
