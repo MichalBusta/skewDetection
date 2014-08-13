@@ -18,7 +18,7 @@ using namespace cv;
 
 #include "VerticalDomSkDet.h"
 #include "SkewDetector.h"
-
+//#define VERBOSE
 
 
 namespace cmp{
@@ -110,12 +110,13 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	cv::imshow("Histogram", histogram);
 	cv::waitKey(0);
 #endif
-
+/*
 	double minValue = 0.0151; //TODO what is the value
 	double maxValue = 0.1333;
 
-
-	int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
+*/
+//  int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
+    int index = resLen/totalLen;
 	index = MAX(0, index);
 	index = MIN(index, probabilities.size()-1);
     assert(index<probabilities.size());

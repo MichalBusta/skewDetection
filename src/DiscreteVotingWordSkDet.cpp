@@ -15,16 +15,16 @@
 
 namespace cmp
 {
-    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::vector<double>weights,std::map<std::string, cv::Scalar> detectorIDColours)
+    DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames,std::vector<double>weights,std::map<std::string, cv::Scalar> detectorIDColors)
     {
 
         
         this->detNames = detNames;
         this->detectors = detectors;
         this->weights = weights;
-        this->detectorIDColours = detectorIDColours;
+        this->detectorIDColors = detectorIDColors;
         int noOfDetectors = detectors.size();
-        assert(detNames.size() == noOfDetectors && weights.size() ==noOfDetectors && detectorIDColours.size()==noOfDetectors);
+        assert(detNames.size() == noOfDetectors && weights.size() == noOfDetectors && detectorIDColors.size() == noOfDetectors);
     }
     DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
     {
@@ -154,17 +154,19 @@ namespace cmp
         
         for (size_t i = 0; i<visData.imageData.size(); i++) {
             
-            for (auto iterator : visData.imageData[i]) {
+            for (auto iterator = visData.imageData[i].begin(); iterator != visData.imageData[i].end(); ++iterator) {
                 
+                confidenceBarColor = detectorIDColors[iterator->first];
                 //resizing the canvas and copying the debug image
-                cv::Mat tempImg = cv::Mat::zeros(maxImgHeight, iterator.second.cols+confidenceBarSpacer+confidenceBarWidth,CV_8UC3);
-                cv::Rect roi(0,0, iterator.second.cols, maxImgHeight-iterator.second.rows);
-                iterator.second.copyTo(tempImg);
+                cv::Mat tempImg = cv::Mat::zeros(maxImgHeight, iterator->second.cols+confidenceBarSpacer+confidenceBarWidth,CV_8UC3);
+                cv::Rect roi(0,maxImgHeight-iterator->second.rows, iterator->second.cols, iterator->second.rows);
+                iterator->second.copyTo(tempImg(roi));
                 
                 //drawing the bar itself
-                cv::rectangle(tempImg, cv::Point(iterator.second.cols+confidenceBarSpacer, maxImgHeight), cv::Point(iterator.second.cols+confidenceBarSpacer+confidenceBarWidth,visData.confidenceData[i][iterator.first]*maxImgHeight), confidenceBarColor,CV_FILLED);
+                cv::rectangle(tempImg, cv::Point(iterator->second.cols+confidenceBarSpacer, maxImgHeight), cv::Point(iterator->second.cols+confidenceBarSpacer+confidenceBarWidth,maxImgHeight-visData.confidenceData[i][iterator->first]*maxImgHeight), confidenceBarColor,CV_FILLED);
                 
-                iterator.second = tempImg;
+                iterator->second= tempImg;
+                
             }
         }
         
@@ -174,10 +176,17 @@ namespace cmp
         int rowSize =0;
         int rowIdx =0;
         rowImages.resize(1);
-        for (auto imgMap : visData.imageData) {
+        
+        for (size_t t = 0; t<visData.imageData.size(); t++) {
             
-            for (auto iterator : imgMap) {
-            
+            for (auto iterator : visData.imageData[t]) {
+                
+#ifdef VERBOSE
+                
+                cv::imshow("ts", iterator.second);
+                cv::waitKey(0);
+#endif
+                
                 if (rowSize + iterator.second.cols +imgBufferBar < histWidth) {
                     rowSize += iterator.second.cols;
                     rowSize += imgBufferBar;
@@ -248,7 +257,7 @@ namespace cmp
             for (size_t i1=0; i1<rowImages[i].size(); i1++) {
                 
 
-                cv::Rect roi =cv::Rect(rowWidth,(maxImgHeight*i)+(maxImgHeight-rowImages[i][i1].rows),rowImages[i][i1].cols,rowImages[i][i1].rows);
+                cv::Rect roi =cv::Rect(rowWidth,(maxImgHeight*i),rowImages[i][i1].cols,rowImages[i][i1].rows);
                 cv::Mat temp;
                 
 #ifdef VERBOSE
@@ -262,9 +271,8 @@ namespace cmp
                 } catch (...) {
                     
                 }
-                //drawing the confidence bar;
                 
-                rowWidth += rowImages[i][i1].cols+(confidenceBarWidth*(i+1))+imgBufferBar;
+                rowWidth += rowImages[i][i1].cols+imgBufferBar;
             }
             imageCount++;
         }

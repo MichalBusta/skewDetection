@@ -45,7 +45,7 @@ namespace cmp {
     {
     public:
         
-        DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames, std::vector<double> weights, std::map<std::string, cv::Scalar> detectorIDColours);
+        DiscreteVotingWordSkDet(std::vector< cv::Ptr<SkewDetector> > detectors, std::vector<std::string> detNames, std::vector<double> weights, std::map<std::string, cv::Scalar> detectorIDColors);
         virtual ~DiscreteVotingWordSkDet();
         
         double detectSkew(std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL);
@@ -53,7 +53,7 @@ namespace cmp {
     private:
         
         std::vector<double> weights;
-        std::map<std::string, cv::Scalar> detectorIDColours;
+        std::map<std::string, cv::Scalar> detectorIDColors;
         std::vector<std::string> detNames;
         std::vector<cv::Ptr<SkewDetector> > detectors;
         double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visData, cv::Mat* debugImage = NULL);

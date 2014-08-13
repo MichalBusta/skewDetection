@@ -37,22 +37,22 @@ int main( int argc, char **argv)
     detectors.push_back( new cmp::VerticalDomSkDet());
 	weights.push_back(1.0);
     detectorNames.push_back("VerticalDomSkDet");
-    detectorIdentifierColours["VerticalDomSkDet"] = cv::Scalar();
+    detectorIdentifierColours["VerticalDomSkDet"] = cv::Scalar(90,200,220);
     
 	detectors.push_back( new cmp::ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.1));
 	weights.push_back(1.0);
     detectorNames.push_back("ThinProfileSkDet");
-    detectorIdentifierColours["ThinProfileSkDet"] = cv::Scalar();
+    detectorIdentifierColours["ThinProfileSkDet"] = cv::Scalar(210,105,30);
     
 	detectors.push_back( new cmp::LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
     weights.push_back(1.0);
     detectorNames.push_back("LongestEdgeSkDetector");
-    detectorIdentifierColours["LongestEdgeSkDetector"] = cv::Scalar();
+    detectorIdentifierColours["LongestEdgeSkDetector"] = cv::Scalar(40,250,0);
     
 	detectors.push_back( new cmp::LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
 	weights.push_back(0.25);
     detectorNames.push_back("LRLongestEdge");
-    detectorIdentifierColours["LRLongestEdge"] = cv::Scalar();
+    detectorIdentifierColours["LRLongestEdge"] = cv::Scalar(0,50,200);
     
     eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(detectors,detectorNames,weights,detectorIdentifierColours), "DiscreteVoting");
     eval.run();
