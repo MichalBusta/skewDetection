@@ -17,12 +17,12 @@
 
 namespace cmp{
 
-    struct Blob{
+    struct Blob1{
         
         cv::Mat mask;
         cv::Rect bBox;
         
-        Blob(cv::Mat mask, cv::Rect bBox = cv::Rect()){
+        Blob1(cv::Mat mask, cv::Rect bBox = cv::Rect()){
             this->mask = mask;
             this->bBox = bBox;
             
@@ -36,7 +36,7 @@ namespace cmp{
         WordSkewDetector();
         virtual ~WordSkewDetector();
         
-        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL) = 0;
+        virtual double detectSkew( std::vector<Blob1>& blobs, double lineK, cv::Mat* debugImage =NULL) = 0;
 
     };
     class ContourWordSkewDetector : public WordSkewDetector
@@ -46,7 +46,7 @@ namespace cmp{
         ContourWordSkewDetector(cv::Ptr<ContourSkewDetector> detector);
         virtual ~ContourWordSkewDetector();
        
-        virtual double detectSkew( std::vector<Blob>& blobs, double lineK, cv::Mat* debugImage =NULL);
+        virtual double detectSkew( std::vector<Blob1>& blobs, double lineK, cv::Mat* debugImage =NULL);
         
         virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
 

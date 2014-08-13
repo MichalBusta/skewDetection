@@ -20,6 +20,7 @@ using namespace cv;
 #include "SkewDetector.h"
 
 
+
 namespace cmp{
 
 
@@ -93,6 +94,10 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 			totalLen += hist[i];
 		}
 	}
+    /*
+     *TODO there is an error in the confidence computation, most probably in the division 
+     10
+     */
 	for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
 	{
 		int j = i;
@@ -113,7 +118,8 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
 	index = MAX(0, index);
 	index = MIN(index, probabilities.size()-1);
-
+    assert(index<probabilities.size());
+    
 	this->lastDetectionProbability = probabilities[index];
 	this->probMeasure2 = this->lastDetectionProbability;
 

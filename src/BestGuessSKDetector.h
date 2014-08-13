@@ -32,6 +32,8 @@ public:
 	virtual double detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage = NULL );
 
 	std::vector<double> weights;
+    std::vector<std::string> detectorNames;
+    std::map<std::string, cv::Mat> debugImages;
 private:
 	std::vector<cv::Ptr<ContourSkewDetector> > detectors;
 };

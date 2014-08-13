@@ -51,7 +51,7 @@ int main( int argc, char **argv)
 	}
 	int detector = 0;
     int wordDetector =0;
-    double skew;
+    double skew=0;
     cv::Mat debugImage;
     cv::Mat dbgImage;
     std::vector<Blob> blobs;
@@ -77,7 +77,7 @@ int main( int argc, char **argv)
 		CV_Error( CV_StsBadArg, "Unsupported detector number" );
 	}
     
-	cv::Ptr<ContourWordSkewDetector> WordSkewDetector = new DiscreteVotingWordSkDet(detectors[detector]);
+	//cv::Ptr<DiscreteVotingWordSkDet> WordSkewDetector =  DiscreteVotingWordSkDet();
     
     cv::Mat debugImg = cv::imread(argv[1]);
     std::string filePath = IOUtils::RemoveExtension(argv[1]);
@@ -95,7 +95,7 @@ int main( int argc, char **argv)
     }
     
     
-    skew = WordSkewDetector->detectSkew(blobs, 0.0, &dbgImage);
+    //skew = WordSkewDetector->detectSkew(blobs, 0.0, &dbgImage);
 
     cv::Mat wrapped;
     cv::Mat warp_mat( 2, 3, CV_32FC1 );
