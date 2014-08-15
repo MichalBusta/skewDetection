@@ -32,7 +32,7 @@ namespace cmp
 	{
 		//ziskani souradnic Y
 		cv::Rect bbox = cv::boundingRect(outerContour);
-		int topPoint = bbox.x + bbox.height;
+		int topPoint = bbox.y + bbox.height;
 		int bottomPoint = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -47,9 +47,11 @@ namespace cmp
 		}
 
 		//vypocet velikosti pisma
-		int letterSize = 0;
-		letterSize = bottomPoint - topPoint;
+		int letterSize = bottomPoint - topPoint;
+        assert(letterSize >1);
 		double addEdgeThickness = letterSize * precision;
+        
+        
 
 		//ziskani souradnic X
 		int TLX = bbox.x + bbox.width;
@@ -77,9 +79,9 @@ namespace cmp
 
 		//pomocne body pro vztvareni usecek
 		Point P1(0, topPoint + addEdgeThickness);
-		Point P2(bbox.width, topPoint + addEdgeThickness);
+		Point P2(bbox.width+bbox.x, topPoint + addEdgeThickness);
 		Point P3(0, bottomPoint - addEdgeThickness);
-		Point P4(bbox.width, bottomPoint - addEdgeThickness);
+		Point P4(bbox.width+bbox.x, bottomPoint - addEdgeThickness);
 
 		/*Point P1(0, topPoint + 100*precision);
 		Point P2(mask.cols, topPoint + 100*precision);
@@ -99,13 +101,15 @@ namespace cmp
 
 		if(debugImage != NULL)
 		{
+            int borderForVis=10;
+            
 			Mat& drawing =  *debugImage;
-			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+			drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
 			Scalar color = Scalar( 255, 255, 255 );
 			std::vector<cv::Point> outerContourNorm;
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
-				outerContourNorm.push_back(cv::Point(outerContour[j].x - bbox.x, outerContour[j].y - bbox.y));
+				outerContourNorm.push_back(cv::Point((outerContour[j].x - bbox.x)*scalefactor, (outerContour[j].y - bbox.y)*scalefactor));
 				cv::circle(drawing, outerContourNorm[j], 2, cv::Scalar(0, 255, 255), 1);
 			}
 			std::vector<std::vector<cv::Point> > contours;
@@ -113,14 +117,39 @@ namespace cmp
 			drawContours( drawing, contours, 0, color, 1, 8);
 
 			cv::Point offset(bbox.x, bbox.y);
-
-
-			cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
-			cv::line(drawing, P3, P4, cv::Scalar(255, 255, 0), 1 );
-			cv::line(drawing, TL - offset, TR - offset, cv::Scalar(0, 255, 0), 2 );
-			cv::line(drawing, BL - offset, BR - offset, cv::Scalar(0, 255, 0), 2 );
-			cv::circle(drawing, TM - offset, 4, cv::Scalar(0, 0, 255), 2);
-			cv::circle(drawing, BM - offset, 4, cv::Scalar(0, 0, 255), 2);
+            //scaling up the points
+            offset.x *=scalefactor;
+            offset.y *=scalefactor;
+            
+            P1.x = P1.x*scalefactor;
+            P1.y = P1.y*scalefactor;
+            P2.x = P2.x*scalefactor;
+            P2.y = P2.y*scalefactor;
+            P3.x = P3.x*scalefactor;
+            P3.y = P3.y*scalefactor;
+            P4.x = P4.x*scalefactor;
+            P4.y = P4.y*scalefactor;
+            
+            TL.x = TL.x*scalefactor;
+            TL.y = TL.y*scalefactor;
+            TR.x = TR.x*scalefactor;
+            TR.y = TR.y*scalefactor;
+            TM.x = TM.x*scalefactor;
+            TM.y = TM.y*scalefactor;
+            
+            BL.x = BL.x*scalefactor;
+            BL.y = BL.y*scalefactor;
+            BR.x = BR.x*scalefactor;
+            BR.y = BR.y*scalefactor;
+            BM.x = BM.x*scalefactor;
+            BM.y = BM.y*scalefactor;
+            
+			cv::line(drawing, P1-offset, P2-offset, cv::Scalar(255, 255, 0), 1 );
+			cv::line(drawing, P3-offset, P4-offset, cv::Scalar(255, 255, 0), 1 );
+			cv::line(drawing, (TL - offset), (TR - offset), cv::Scalar(0, 255, 0), 2 );
+			cv::line(drawing, (BL - offset), (BR - offset), cv::Scalar(0, 255, 0), 2 );
+			cv::circle(drawing, (TM - offset), 4, cv::Scalar(0, 0, 255), 2);
+			cv::circle(drawing, (BM - offset), 4, cv::Scalar(0, 0, 255), 2);
 		}
 
 		return angle;

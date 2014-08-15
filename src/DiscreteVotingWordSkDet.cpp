@@ -55,6 +55,7 @@ namespace cmp
                     bestIndex=t1;
                 }
                 
+                assert(t1<weights.size());
                 detectorConfidence.push_back(detectors[t1]->lastDetectionProbability*weights[t1]);
                 
                 assert(t1<detNames.size());
