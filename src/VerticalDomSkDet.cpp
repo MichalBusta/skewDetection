@@ -121,7 +121,8 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
     assert(index<probabilities.size());
     
 	this->lastDetectionProbability = probabilities[index];
-	this->probMeasure2 = this->lastDetectionProbability;
+	this->probMeasure1 = probabilities[index] * 100;
+	this->probMeasure2 = (resLen/totalLen);
 
 	if(debugImage != NULL)
 	{
