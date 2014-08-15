@@ -99,7 +99,8 @@ namespace cmp
 			deltaX = TR.x - BR.x;
 			deltaY = TR.y - BR.y;
 			angle = atan((deltaX)*1.0/(deltaY));
-		}else										// isRight=false
+		}
+        else										// isRight=false
 		{
 			deltaX = TL.x - BL.x;
 			deltaY = TL.y - BL.y;

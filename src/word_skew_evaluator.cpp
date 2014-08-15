@@ -31,30 +31,35 @@ int main( int argc, char **argv)
     std::vector<cv::Ptr<cmp::SkewDetector> > detectors;
     std::vector<std::string> detectorNames;
     std::vector<double> weights;
-    std::map< std::string ,cv::Scalar> detectorIdentifierColours;
+    std::map< std::string ,cv::Scalar> detectorIdentifierColors;
     
     //adding detectors
     detectors.push_back( new cmp::VerticalDomSkDet());
 	weights.push_back(1.0);
     detectorNames.push_back("VerticalDomSkDet");
-    detectorIdentifierColours["VerticalDomSkDet"] = cv::Scalar(90,200,220);
+    detectorIdentifierColors["VerticalDomSkDet"] = cv::Scalar(90,200,220);
     
 	detectors.push_back( new cmp::ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.1));
 	weights.push_back(1.0);
     detectorNames.push_back("ThinProfileSkDet");
-    detectorIdentifierColours["ThinProfileSkDet"] = cv::Scalar(210,105,30);
+    detectorIdentifierColors["ThinProfileSkDet"] = cv::Scalar(210,105,30);
     
 	detectors.push_back( new cmp::LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
     weights.push_back(1.0);
     detectorNames.push_back("LongestEdgeSkDetector");
-    detectorIdentifierColours["LongestEdgeSkDetector"] = cv::Scalar(40,250,0);
+    detectorIdentifierColors["LongestEdgeSkDetector"] = cv::Scalar(40,250,0);
     
 	detectors.push_back( new cmp::LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
 	weights.push_back(0.25);
     detectorNames.push_back("LRLongestEdge");
-    detectorIdentifierColours["LRLongestEdge"] = cv::Scalar(0,50,200);
+    detectorIdentifierColors["LRLongestEdge"] = cv::Scalar(0,50,200);
     
-    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(detectors,detectorNames,weights,detectorIdentifierColours), "DiscreteVoting");
+    detectors.push_back(new cmp::CentersSkDet());
+    weights.push_back(0.25);
+    detectorNames.push_back("CenterSkDet");
+    detectorIdentifierColors["CenterSkDet"] = cv::Scalar(200,200,150);
+    
+    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(detectors,detectorNames,weights,detectorIdentifierColors), "DiscreteVoting");
     eval.run();
     
 }
