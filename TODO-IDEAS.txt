@@ -57,3 +57,8 @@ Tomas: Vertikalni smer dominantni
 link na cv::approxPolyDP:
 
 http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm 
+
+Possible fix for Centers Skew Detector: 
+	- rotation of line is important !!!!
+
+	

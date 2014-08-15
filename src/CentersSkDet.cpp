@@ -32,7 +32,7 @@ namespace cmp
 	{
 		//ziskani souradnic Y
 		cv::Rect bbox = cv::boundingRect(outerContour);
-		int topPoint = bbox.height;
+		int topPoint = bbox.x + bbox.height;
 		int bottomPoint = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -49,13 +49,12 @@ namespace cmp
 		//vypocet velikosti pisma
 		int letterSize = 0;
 		letterSize = bottomPoint - topPoint;
-		int addEdgeThickness = 0;
-		addEdgeThickness = letterSize * precision;
+		double addEdgeThickness = letterSize * precision;
 
 		//ziskani souradnic X
-		int TLX = bbox.width;
+		int TLX = bbox.x + bbox.width;
 		int TRX = 0;
-		int BLX = bbox.width;
+		int BLX = bbox.x + bbox.width;
 		int BRX = 0;
 		for (int c = 0; c < outerContour.size();c++)
 		{
@@ -103,21 +102,25 @@ namespace cmp
 			Mat& drawing =  *debugImage;
 			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
 			Scalar color = Scalar( 255, 255, 255 );
-			std::vector<std::vector<cv::Point> > contours;
-			contours.push_back(outerContour);
-			drawContours( drawing, contours, 0, color, 1, 8);
-
+			std::vector<cv::Point> outerContourNorm;
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
-				cv::circle(drawing, outerContour[j], 2, cv::Scalar(0, 255, 255), 2);
+				outerContourNorm.push_back(cv::Point(outerContour[j].x - bbox.x, outerContour[j].y - bbox.y));
+				cv::circle(drawing, outerContourNorm[j], 2, cv::Scalar(0, 255, 255), 1);
 			}
+			std::vector<std::vector<cv::Point> > contours;
+			contours.push_back(outerContourNorm);
+			drawContours( drawing, contours, 0, color, 1, 8);
+
+			cv::Point offset(bbox.x, bbox.y);
+
 
 			cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
 			cv::line(drawing, P3, P4, cv::Scalar(255, 255, 0), 1 );
-			cv::line(drawing, TL, TR, cv::Scalar(0, 255, 0), 2 );
-			cv::line(drawing, BL, BR, cv::Scalar(0, 255, 0), 2 );
-			cv::circle(drawing, TM, 4, cv::Scalar(0, 0, 255), 2);
-			cv::circle(drawing, BM, 4, cv::Scalar(0, 0, 255), 2);
+			cv::line(drawing, TL - offset, TR - offset, cv::Scalar(0, 255, 0), 2 );
+			cv::line(drawing, BL - offset, BR - offset, cv::Scalar(0, 255, 0), 2 );
+			cv::circle(drawing, TM - offset, 4, cv::Scalar(0, 0, 255), 2);
+			cv::circle(drawing, BM - offset, 4, cv::Scalar(0, 0, 255), 2);
 		}
 
 		return angle;
