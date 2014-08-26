@@ -231,7 +231,7 @@ namespace cmp {
 		outStream << "<h3>Worst Results</h3>\n";
 		//nejhorsi vsledky
 		outStream << "<table id=\"detectors_wrong_images\">\n";
-		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Measure2</td><td>Preview</td></tr>\n";
+		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Confidence</td><td>Preview</td></tr>\n";
 		int resultsCount = 0;
 		for(int i = (int) work.size() -1; i >= 0; i--)
 		{
@@ -253,7 +253,7 @@ namespace cmp {
 		outStream << "<h3>Best Results</h3>\n";
 
 		outStream << "<table id=\"detectors_right_images\">\n";
-		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Measure2</td><td align=\"center\">Preview</td></tr>\n";
+		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Confidence</td><td align=\"center\">Preview</td></tr>\n";
 		resultsCount = 0;
 		LetterCheck.clear();
 		for(int i = 0; i < work.size(); i++)
