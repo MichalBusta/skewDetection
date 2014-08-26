@@ -109,15 +109,21 @@ namespace cmp
 		if(debugImage != NULL)
 		{
             //scaling up the contour
+            cv::Rect bbox = cv::boundingRect(contour);
+            double minX = bbox.x;
+            double minY =bbox.y;
+            
             for (size_t i=0; i<contour.size(); i++) {
+                contour[i].x -=minX;
                 contour[i].x *=scalefactor;
+                
+                contour[i].y -=minY;
                 contour[i].y *=scalefactor;
             }
             
             
 			cv::Mat& drawing =  *debugImage;
-			cv::Rect bbox = cv::boundingRect(contour);
-			drawing =  cv::Mat::zeros(bbox.height+brd, bbox.width+brd, CV_8UC3 );
+			drawing =  cv::Mat::zeros(bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
 
 			cv::Scalar color = cv::Scalar( 255, 255, 255 );
 			std::vector<std::vector<cv::Point> > contours;

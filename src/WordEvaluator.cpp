@@ -164,12 +164,13 @@ namespace cmp {
                 font = splitString(imageName, '-')[0];
                 
                 Result tempResult(angle, std::fabs(angleDifference), isWrong, debugImage, imageName,letters,font);
-                results.push_back(tempResult);
-                
                 std::stringstream imageFileName;
                 imageFileName << dirPath<< "/" << imageName <<".png";
                 
                 saveDebugImg(imageFileName.str(), tempResult);
+                tempResult.debugImg.release();
+                results.push_back(tempResult);
+
                 
             }
         }
@@ -383,7 +384,7 @@ namespace cmp {
         if(result.isWrong){
             cv::imwrite(outputDirectory+"/Failed"+"/"+result.imgName+".png", result.debugImg);
         }
-   
+        
     }
     
     
