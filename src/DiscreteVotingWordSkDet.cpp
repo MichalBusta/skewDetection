@@ -44,14 +44,15 @@ namespace cmp
             std::map<std::string,cv::Mat> tempImgMap;
             std::map<std::string,double> tempConfidenceMap;
             std::vector<double> detectorConfidence;
-            double bestDetection=0;
+            std::vector<double> tempAngles;
+            
+            double bestDetectionConfidence=0;
             int bestIndex=0;
             for (size_t t1=0; t1<detectors.size(); t1++) {
                 cv::Mat tempDebug;
-                double angle;
-                angle =detectors[t1]->detectSkew(blobs[t].mask, lineK, &tempDebug);
-                if (bestDetection<detectors[t1]->lastDetectionProbability) {
-                    bestDetection=detectors[t1]->lastDetectionProbability;
+                tempAngles.push_back(detectors[t1]->detectSkew(blobs[t].mask, lineK, &tempDebug));
+                if (bestDetectionConfidence<detectors[t1]->lastDetectionProbability) {
+                    bestDetectionConfidence=detectors[t1]->lastDetectionProbability;
                     bestIndex=t1;
                 }
                 
@@ -65,10 +66,11 @@ namespace cmp
                 
             }
             assert(bestIndex<detectorConfidence.size());
+            assert(bestIndex<tempAngles.size());
             probabilities.push_back(detectorConfidence[bestIndex]);
             debugImages.push_back(tempImgMap);
             confidenceData.push_back(tempConfidenceMap);
-            angles.push_back(bestDetection);
+            angles.push_back(tempAngles[bestIndex]);
         }
         
         VisualisationData visData(confidenceData,debugImages);

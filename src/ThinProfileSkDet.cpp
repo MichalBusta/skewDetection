@@ -217,6 +217,10 @@ namespace cmp
 				Mat& drawing =  *debugImage;
 				cv::Rect bbox = cv::boundingRect(contour);
 				drawing =  Mat::zeros( scalefactor*bbox.height+brd, scalefactor*bbox.width+brd, CV_8UC3 );
+                
+                
+                double minY = bbox.y;
+                double minX = bbox.x;
 
 				Scalar color = Scalar( 255, 255, 255 );
 				std::vector<std::vector<cv::Point> > contours;
@@ -225,34 +229,53 @@ namespace cmp
                 //scale up the contours
                 for (size_t i=0; i<contours.size(); i++) {
                     for (size_t p=0; p<contours[i].size(); p++) {
+                        
+                        contours[i][p].x -=minX;
                         contours[i][p].x *=scalefactor;
+                        
+                        contours[i][p].y -=minY;
                         contours[i][p].y *=scalefactor;
                     }
                 }
                 //scale up the hulls
                 for (size_t i=0; i<hull.size(); i++) {
+                    hull[i].x -=minX;
                     hull[i].x *=scalefactor;
+                    
+                    hull[i].y -=minY;
                     hull[i].y *=scalefactor;
                 }
                 //scale up the point vectors
                 for (size_t i=0; i<PointsForWiderProfiles.size(); i++) {
-                    PointsForWiderProfiles[i].x *=scalefactor;
+                    PointsForWiderProfiles[i].x-=minX;
+                    PointsForWiderProfiles[i].x*=scalefactor;
+                    
+                    PointsForWiderProfiles[i].y-=minY;
                     PointsForWiderProfiles[i].y*=scalefactor;
                 }
                 for (size_t i=0; i<PointsForWiderProfiles2.size(); i++) {
-                    PointsForWiderProfiles2[i].x *=scalefactor;
+                    PointsForWiderProfiles2[i].x-=minX;
+                    PointsForWiderProfiles2[i].x*=scalefactor;
+                    
+                    PointsForWiderProfiles2[i].y-=minY;
                     PointsForWiderProfiles2[i].y*=scalefactor;
                 }
                 for (size_t i=0; i<VectorsForWiderProfiles.size(); i++) {
-                    VectorsForWiderProfiles[i].x *=scalefactor;
+                    VectorsForWiderProfiles[i].x*=scalefactor;
                     VectorsForWiderProfiles[i].y*=scalefactor;
                     
                 }
                 //...and the points
+                resPoint.x -=minX;
                 resPoint.x *=scalefactor;
+                resPoint.y -=minY;
                 resPoint.y *=scalefactor;
+                
+                resPoint2.x -=minX;
                 resPoint2.x *=scalefactor;
+                resPoint2.y -=minY;
                 resPoint2.y *=scalefactor;
+                
                 resVector.x *=scalefactor;
                 resVector.y *= scalefactor;
                 
