@@ -109,9 +109,45 @@ namespace cmp
 
 		if(debugImage != NULL)
 		{
+            // moving the contour + points to 0,0 & scaling up the image
+            double minX = bbox.x;
+            double minY = bbox.y;
+            
+            int brd = 10;
+            
+            cv::Point offset(minX, minY);
+            
+            for (size_t i=0; i<outerContour.size(); i++) {
+                outerContour[i].x -= minX;
+                outerContour[i].x *= scalefactor;
+                
+                outerContour[i].y -= minY;
+                outerContour[i].y *= scalefactor;
+                
+            }
+            
+            P1.x *=scalefactor;
+            P1.y *=scalefactor;
+            P2.x *=scalefactor;
+            P2.y *=scalefactor;
+            P3.x *=scalefactor;
+            P3.y *=scalefactor;
+            P4.x *=scalefactor;
+            P4.y *=scalefactor;
+            
+            TL.x *=scalefactor;
+            TL.y *=scalefactor;
+            TR.x *=scalefactor;
+            TR.y *=scalefactor;
+            
+            BL.x *=scalefactor;
+            BL.y *=scalefactor;
+            BR.x *=scalefactor;
+            BR.y *=scalefactor;
+            
 			Mat& drawing =  *debugImage;
 
-			drawing =  Mat::zeros( bbox.height, bbox.width, CV_8UC3 );
+			drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
 
 			Scalar color = Scalar( 255, 255, 255 );
 			std::vector<std::vector<cv::Point> > contours;
@@ -123,13 +159,13 @@ namespace cmp
 				cv::circle(drawing, outerContour[i], 1, Scalar( 0, 0, 255 ), 1,5);
 			}
 
-			cv::line(drawing, P1, P2, cv::Scalar(255, 255, 0), 1 );
-			cv::line(drawing, P3, P4, cv::Scalar(255, 255, 0), 1 );			
+			cv::line(drawing, P1-offset, P2-offset, cv::Scalar(255, 255, 0), 1 );
+			cv::line(drawing, P3-offset, P4-offset, cv::Scalar(255, 255, 0), 1 );
 
-			cv::circle(drawing, TL, 4, Scalar( 0, 255, 255 ), 1);
-			cv::circle(drawing, TR, 4, Scalar( 0, 255, 255 ), 1);
-			cv::circle(drawing, BL, 4, Scalar( 0, 255, 0 ), 1);
-			cv::circle(drawing, BR, 4, Scalar( 0, 255, 0 ), 1);
+			cv::circle(drawing, TL-offset, 4, Scalar( 0, 255, 255 ), 1);
+			cv::circle(drawing, TR-offset, 4, Scalar( 0, 255, 255 ), 1);
+			cv::circle(drawing, BL-offset, 4, Scalar( 0, 255, 0 ), 1);
+			cv::circle(drawing, BR-offset, 4, Scalar( 0, 255, 0 ), 1);
 		}
 
 		//y-souradnice je opacne

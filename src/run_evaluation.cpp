@@ -48,8 +48,8 @@ int main( int argc, char **argv)
      /**/
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenter" );
-	evaluator.registerDetector(new LeftRightHullSkDet(), "RightHullLongest" );
-	evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_NONE, 0, 0.1, false), "LeftHullLongest" );
+	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, true), "RightHullLongest" );
+	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, false), "LeftHullLongest" );
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge" );
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom" );
 	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess" );

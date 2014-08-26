@@ -121,28 +121,28 @@ namespace cmp
             offset.x *=scalefactor;
             offset.y *=scalefactor;
             
-            P1.x = P1.x*scalefactor;
-            P1.y = P1.y*scalefactor;
-            P2.x = P2.x*scalefactor;
-            P2.y = P2.y*scalefactor;
-            P3.x = P3.x*scalefactor;
-            P3.y = P3.y*scalefactor;
-            P4.x = P4.x*scalefactor;
-            P4.y = P4.y*scalefactor;
+            P1.x *=scalefactor;
+            P1.y *=scalefactor;
+            P2.x *=scalefactor;
+            P2.y *=scalefactor;
+            P3.x *=scalefactor;
+            P3.y *=scalefactor;
+            P4.x *=scalefactor;
+            P4.y *=scalefactor;
             
-            TL.x = TL.x*scalefactor;
-            TL.y = TL.y*scalefactor;
-            TR.x = TR.x*scalefactor;
-            TR.y = TR.y*scalefactor;
-            TM.x = TM.x*scalefactor;
-            TM.y = TM.y*scalefactor;
+            TL.x *=scalefactor;
+            TL.y *=scalefactor;
+            TR.x *=scalefactor;
+            TR.y *=scalefactor;
+            TM.x *=scalefactor;
+            TM.y *=scalefactor;
             
-            BL.x = BL.x*scalefactor;
-            BL.y = BL.y*scalefactor;
-            BR.x = BR.x*scalefactor;
-            BR.y = BR.y*scalefactor;
-            BM.x = BM.x*scalefactor;
-            BM.y = BM.y*scalefactor;
+            BL.x *=scalefactor;
+            BL.y *=scalefactor;
+            BR.x *=scalefactor;
+            BR.y *=scalefactor;
+            BM.x *=scalefactor;
+            BM.y *=scalefactor;
             
 			cv::line(drawing, P1-offset, P2-offset, cv::Scalar(255, 255, 0), 1 );
 			cv::line(drawing, P3-offset, P4-offset, cv::Scalar(255, 255, 0), 1 );

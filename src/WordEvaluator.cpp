@@ -363,7 +363,7 @@ namespace cmp {
                     
                     if (c<iterator.second[categoryName].resultVector.size()) {
                         
-                    outputFile << "<td>" << "<a href =\"" << "file://" <<outputDirectory<< "/" << detectorIDs[0] << "/" << iterator.second[categoryName].resultVector[c].imgName<< "/"<< iterator.second[categoryName].resultVector[c].imgName<<".png"<<"\"" <<">" << iterator.second[categoryName].resultVector[c].angleDifference << "</a>" << "</td>" <<"/n";
+                    outputFile << "<td>" << "<a href =\"" << "file://" <<outputDirectory<< "/" << detectorIDs[0] << "/" << iterator.second[categoryName].resultVector[c].imgName<< "/"<< iterator.second[categoryName].resultVector[c].imgName<<".png"<<"\"" <<">" << iterator.second[categoryName].resultVector[c].angleDifference << "</a>" << "</td>" <<"\n";
                     }
                 }
                 outputFile << "</tr>" <<"\n";

@@ -58,11 +58,11 @@ struct EvaluationResult
 	double measure2;
 
 
-	EvaluationResult(double angleDiff, std::string alphabet, std::string letter,
-			int classificator, size_t imageId, size_t faceIndex) :
-			angleDiff(angleDiff), alphabet(alphabet), letter(letter), classificator(
-					classificator), imageId(imageId), faceIndex(faceIndex), measure1(0.0), measure2(0.0)
-	{
+	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex)
+    :
+			angleDiff(angleDiff), alphabet(alphabet), letter(letter),classificator(classificator), imageId(imageId), faceIndex(faceIndex), measure1(0.0), measure2(0.0)
+    {
+        
 	}
 	;
 	
