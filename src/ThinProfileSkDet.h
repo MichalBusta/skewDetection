@@ -29,7 +29,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.005, bool returnMiddleAngle = true);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02, double binWidth = 1, double sigma =3 ,bool returnMiddleAngle = true);
 
 	virtual ~ThinProfileSkDet();
 
@@ -41,6 +41,15 @@ public:
 	//% of profile width 
 	double profilesRange;
 
+    // the voting histogram
+    std::vector<double> histogram;
+    
+    //sigma for normal distr
+    double sigma;
+    
+    // sirka binu ve stupnich >_>
+    double binWidth;
+    
 	bool returnMiddleAngle;
 	
 	std::vector<double> probabilities;

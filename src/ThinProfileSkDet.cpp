@@ -24,8 +24,8 @@ namespace cmp
 {
     int brd=10;
 
-	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool returnMiddleAngle) :
-		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),
+	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, double binWidth, double sigma ,bool returnMiddleAngle) :
+		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),binWidth(binWidth),sigma(sigma),
 		returnMiddleAngle(returnMiddleAngle)
 	{
 		probabilities.push_back(0.48);
@@ -34,6 +34,9 @@ namespace cmp
 		probabilities.push_back(0.53);
 		probabilities.push_back(0.50);
 		probabilities.push_back(0.48);
+        histogram.resize(180/binWidth);
+        std::fill(histogram.begin(), histogram.end(), 0);
+        assert(binWidth>0);
 	}
 
 	ThinProfileSkDet::~ThinProfileSkDet()
@@ -133,15 +136,16 @@ namespace cmp
 				tmpVector = horizont_neg;
 				tmpPoint = hull[p_b];
 				tmpPoint2 = hull[p_a];
-				ang = atan2(horizont_neg.y, horizont_neg.x);
+				ang = atan(horizont_neg.y/horizont_neg.x);
 			}
 
 
 			rotated_angle = rotated_angle + min(angle_a, angle_b);
 
+            
 			ang = ang + M_PI/2;
-			while (ang > M_PI/2) ang = ang - M_PI;
-			while (ang <= -M_PI/2) ang = ang + M_PI;
+			while (ang > M_PI/2) ang -= M_PI;
+			while (ang <= -M_PI/2) ang += M_PI;
 
 
 			if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
@@ -177,22 +181,58 @@ namespace cmp
 		vector<double>widths2;
 		vector<double>angles2;
         
+        filterValuesBySimiliarAngle(widths, angles, widths2, angles2);
+        
         assert(angles.size()==widths.size());
-
-		filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
-
-		// counting profiles filtered by filterValuesBySimiliarAngle
         
-        assert(widths.size()==widths2.size());
+        /*
+         TODO
+         USE DISCRETIZATION & HISTOGRAM TO DETERMINE RESULTING ANGLE
+        */
         
-		for(int c=0;c<widths.size();c++)
-			if( ( widths2[c] != 0 ) && ( widths2[c] <= thinProfilesRange ) )
-				probMeasure2++;
-
-
+        std::vector<int> angleCountBins;
+        std::vector<double> widthSumBins = histogram;
+        std::vector<double> avgWidths;
+        
+        double maxWidth = DBL_MAX;
+        double minWidth = DBL_MIN;
+        
+        angleCountBins.resize(histogram.size());
+        std::fill(angleCountBins.begin(), angleCountBins.end(), 0);
+        double binRange = M_PI/180/binWidth;
+        
+        for (size_t i=0 ; i<angles.size(); i++) {
+            int index =(angles[i]+M_PI_2)/binRange;
+            assert(index < angleCountBins.size());
+            angleCountBins[index]++;
+            widthSumBins[index] += widths[index];
+        }
+        
+        for (size_t i=0; i<widthSumBins.size(); i++) {
+            
+            if (angleCountBins[i] ==0) {
+                avgWidths.push_back(0);
+            }
+            else{
+                avgWidths.push_back(widthSumBins[i]/angleCountBins[i]);
+                minWidth = MIN(minWidth, avgWidths.back());
+                maxWidth = MAX(maxWidth, avgWidths.back());
+            }
+        }
+        
+        assert(avgWidths.size()==histogram.size());
+        
+        double weightFuncGradient=-1/maxWidth-minWidth;
+        double offset = maxWidth-minWidth;
+        
+        for (size_t i =0 ; i<avgWidths.size(); i++) {
+            
+            
+        }
+        
 		// counting all profiles in thinProfilesRange
 		for(int c=0;c<widths.size();c++)
-			if( (widths[c] <= thinProfilesRange ))
+			if((widths[c] <= thinProfilesRange))
 			{
 				probMeasure1++;
                 greatestAngle = MAX(greatestAngle, angles[c]);
@@ -314,6 +354,7 @@ namespace cmp
         index = MIN(index, this->probabilities.size() - 1);
         assert(index<probabilities.size());
         lastDetectionProbability = probabilities[index];
+        probMeasure2 = lastDetectionProbability;
 
 
         if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;

@@ -16,6 +16,7 @@ void ContourSkewDetector::filterValuesBySimiliarAngle(
 		const std::vector<double>& values, const std::vector<double>& angles,
 		std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange)
 {
+    
 	anglesOut = angles;
 	valuesOut = values;
 
