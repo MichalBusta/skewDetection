@@ -324,7 +324,8 @@ namespace cmp
 				alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
 			}
 		}
-
+        
+        //Writing the report
 		std::fstream report_overview;
 		report_overview.open ( (outputDirectory+ "/index.htm").c_str(), std::fstream::out | std::fstream::app );
 		report_overview << std::fixed << std::setprecision(2);
@@ -655,9 +656,67 @@ namespace cmp
 		alphabet_json << "];";
 		alphabet_json.close();
 
-
-
 		ResultsWriter::writeLettersResults( results, outputDirectory, detectorNames, ANGLE_TOLERANCE, ANGLE_MIN );
+        
+        /*
+            EXPORTING RESULTS TO CSV
+         */
+        
+        //exporting detector correlation data
+        std::vector<std::pair<int, int>> detPairs;
+        int pairedDetectors;
+        std::vector<std::vector<EvaluationResult> > detResults;
+        detResults.resize(detectorNames.size());
+        
+        //create result vector for each detector
+        
+        for (int iter =0; iter<results.size(); iter++) {
+            
+            EvaluationResult& er = results[iter];
+            assert(er.classificator < detResults.size());
+            detResults[er.classificator].push_back(er);
+        
+        }
+        
+        //create detector pairs
+        
+        pairedDetectors = 0;
+        
+        for (int i = 0; i<classMap.size(); i++) {
+            pairedDetectors++;
+            for (int i2 = pairedDetectors; i2 <classMap.size(); i2++) {
+                
+                std::pair<int, int> tempPair;
+                tempPair.first = i;
+                tempPair.second = i2;
+                detPairs.push_back(tempPair);
+            }
+        }
+        
+        //writing the table as a csv file
+        
+        for (int i=0; i<detPairs.size(); i++) {
+            
+            
+            //open&create the file
+            std::fstream correlationTable;
+            correlationTable.open((std::stringstream()<<outputDirectory << "/correlationTable"<<"_" << i<<".csv").str(), std::fstream::out | std::fstream::app);
+            
+            //write column titles
+            
+            correlationTable << detectorNames[detPairs[i].first] <<"," <<detectorNames[detPairs[i].second]<< "\n";
+            
+            //writing the data
+            
+            for (int idx =0; idx < detResults[detPairs[i].first].size(); idx++) {
+                
+                correlationTable << fabs(detResults[detPairs[i].first][idx].angleDiff)<< ",";
+                correlationTable << fabs(detResults[detPairs[i].second][idx].angleDiff)<< "\n";
+                
+            }
+            
+            correlationTable.close();
+        }
 	}
 
 	/**

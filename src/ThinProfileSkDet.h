@@ -29,7 +29,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02, double binWidth = 1, double sigma =3 ,bool returnMiddleAngle = true);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02, double binWidth = 1, double sigma =3, double delta =1 ,bool returnMiddleAngle = true);
 
 	virtual ~ThinProfileSkDet();
 
@@ -46,6 +46,10 @@ public:
     
     //sigma for normal distr
     double sigma;
+    
+    //delta for normal distrib
+    
+    double delta;
     
     // sirka binu ve stupnich >_>
     double binWidth;

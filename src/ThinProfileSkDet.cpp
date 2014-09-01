@@ -24,8 +24,8 @@ namespace cmp
 {
     int brd=10;
 
-	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, double binWidth, double sigma ,bool returnMiddleAngle) :
-		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),binWidth(binWidth),sigma(sigma),
+	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, double binWidth, double sigma, double delta ,bool returnMiddleAngle) :
+		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),binWidth(binWidth),sigma(sigma),delta(delta),
 		returnMiddleAngle(returnMiddleAngle)
 	{
 		probabilities.push_back(0.48);
@@ -222,13 +222,27 @@ namespace cmp
         
         assert(avgWidths.size()==histogram.size());
         
-        double weightFuncGradient=-1/maxWidth-minWidth;
+        double weightFuncGradient=1/maxWidth-minWidth;
         double offset = maxWidth-minWidth;
         
         for (size_t i =0 ; i<avgWidths.size(); i++) {
-            
-            
+            if (avgWidths[i] != 0) {
+                double weight = avgWidths[i]*weightFuncGradient-offset;
+                int functionIndex=0;
+                for (int idx=i; idx < histogram.size(); idx++) {
+                    histogram[idx] += weight/(delta*sqrt(2*M_PI))*pow(M_E, -(functionIndex* -sigma)*(functionIndex* -sigma)/(2*delta*delta));
+                    functionIndex++;
+                }
+                
+                functionIndex=0;
+                for (int idx=i-1; idx >= 0; idx--) {
+                    histogram[idx] += weight/(delta*sqrt(2*M_PI))*pow(M_E, -(functionIndex* -sigma)*(functionIndex* -sigma)/(2*delta*delta));
+                    functionIndex++;
+                }
+                
+            }
         }
+        
         
 		// counting all profiles in thinProfilesRange
 		for(int c=0;c<widths.size();c++)

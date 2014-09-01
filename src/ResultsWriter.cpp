@@ -575,6 +575,7 @@ namespace cmp {
 				images_table << "\t\t\t<td>" << tooGoodRes << bestDet.str() << "</td>\n";
 
 				images_table << "\t\t</tr>\n";
+                
 			}
 
 			for(std::map<int, std::string>::iterator iterator = data.begin(); iterator != data.end(); iterator++)
@@ -604,6 +605,7 @@ namespace cmp {
 			report_overview << "</body>\n</html>";
 
 			report_overview.close();
+            
 
 		}
 
