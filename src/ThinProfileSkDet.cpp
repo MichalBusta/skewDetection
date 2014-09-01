@@ -223,7 +223,12 @@ namespace cmp
         assert(avgWidths.size()==histogram.size());
         
         double weightFuncGradient=1/maxWidth-minWidth;
-        double offset = maxWidth-minWidth;
+        double offset =0;
+        
+        if (minWidth !=0) {
+            
+        offset = maxWidth/weightFuncGradient-1;
+        }
         
         for (size_t i =0 ; i<avgWidths.size(); i++) {
             if (avgWidths[i] != 0) {
