@@ -374,7 +374,23 @@ namespace cmp
         assert(index<probabilities.size());
         lastDetectionProbability = probabilities[index];
         probMeasure2 = lastDetectionProbability;
-
+        
+        int winningConfidence=0;
+        int totalConfidence=0;
+        int winningConfidenceIndex=0;
+        for (int i=0; i<histogram.size(); i++) {
+            if (winningConfidence<histogram[i]) {
+                winningConfidence = histogram[i];
+                winningConfidenceIndex = i;
+            }
+        }
+        for (int i =0; i < histogram.size(); i++) {
+            if (i != winningConfidenceIndex) {
+                totalConfidence += histogram[i];
+            }
+        }
+        
+        probMeasure2=totalConfidence/winningConfidence;
 
         if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
         
