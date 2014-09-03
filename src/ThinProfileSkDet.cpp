@@ -277,11 +277,12 @@ namespace cmp
 				cv::Rect bbox = cv::boundingRect(contour);
 				drawing =  Mat::zeros( scalefactor*bbox.height+brd, scalefactor*bbox.width+brd, CV_8UC3 );
                 
+                drawing = Scalar(255,255,255);
                 
                 double minY = bbox.y;
                 double minX = bbox.x;
 
-				Scalar color = Scalar( 255, 255, 255 );
+				Scalar color = Scalar( 0, 0, 0 );
 				std::vector<std::vector<cv::Point> > contours;
 				contours.push_back(contour);
                 
@@ -345,10 +346,10 @@ namespace cmp
 				// drawing the thinnest profile
 				for(int i=0;i<hull.size();i++)
 				{
-					cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 255 ), 2);
+					cv::circle(drawing, hull[i], 2, Scalar( 170, 0, 30 ), 2);
 				}
-				cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 2);
-				cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 0, 255 ), 2);
+				cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 55, 0, 255 ), 2);
+				cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 55, 0, 255 ), 2);
 
 				cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 
@@ -363,7 +364,7 @@ namespace cmp
 						cv::Point2f middleVector, middlePoint;
 						cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
 						cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
-						cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 0, 0, 255 ), 1);
+						cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 55, 0, 255 ), 1);
 					}
 				}
 			}
@@ -390,8 +391,14 @@ namespace cmp
             }
         }
         
+        
+        if (winningConfidence >0) {
+        
         probMeasure2=totalConfidence/winningConfidence;
 
+        }
+        else probMeasure2=0;
+        
         if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
         
         return angle;

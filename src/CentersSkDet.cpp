@@ -105,12 +105,14 @@ namespace cmp
             
 			Mat& drawing =  *debugImage;
 			drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
-			Scalar color = Scalar( 255, 255, 255 );
+            
+            drawing = Scalar(255,255,255);
+			Scalar color = Scalar( 0, 0, 0 );
 			std::vector<cv::Point> outerContourNorm;
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
 				outerContourNorm.push_back(cv::Point((outerContour[j].x - bbox.x)*scalefactor, (outerContour[j].y - bbox.y)*scalefactor));
-				cv::circle(drawing, outerContourNorm[j], 2, cv::Scalar(0, 255, 255), 1);
+				//cv::circle(drawing, outerContourNorm[j], 2, cv::Scalar(255, 0, 255), 1);
 			}
 			std::vector<std::vector<cv::Point> > contours;
 			contours.push_back(outerContourNorm);

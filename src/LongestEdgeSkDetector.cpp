@@ -131,8 +131,10 @@ namespace cmp {
 
 			int brd = 10;
 			drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
+            
+            drawing = cv::Scalar(255,255,255);
             *debugImage = drawing;
-			Scalar color = Scalar( 255, 255, 255 );
+            cv::Scalar color = cv::Scalar( 0, 0, 0 );
 			std::vector<std::vector<cv::Point> > contours;
 			contours.push_back(outerContour);
             int min_Y = INT_MAX;
@@ -143,14 +145,16 @@ namespace cmp {
             }
 			for(size_t j = 0; j < outerContour.size(); j++)
 			{
+                
+                color = cv::Scalar(0,0,0);
 				int index = j+1;
 				if(index >=  (outerContour.size()) )
 					index = 0;
 
                 cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color);
-				cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), 2, cv::Scalar(0, 255, 255), 1);
+				cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), 2, cv::Scalar(175, 0, 30), 2);
 
-				cv::Scalar color = cv::Scalar( 255, 255, 255 );
+				//cv::Scalar color = cv::Scalar( 0, 0, 0 );
 				deltaX = outerContour[index].x - outerContour[j].x;
 				deltaY = outerContour[index].y - outerContour[j].y;
 				QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
@@ -168,8 +172,8 @@ namespace cmp {
 				index = 0;
 			cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2),
 					cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), cv::Scalar( 0, 255, 0 ), 1, 0);
-			cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
-			cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
+			cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 4,(outerContour[counter].y-min_Y)*scalefactor + brd / 2), 6, cv::Scalar( 0, 255, 0 ), 1, 0);
+			cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 4,(outerContour[index].y-min_Y)*scalefactor + brd / 2), 6, cv::Scalar( 0, 255, 0 ), 1, 0);
 		}
         
         

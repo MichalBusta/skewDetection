@@ -94,10 +94,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 			totalLen += hist[i];
 		}
 	}
-    /*
-     *TODO there is an error in the confidence computation, most probably in the division 
-     10
-     */
+
 	for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
 	{
 		int j = i;
@@ -130,7 +127,8 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 		cv::Rect bbox = cv::boundingRect(contour);
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
 
-		Scalar color = Scalar( 255, 255, 255 );
+        drawing = Scalar(255,255,255);
+		Scalar color = Scalar( 0, 0, 0 );
 		std::vector<std::vector<cv::Point> > contours;
 		contours.push_back(contour);
         
@@ -146,7 +144,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 		{
 			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
             
-			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
+			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 170, 0, 30 ), 2);
             
             cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), cv::Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), color);
             
