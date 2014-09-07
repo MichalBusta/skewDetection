@@ -39,14 +39,12 @@ namespace cmp {
         
         std::vector<double> probs;
         std::vector<double> angles;
+        std::vector<int> detectorsIndex;
         int noImg = blobs.size();
-        std::vector<cv::Mat> debugImages;
-        if (debugImage != NULL) {
-            debugImages.resize(blobs.size());
-        }
         for (int i = 0; i<noImg; i++)
         {
-        	angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, &debugImages[i]));
+        	angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, debugImage));
+        	detectorsIndex.push_back(0);
 #ifdef VERBOSE
             
         	cv::imshow("temp", *tempDebugPtr);
@@ -55,28 +53,27 @@ namespace cmp {
         	probs.push_back(localDetector->lastDetectionProbability);
         }
         double probability = 0;
-        return computeAngle(angles, probs, probability, debugImages, debugImage);
+        return computeAngle(angles, probs, detectorsIndex, probability, debugImage);
     }
 
     double ContourWordSkewDetector::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage)
     {
     	std::vector<double> probs;
     	std::vector<double> angles;
+    	std::vector<int> detectorsIndex;
     	for (size_t i = 0; i < contours.size(); i++)
     	{
 #ifdef VERBOSE
     		cv::Mat tempDebug;
     		debugImage = &tempDebug;
 #endif
-    		angles.push_back(localDetector->detectSkew(*contours[i],debugImage));
-    		probs.push_back(localDetector->lastDetectionProbability);
+    		localDetector->getSkewAngles(*contours[i], angles, probs, detectorsIndex, debugImage);
 #ifdef VERBOSE
         	cv::imshow("temp", tempDebug);
         	cv::waitKey(0);
 #endif
     	}
-    	//double angle = computeAngle(angles, probs, probability);
-        double angle =0;
+    	double angle = computeAngle(angles, probs, detectorsIndex, probability, debugImage);
 #ifdef VERBOSE
     	std::cout << "Detected skew angle is: " << angle << " with prob.: " << probability << std::endl;
 #endif

@@ -167,7 +167,7 @@ namespace cmp {
 		outStream << "                }\n";
 		outStream << "            }, {\n";
 		outStream << "                name: 'Measure2: % of samples in bin " << minValue << "," << maxValue << " ',\n";
-		outStream << "                color: '#FFFF00',\n";
+		outStream << "                color: '#FF00FF',\n";
 		outStream << "                type: 'column',\n";
 		outStream << "                data: [";
 
@@ -196,7 +196,7 @@ namespace cmp {
 		if (classificator<0) picture << detectorName << "/";
 		picture << work.alphabet << "/" << work.letter << "/" << work.imageId << ".png";
 		std::string pictureLink = picture.str();
-		outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << work.measure1 << "</td><td>" << work.measure2 << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td>" << work.angleDiff << "</td><td>" << detectorName << "</td><td>&#" << work.letter << ";</td><td>" << work.measure1 << "</td><td>" << work.measure2 <<  "</td><td>" << work.probability << "</td><td>" << "<img src=\"" << pictureLink << "\"/>" << "</td></tr>\n";
 	}
 
 	/**
@@ -231,7 +231,7 @@ namespace cmp {
 		outStream << "<h3>Worst Results</h3>\n";
 		//nejhorsi vsledky
 		outStream << "<table id=\"detectors_wrong_images\">\n";
-		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Confidence</td><td>Preview</td></tr>\n";
+		outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Meas1</td><td>Meas2</td><td>Confidence</td><td>Preview</td></tr>\n";
 		int resultsCount = 0;
 		for(int i = (int) work.size() -1; i >= 0; i--)
 		{

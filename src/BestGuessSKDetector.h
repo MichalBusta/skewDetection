@@ -24,12 +24,20 @@ class BestGuessSKDetector : public ContourSkewDetector
 {
 public:
 	BestGuessSKDetector(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.05);
+
+	BestGuessSKDetector(std::vector<cv::Ptr<ContourSkewDetector> >& detectors,
+			std::vector<double>& weights,
+			std::vector<std::string>& detectorNames,
+			int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.05);
+
 	virtual ~BestGuessSKDetector();
 
 
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
 
 	virtual double detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage = NULL );
+
+	void getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage);
 
 	std::vector<double> weights;
     std::vector<std::string> detectorNames;

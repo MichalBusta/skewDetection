@@ -15,6 +15,8 @@
 #include "WordSkewDetector.h"
 #include <math.h>
 
+#include "BestGuessSKDetector.h"
+
 namespace cmp {
     
     
@@ -58,6 +60,21 @@ namespace cmp {
         std::vector<cv::Ptr<SkewDetector> > detectors;
         double computeAngle(std::vector<double> angles, std::vector<double> probabilities, double& probability, VisualisationData visData, cv::Mat* debugImage = NULL);
     };
+
+    class DiscreteVotingWordSkDet2 : public ContourWordSkewDetector
+        {
+        public:
+
+    	DiscreteVotingWordSkDet2(cv::Ptr<BestGuessSKDetector> detector, double delta = 1);
+            virtual ~DiscreteVotingWordSkDet2();
+
+
+        protected:
+
+            virtual double computeAngle(std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detectorsIndex, double& probability, cv::Mat* debugImage);
+
+            double delta;
+        };
 }
 
 #endif /* defined(__SkewDetection__DiscreteVotingWordSkDet__) */

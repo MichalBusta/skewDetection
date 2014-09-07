@@ -10,128 +10,110 @@
 #include "WordSkewDetector.h"
 #include "stdlib.h"
 
+#include "SkewDetection.h"
+
 namespace cmp
 {
-    VotingWordSkDet::VotingWordSkDet(cv::Ptr<SkewDetector> detector) :
-    ContourWordSkewDetector( detector )
-    {
-        
-    }
-    VotingWordSkDet::~VotingWordSkDet()
-    {
-        
-    }
-    
-    double VotingWordSkDet::computeAngle(std::vector<double> angles, std::vector<double> probabilities){
-        
-    	//sanity check
-    	if(angles.size() == 0)
-    		cvError(CV_StsError, "VotingWordSkDet::computeAngle", "vector angles has zero length", __FILE__, __LINE__);
-        
-        //get highest certainty
-        /*int maxProb =0;
-        int iterator;
-        for (int i=0; i<probabilities.size(); i++) {
-            if(probabilities[i]>maxProb){
-                maxProb = probabilities[i];
-                iterator = i;
-            }
-        }
-        return angles[iterator];
-         **/
-        int begin=0;
-        int end=0;
-        int max =0;
-        int maximum =0;
-        int iterator = 0;
-        int sum = 0;
-        int lastVal=0;
-        int secondLastVal =0;
-        
-        bool isGroup = false;
-        
-        std::vector<double> sortedAngles;
-        std::vector<double> grad;
-        std::vector<double> sortedProbs;
-        std::vector<double> groupProbs;
-        std::vector<std::vector<double> > groups;
-        std::vector<bool> isAssigned;
-        
-        //sort the angles
 
-        sortedAngles = angles;
-        std::sort(sortedAngles.begin(), sortedAngles.end());
-        
-        //calculate the gradients
-        for(int i =0; i < sortedAngles.size()-1; i++)
-        {
-            grad.push_back(std::abs(sortedAngles[i+1]-sortedAngles[i]));
-        }
-        
-        //match probs with sorted angles
-        
-        for (int i=0; i<angles.size(); i++) {
-            isAssigned.push_back(false);
-        }
-        
-        for (int i=0; i<sortedAngles.size(); i++) {
-            int val = sortedAngles[i];
-            
-            int i2=0;
-            bool control =true;
-            while (control){
-                if(angles[i2] == val && isAssigned[i2] == false) {
-                    sortedProbs.push_back(probabilities[i2]);
-                    isAssigned[i2] = true;
-                    control = false;
-                }
-                i2++;
-            }
-        }
-        
-        //group similar values
-        for (int i =0; i<grad.size(); i++) {
-            
-            secondLastVal=lastVal;
-            lastVal = grad[i];
-            
-            if (!isGroup && grad[i]>0) {
-                isGroup =true;
-                begin=i;
-                
-            }
-            
-            else if (secondLastVal < lastVal > grad[i] || grad[1] ==0) {
-                end=i-1;
-                std::vector<double> tempVector;
-                int totalProb=0;
-                
-                for(int i = begin; i < end; i++){
-                    tempVector.push_back(sortedAngles[i]);
-                    totalProb += sortedProbs[i];
-                    
-                }
-                
-                groupProbs.push_back(totalProb);
-                groups.push_back(tempVector);
-                tempVector.clear();
-                
-                begin =i;
-            }
-            
-        }
-        //return the avg of the group with the highest total certainty
-        
-        for (int i = 0; i<groupProbs.size(); i++) {
-            if(groupProbs[i]> maximum){
-                maximum = groupProbs[i];
-                iterator =i;
-                
-            }
-        }
-        for (double d : groups[iterator]) {
-            sum += d;
-        }
-        return sum/groups[iterator].size();
-    }
+VotingWordSkDet::VotingWordSkDet(int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon)
+{
+	detectors.push_back( new VerticalDomSkDet());
+	weights.push_back(1.0);
+	//detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.1));
+	//weights.push_back(1.0);
+	detectors.push_back( new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
+	weights.push_back(1.0);
+	//detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
+	//weights.push_back(0.5);
 }
+
+VotingWordSkDet::~VotingWordSkDet()
+{
+	// TODO Auto-generated destructor stub
+}
+
+double VotingWordSkDet::detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage )
+{
+	double bestProb = 0;
+	std::vector<double> angles;
+	cv::Mat bestDebugImage;
+	size_t bestDetIndex = -1;
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+
+		cv::Mat dbgImage;
+		cv::Mat img = mask.clone();
+		angles.push_back( this->detectors[i]->detectSkew( img, lineK, &dbgImage) );
+		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
+		{
+			bestDetIndex = i;
+			bestDebugImage = dbgImage;
+			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
+		}
+	}
+	this->lastDetectionProbability = bestProb;
+	if(debugImage != NULL)
+		*debugImage = bestDebugImage;
+
+#ifdef VERBOSE
+	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
+#endif
+	return angles[bestDetIndex];
+
+}
+
+double VotingWordSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+{
+	double bestProb = 0;
+	std::vector<double> angles;
+	size_t bestDetIndex = -1;
+	cv::Mat img;
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(outerContour);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
+	}
+
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
+		{
+			bestDetIndex = i;
+			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
+		}
+	}
+	this->lastDetectionProbability = bestProb;
+
+#ifdef VERBOSE
+	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
+#endif
+	return angles[bestDetIndex];
+}
+
+void VotingWordSkDet::getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage)
+{
+	double bestProb = 0;
+	cv::Mat img;
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(outerContour);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
+	}
+
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		probabilities.push_back(this->detectors[i]->lastDetectionProbability * weights[i]);
+	}
+}
+
+}//namespace cmp

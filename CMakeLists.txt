@@ -47,6 +47,13 @@ target_link_libraries (run_evaluation
     ${OpenCV_LIBS}
 )
 
+add_executable(run_word_evaluation "src/run_word_evaluation.cpp")
+
+target_link_libraries (run_word_evaluation     
+    skewDetection
+    ${OpenCV_LIBS}
+)
+
 add_executable(word_skew_evaluator "src/word_skew_evaluator.cpp")
 
 target_link_libraries (word_skew_evaluator

@@ -17,16 +17,29 @@
 
 namespace cmp {
     
-    class VotingWordSkDet : public ContourWordSkewDetector
-    {
-    public:
-        
-        VotingWordSkDet(cv::Ptr<SkewDetector> detector);
-        virtual ~VotingWordSkDet();
-        
-    protected:
-        
-        virtual double computeAngle(std::vector<double> angles, std::vector<double> probabilities);
-    };
+/**
+ * @class cmp::BestGuessSKDetector
+ *
+ * @brief TODO brief description
+ *
+ * TODO type description
+ */
+class VotingWordSkDet : public ContourSkewDetector
+{
+public:
+	VotingWordSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.05);
+	virtual ~VotingWordSkDet();
+
+
+	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
+
+	virtual double detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage = NULL );
+
+	void getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage  = NULL);
+
+	std::vector<double> weights;
+private:
+	std::vector<cv::Ptr<ContourSkewDetector> > detectors;
+};
 }
 #endif /* defined(__SkewDetection__VotingWordSkDet__) */

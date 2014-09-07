@@ -19,19 +19,38 @@ BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon)
 {
 	detectors.push_back( new VerticalDomSkDet());
 	weights.push_back(1.0);
-    detectorNames.push_back("VerticalDomSkDet");
-    
-	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.1));
-	weights.push_back(1.0);
+    detectorNames.push_back("VertDom");
+
+    detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
+    weights.push_back(1.0);
+    detectorNames.push_back("VertDomCH");
+
+    detectors.push_back( new CentersSkDet() );
+    weights.push_back(1.0);
+    detectorNames.push_back("CentersSkDet");
+
+    /*
+	detectors.push_back( new ThinProfileSkDet() );
+	weights.push_back(0.5);
     detectorNames.push_back("ThinProfileSkDet");
     
-	detectors.push_back( new LongestEdgeSkDetector(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.4));
-    weights.push_back(1.0);
+	detectors.push_back( new LongestEdgeSkDetector() );
+    weights.push_back(0.5);
     detectorNames.push_back("LongestEdgeSkDetector");
     
-	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.014, IGNORE_ANGLE, true) );
-	weights.push_back(0.25);
-    detectorNames.push_back("LRLongestEdge");
+    detectors.push_back( new CentersSkDet() );
+    weights.push_back(1.0);
+    detectorNames.push_back("CentersSkDet");
+    */
+
+}
+
+BestGuessSKDetector::BestGuessSKDetector(std::vector<cv::Ptr<ContourSkewDetector> >& detectors,
+			std::vector<double>& weights, std::vector<std::string>& detectorNames,
+			int approximatioMethod, double epsilon) : ContourSkewDetector(approximatioMethod, epsilon),
+					detectors(detectors), weights(weights), detectorNames(detectorNames)
+{
+
 }
 
 BestGuessSKDetector::~BestGuessSKDetector()
@@ -102,6 +121,29 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
 #endif
 	return angles[bestDetIndex];
+}
+
+void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage)
+{
+	double bestProb = 0;
+	cv::Mat img;
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(outerContour);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
+	}
+
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		probabilities.push_back(this->detectors[i]->lastDetectionProbability * weights[i]);
+		assert( detectors[i]->lastDetectionProbability == detectors[i]->lastDetectionProbability);
+		detecotrsId.push_back(i);
+	}
 }
 
 } /* namespace cmp */

@@ -16,6 +16,9 @@
 #include "LRLongestEdge.h"
 #include "BestGuessSKDetector.h"
 
+#include "WordSkewDetector.h"
+
+
 //#define VERBOSE 1
 
 

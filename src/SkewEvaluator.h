@@ -57,16 +57,18 @@ struct EvaluationResult
 	/** measure for detector to estimate probability */
 	double measure2;
 
+	double probability;
+
 
 	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex)
     :
-			angleDiff(angleDiff), alphabet(alphabet), letter(letter),classificator(classificator), imageId(imageId), faceIndex(faceIndex), measure1(0.0), measure2(0.0)
+			angleDiff(angleDiff), alphabet(alphabet), letter(letter),classificator(classificator), imageId(imageId), faceIndex(faceIndex), measure1(0.0), measure2(0.0), probability(0.0)
     {
         
 	}
 	;
 	
-	EvaluationResult() : angleDiff(0), measure1(0.0), measure2(0.0), classificator(-1), faceIndex(0), imageId(0) { };
+	EvaluationResult() : angleDiff(0), measure1(0.0), measure2(0.0), classificator(-1), faceIndex(0), imageId(0), probability(0) { };
 
 	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
 	{
@@ -106,11 +108,21 @@ public:
 
 	void evaluate( const std::string& evalDir );
 
+
+	void evaluateWords( const std::string& evalDir, std::vector<cv::Ptr<ContourWordSkewDetector> >& wordSkewDetectors );
+
 	void evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter, size_t faceIndex );
 
-	void registerDetector( cv::Ptr<SkewDetector> detector, const std::string detectorName );
+	void evaluateWordsMat( std::vector<cv::Mat>& letterImages, const std::string& alphabet, const std::string& letter, size_t faceIndex, std::vector<cv::Ptr<ContourWordSkewDetector> >& wordSkewDetectors, std::string& wordImage);
+
+	void registerDetector( cv::Ptr<SkewDetector> detector, const std::string& detectorName,  const std::string& detectorCaption);
 
 	void writeResults();
+
+	/** the names of detector */
+	std::vector<std::string> detectorNames;
+	/** the long detector names*/
+	std::vector<std::string> detectorCaptions;
 
 private:
 
@@ -120,8 +132,6 @@ private:
 	std::vector<EvaluationResult> bestResults;
 	/** the detectors to evaluate */
 	std::vector<cv::Ptr<SkewDetector> > detectors;
-	/** the names of detector */
-	std::vector<std::string> detectorNames;
 
 	/** if true, results are show during the processing */
 	bool debug;

@@ -19,7 +19,7 @@ namespace cmp {
 	LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio) :
 		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio)
 	{
-		probabilities.push_back(0.84);
+		probabilities.push_back(0.7);
 		probabilities.push_back(0.25);
 	}
 
@@ -175,7 +175,7 @@ namespace cmp {
         
 		int index = (int) (probMeasure2 - 1);
 		index = MIN(index, this->probabilities.size() - 1);
-		lastDetectionProbability = probabilities[index];
+		lastDetectionProbability = 0.5;
         
         assert(anglesCount>0);
 		if(probMeasure2 == 2)

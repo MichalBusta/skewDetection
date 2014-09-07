@@ -24,9 +24,8 @@ namespace cmp
 {
     int brd=10;
 
-	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, double binWidth, double sigma, double delta ,bool returnMiddleAngle) :
-		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange),binWidth(binWidth),sigma(sigma),delta(delta),
-		returnMiddleAngle(returnMiddleAngle)
+	ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange) :
+		ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange)
 	{
 		probabilities.push_back(0.48);
 		probabilities.push_back(0.79);
@@ -34,9 +33,6 @@ namespace cmp
 		probabilities.push_back(0.53);
 		probabilities.push_back(0.50);
 		probabilities.push_back(0.48);
-        histogram.resize(180/binWidth);
-        std::fill(histogram.begin(), histogram.end(), 0);
-        assert(binWidth>0);
 	}
 
 	ThinProfileSkDet::~ThinProfileSkDet()
@@ -71,6 +67,7 @@ namespace cmp
 
 		double rotated_angle = 0;
 		double min_width = std::numeric_limits<double>::infinity();
+		double max_width = 0;
 
 		Point2d horizont_poz(1,0);
 		Point2d horizont_neg(-1,0);
@@ -136,16 +133,21 @@ namespace cmp
 				tmpVector = horizont_neg;
 				tmpPoint = hull[p_b];
 				tmpPoint2 = hull[p_a];
-				ang = atan(horizont_neg.y/horizont_neg.x);
+				ang = atan2(horizont_neg.y, horizont_neg.x);
 			}
 
 
 			rotated_angle = rotated_angle + min(angle_a, angle_b);
 
-            
+			if( width == 0 )
+			{
+				//todo this shoud not happen
+				width = 1;
+			}
+
 			ang = ang + M_PI/2;
-			while (ang > M_PI/2) ang -= M_PI;
-			while (ang <= -M_PI/2) ang += M_PI;
+			while (ang > M_PI/2) ang = ang - M_PI;
+			while (ang <= -M_PI/2) ang = ang + M_PI;
 
 
 			if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
@@ -157,6 +159,7 @@ namespace cmp
 				PointsForWiderProfiles2.push_back(tmpPoint2);
 				VectorsForWiderProfiles.push_back(tmpVector);
 
+				max_width = MAX(max_width, width);
 				if(width <= min_width)
 				{
 					angle = ang;
@@ -174,91 +177,68 @@ namespace cmp
 		probMeasure1 = 0;
 		probMeasure2 = 0;
 
-		double greatestAngle = -M_PI;
-		double smallestAngle = M_PI;
-
-		// filtering thin profiles that are closer than ANGLE_TOLERANCE to other profile
-		vector<double>widths2;
-		vector<double>angles2;
-        
-        filterValuesBySimiliarAngle(widths, angles, widths2, angles2);
-        
         assert(angles.size()==widths.size());
-        
-        /*
-         TODO
-         USE DISCRETIZATION & HISTOGRAM TO DETERMINE RESULTING ANGLE
-        */
-        
-        std::vector<int> angleCountBins;
-        std::vector<double> widthSumBins = histogram;
-        std::vector<double> avgWidths;
-        
-        double maxWidth = DBL_MAX;
-        double minWidth = DBL_MIN;
-        
-        angleCountBins.resize(histogram.size());
-        std::fill(angleCountBins.begin(), angleCountBins.end(), 0);
-        double binRange = M_PI/180/binWidth;
-        
-        for (size_t i=0 ; i<angles.size(); i++) {
-            int index =(angles[i]+M_PI_2)/binRange;
-            assert(index < angleCountBins.size());
-            angleCountBins[index]++;
-            widthSumBins[index] += widths[index];
-        }
-        
-        for (size_t i=0; i<widthSumBins.size(); i++) {
-            
-            if (angleCountBins[i] ==0) {
-                avgWidths.push_back(0);
-            }
-            else{
-                avgWidths.push_back(widthSumBins[i]/angleCountBins[i]);
-                minWidth = MIN(minWidth, avgWidths.back());
-                maxWidth = MAX(maxWidth, avgWidths.back());
-            }
-        }
-        
-        assert(avgWidths.size()==histogram.size());
-        
-        double weightFuncGradient=1/maxWidth-minWidth;
-        double offset =0;
-        
-        if (minWidth !=0) {
-            
-        offset = maxWidth/weightFuncGradient-1;
-        }
-        
-        for (size_t i =0 ; i<avgWidths.size(); i++) {
-            if (avgWidths[i] != 0) {
-                double weight = avgWidths[i]*weightFuncGradient-offset;
-                int functionIndex=0;
-                for (int idx=i; idx < histogram.size(); idx++) {
-                    histogram[idx] += weight/(delta*sqrt(2*M_PI))*pow(M_E, -(functionIndex* -sigma)*(functionIndex* -sigma)/(2*delta*delta));
-                    functionIndex++;
-                }
-                
-                functionIndex=0;
-                for (int idx=i-1; idx >= 0; idx--) {
-                    histogram[idx] += weight/(delta*sqrt(2*M_PI))*pow(M_E, -(functionIndex* -sigma)*(functionIndex* -sigma)/(2*delta*delta));
-                    functionIndex++;
-                }
-                
-            }
-        }
-        
-        
+
+		//set values to histogram
+		double hist[180];
+		memset (hist, 0, 180 * sizeof(double));
+		int sigma = 3, range = 3;
 		// counting all profiles in thinProfilesRange
+		double maxHistValue = 0;
 		for(int c=0;c<widths.size();c++)
-			if((widths[c] <= thinProfilesRange))
+		{
+			double ang = angles[c] * 180/M_PI;;
+			for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
 			{
-				probMeasure1++;
-                greatestAngle = MAX(greatestAngle, angles[c]);
-				smallestAngle = MIN(smallestAngle, angles[c]);
+				int j = i;
+				if (j<0) j += int(180/histColWidth);
+				if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
+				assert(widths[c] != 0);
+				double length = 1/widths[c];
+				hist[j] +=  length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-ang)*(i*histColWidth+histColWidth/2-ang)/(2*sigma*sigma));
+				maxHistValue = MAX(maxHistValue, hist[j]);
 			}
 
+			if( (widths[c] <= thinProfilesRange ))
+			{
+				probMeasure1++;
+			}
+		}
 
+		int height = 300;
+
+		cv::Mat histogram = Mat::zeros(height, 380, CV_8UC3);
+		int maxI = ceil(double(ignoreAngle/histColWidth));
+
+		double totalLen = 0.0;
+		double resLen = 0.0;
+
+		for(int i=0;i<int(180/histColWidth);i++)
+		{
+			int rectH = hist[i] / maxHistValue * (height - 20);
+			cv::rectangle(histogram, Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), Scalar(0,0,255), CV_FILLED);
+			if (i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth)
+			{
+				if (hist[i] > hist[maxI]) maxI = i;
+				totalLen += hist[i];
+			}
+		}
+		for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+		{
+			if (i > ignoreAngle/histColWidth && i < (180-ignoreAngle)/histColWidth)
+			{
+				int j = i;
+				if (j<0) j = j + int(180/histColWidth);
+				if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+
+				resLen += hist[j];
+			}
+		}
+
+		if(totalLen > 0)
+			probMeasure2 = (resLen/totalLen);
+		//imshow("Hist", histogram);
+		//cv::waitKey(0);
 
 #ifdef VERBOSE
 			std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
@@ -355,6 +335,7 @@ namespace cmp
 				// drawing other filtered profiles
 				for(int i=0;i<widths.size();i++)
 				{
+					/*
 					if( ( widths2[i] != 0 ) && ( widths2[i] <= thinProfilesRange ) )
 					{
 						if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
@@ -365,6 +346,7 @@ namespace cmp
 						cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
 						cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 0, 0, 255 ), 1);
 					}
+					*/
 				}
 			}
         
@@ -372,27 +354,8 @@ namespace cmp
         assert(this->probabilities.size()>0);
         index = MIN(index, this->probabilities.size() - 1);
         assert(index<probabilities.size());
-        lastDetectionProbability = probabilities[index];
-        probMeasure2 = lastDetectionProbability;
-        
-        int winningConfidence=0;
-        int totalConfidence=0;
-        int winningConfidenceIndex=0;
-        for (int i=0; i<histogram.size(); i++) {
-            if (winningConfidence<histogram[i]) {
-                winningConfidence = histogram[i];
-                winningConfidenceIndex = i;
-            }
-        }
-        for (int i =0; i < histogram.size(); i++) {
-            if (i != winningConfidenceIndex) {
-                totalConfidence += histogram[i];
-            }
-        }
-        
-        probMeasure2=totalConfidence/winningConfidence;
-
-        if( returnMiddleAngle == true) angle = ( greatestAngle + smallestAngle ) / 2.0;
+        lastDetectionProbability = probMeasure2 * 0.5;
+        assert(lastDetectionProbability == lastDetectionProbability);
         
         return angle;
     }

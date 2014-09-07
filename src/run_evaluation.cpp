@@ -45,14 +45,39 @@ int main( int argc, char **argv)
      evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
      }
      
-     /**/
-	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile" );
-	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenter" );
+    /* */
+	/*
+	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile", "Thinnest Profile" );
+	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenter", "Symmetric Glyph" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, true), "RightHullLongest" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, false), "LeftHullLongest" );
-	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge" );
-	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom" );
-	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess" );
+	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge", "Longest Edge" );
+	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom", "Vertical Dominant" );
+	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess", "Non-Maximum Suppression" );
+
+	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
+	//evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 38, 3), "VerticalDom-38" );
+	*/
+
+	for( double w1 = 0.1; w1 <= 1; w1+= 0.1 ){
+		std::ostringstream os;
+		os << "BG-" << w1;
+
+		std::vector<cv::Ptr<ContourSkewDetector> > detectors;
+		std::vector<std::string> detectorNames;
+		std::vector<double> weights;
+		weights.push_back(1.0);
+		detectorNames.push_back("VertDom");
+		detectors.push_back(new VerticalDomSkDet());
+		weights.push_back(1.0);
+		detectorNames.push_back("VertCH");
+		detectors.push_back(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
+		weights.push_back(w1);
+		detectorNames.push_back("Centers");
+		detectors.push_back(new CentersSkDet());
+
+		evaluator.registerDetector(new BestGuessSKDetector(detectors, weights, detectorNames), os.str(), os.str() );
+	}
     
 	/*
      evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );

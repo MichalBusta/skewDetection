@@ -14,16 +14,15 @@ namespace cmp{
 
 	class VerticalDomSkDet : public ContourSkewDetector {
 	public:
-		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.022, int histColWidth = 1, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3);
+		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.022, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
 		virtual ~VerticalDomSkDet();
 
 		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
         
 
+	private:
 
 		double* hist;
-		/** sirka binu histogramu ve stupnich */
-		int histColWidth;
 		/** parametr sigma u normaloveho rozdeleni */
 		int sigma;
 		/** pocet ovlivnenych binu = sigma*range */
@@ -34,6 +33,8 @@ namespace cmp{
 		int correctAngle;
 		/** debug purpose - add border around the letter **/
 		int borderForVis;
+
+		bool doConvexHull;
 
 		std::vector<double> probabilities;
 	};

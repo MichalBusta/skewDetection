@@ -26,8 +26,7 @@ table
 
 div.preview
 {
-	width: 2100px;
-	margin: 70px auto;
+	margin: auto;
 }
 
 div.preview table
@@ -49,9 +48,9 @@ div.preview h2
 	margin: 10px 0;
 }
 div.column {
-	max-width: 600px;
 	float: left;
 	margin-right: 30px;
+	vertical-align: top
 }
 
 div.column td:last-child {
@@ -135,7 +134,7 @@ table a:hover {
 
 td img 
 { 
-	max-width: 300px;
+	max-width: 250px;
 }
 
 #detectors_overview td, #detectors_overview_sum td, #detector_detail_overview td, #alphabet_detail_overview td
