@@ -47,9 +47,13 @@ int main( int argc, char **argv)
      }
      
      /**/
-
 	cv::Ptr<BestGuessSKDetector> detector = new BestGuessSKDetector();
 	std::vector<cv::Ptr<ContourWordSkewDetector> > detectors;
+	detectors.push_back(new DiscreteVotingWordSkDet2(detector));
+	evaluator.detectorNames.push_back("CommonVoting");
+	evaluator.detectorCaptions.push_back("Common Voting");
+	/*
+
 	for(double i = 0.1; i < 5; i+= 0.2)
 	{
 		detectors.push_back(new DiscreteVotingWordSkDet2(detector, i));
@@ -59,15 +63,8 @@ int main( int argc, char **argv)
 		//evaluator.detectorNames.push_back(st.str());
 		//evaluator.detectorCaptions.push_back(st.str());
 
-	}
-    
-	/*
-     evaluator.registerDetector(new LRLongestEdge(), "LeftLongestEdge" );
-     evaluator.registerDetector(new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false), "RightLongestEdge" );
-     
-     evaluator.registerDetector(new LeftRightHullSkDet(), "LeftTop-BottomEdge" );
-     
-     evaluator.registerDetector(new BestGuessSKDetector(), "BestGuessSKDetector" );/**/
+	}*/
+
     
     
 	evaluator.evaluateWords( argv[1], detectors );

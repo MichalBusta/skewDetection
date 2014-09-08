@@ -77,6 +77,10 @@ public:
 
 	}
 
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage){
+
+	}
+
 	/**
 	 * Descendants have to implement this method
 	 *

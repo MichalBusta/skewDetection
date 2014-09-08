@@ -360,7 +360,7 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 			results.back().probability = probability;
 
 			//for correct angles, do not write image
-			if( fabs(angleDiff) < ANGLE_TOLERANCE)
+			if( fabs(angleDiff) < ANGLE_MIN)
 				continue;
 
 			if (writeImages)

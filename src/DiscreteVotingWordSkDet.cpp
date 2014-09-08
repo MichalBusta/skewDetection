@@ -303,6 +303,116 @@ DiscreteVotingWordSkDet2::~DiscreteVotingWordSkDet2()
 
 }
 
+
+double DiscreteVotingWordSkDet2::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage)
+{
+	std::vector<double> probs;
+	std::vector<double> angles;
+	std::vector<int> detectorsIndex;
+	double histogram[180];
+	memset (histogram, 0, 180 * sizeof(double));
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+#ifdef VERBOSE
+		cv::Mat tempDebug;
+		debugImage = &tempDebug;
+#endif
+		localDetector->voteInHistogram(*contours[i], histogram, debugImage);
+#ifdef VERBOSE
+		cv::imshow("temp", tempDebug);
+		cv::waitKey(0);
+#endif
+	}
+
+	int ranges=10;
+
+
+	double histogramSmooth[180];
+	memset (histogramSmooth, 0, 180 * sizeof(double));
+	double delta2 = 4;
+	for(int k=0; k < 180; k++)
+	{
+		for (int i = k-ranges; i <= k+ranges; i++)
+		{
+			int j = i;
+			if(j < 0) j += 180;
+			if (j >= 180) j -= 180;
+
+			histogramSmooth[k] += histogram[j]/(delta2*sqrt(2*M_PI))*pow(M_E, -((i - k)*(i - k))/(2*delta2*delta2));
+		}
+	}
+
+	int ignoreAngle = 30;
+	int maxI = 0;
+	double totalLen = 0;
+	double maxVal = 0;
+	for(int i=0; i < 180; i++)
+	{
+		if (i > ignoreAngle && i < (180-ignoreAngle))
+		{
+			if (histogramSmooth[i] > histogramSmooth[maxI]) maxI = i;
+			totalLen += histogramSmooth[i];
+			maxVal = MAX(maxVal, histogramSmooth[i]);
+		}
+	}
+
+	int sigma = 3;
+	int range = 3;
+	double resLen = 0;
+	for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+	{
+		int j = i;
+		if (j < 0) j = j + 180;
+		if (j >= 180) j = j - 180;
+		if (j > ignoreAngle && j < (180-ignoreAngle))
+		{
+			resLen += histogramSmooth[j];
+		}
+	}
+
+	double angle = maxI*M_PI/180-M_PI/2;
+	probability =  (resLen/totalLen);
+	//draw the histogram
+	if(debugImage != NULL)
+	{
+		int noOfGroups = 180;
+		std::vector<cv::Scalar> colors;
+		colors.push_back(cv::Scalar(255, 0, 0));
+		colors.push_back(cv::Scalar(0, 255, 0));
+		colors.push_back(cv::Scalar(0, 0, 255));
+		colors.push_back(cv::Scalar(0, 255, 255));
+		colors.push_back(cv::Scalar(255, 0, 255));
+		cv::Mat histogramImg;
+		int histWidth = 180;
+		int histHeight = 100;
+		int colWidth = histWidth / noOfGroups;
+
+		histogramImg = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
+		cv::line(histogramImg, cv::Point(90, 0), cv::Point(90, histogramImg.rows), cv::Scalar(255, 255, 255) );
+		cv::line(histogramImg, cv::Point(90 + 45, 0), cv::Point(90 + 45, histogramImg.rows), cv::Scalar(200, 200, 200) );
+		cv::line(histogramImg, cv::Point(45, 0), cv::Point(45, histogramImg.rows), cv::Scalar(200, 200, 200) );
+		double norm = histHeight / maxVal;
+		int graphWidth =noOfGroups*colWidth;
+		for (int i =0; i <noOfGroups; i++) {
+			int colHeight = histogramSmooth[i] * norm;
+
+			cv::rectangle(histogramImg, cv::Point(i*colWidth, histHeight), cv::Point(colWidth*i+colWidth, histHeight-colHeight), cv::Scalar(0,0,255),CV_FILLED);
+		}
+		*debugImage = histogramImg;
+
+#ifdef VERBOSE
+		cv::imshow("Histogram", histogram);
+		cv::waitKey(0);
+#endif
+
+	}
+
+#ifdef VERBOSE
+	std::cout << "Detected skew angle is: " << angle << " with prob.: " << probability << std::endl;
+#endif
+	return angle;
+}
+
 double DiscreteVotingWordSkDet2::computeAngle(std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detectorsIndex, double& probability, cv::Mat* debugImage)
 {
 
@@ -344,7 +454,7 @@ double DiscreteVotingWordSkDet2::computeAngle(std::vector<double>& angles, std::
 		}
 	}
 
-	angle= iterator*groupRange+min;
+	angle = iterator*groupRange+min;
 	probability = maxProb / allProb;
 
 	//draw the histogram

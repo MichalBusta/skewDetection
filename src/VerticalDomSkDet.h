@@ -19,6 +19,7 @@ namespace cmp{
 
 		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
         
+		virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage);
 
 	private:
 

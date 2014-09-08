@@ -68,7 +68,7 @@ namespace cmp {
     	DiscreteVotingWordSkDet2(cv::Ptr<BestGuessSKDetector> detector, double delta = 1);
             virtual ~DiscreteVotingWordSkDet2();
 
-
+            virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
         protected:
 
             virtual double computeAngle(std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detectorsIndex, double& probability, cv::Mat* debugImage);

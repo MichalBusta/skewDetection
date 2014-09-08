@@ -21,19 +21,21 @@ BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon)
 	weights.push_back(1.0);
     detectorNames.push_back("VertDom");
 
+
     detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
     weights.push_back(1.0);
     detectorNames.push_back("VertDomCH");
+
 
     detectors.push_back( new CentersSkDet() );
     weights.push_back(1.0);
     detectorNames.push_back("CentersSkDet");
 
-    /*
+
 	detectors.push_back( new ThinProfileSkDet() );
 	weights.push_back(0.5);
     detectorNames.push_back("ThinProfileSkDet");
-    
+    /*
 	detectors.push_back( new LongestEdgeSkDetector() );
     weights.push_back(0.5);
     detectorNames.push_back("LongestEdgeSkDetector");
@@ -143,6 +145,24 @@ void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, s
 		probabilities.push_back(this->detectors[i]->lastDetectionProbability * weights[i]);
 		assert( detectors[i]->lastDetectionProbability == detectors[i]->lastDetectionProbability);
 		detecotrsId.push_back(i);
+	}
+}
+
+void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, cv::Mat* debugImage)
+{
+	std::vector<cv::Point>& outerContour = contourOrig;
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(outerContour);
+		int size = MIN(rect.width, rect.height);
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(outerContour, apCont, absEpsilon, true);
+		outerContour = apCont;
+	}
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+		this->detectors[i]->voteInHistogram(outerContour, histogram, debugImage);
 	}
 }
 

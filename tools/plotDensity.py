@@ -72,7 +72,7 @@ def draw_evaluation(data_dir):
     
     plt.plot(be[0:10], his)
     plt.rc('text', usetex=True)
-    plt.xlabel("P($\delta$)")
+    plt.xlabel(r'P($\hat{ \alpha }$)')
     plt.ylabel("Correct Classifications in $\%$")
     #plt.plot(vert[:, 1], vert[:, 4], 'o')
     plt.grid(True)

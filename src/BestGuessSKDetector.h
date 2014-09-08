@@ -39,6 +39,8 @@ public:
 
 	void getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage);
 
+	void voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, cv::Mat* debugImage);
+
 	std::vector<double> weights;
     std::vector<std::string> detectorNames;
     std::map<std::string, cv::Mat> debugImages;

@@ -170,9 +170,25 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 		cv::circle(drawing, (TM - offset), 4, cv::Scalar(0, 0, 255), 2);
 		cv::circle(drawing, (BM - offset), 4, cv::Scalar(0, 0, 255), 2);
 	}
-	this->lastDetectionProbability = 1.0;
+	this->lastDetectionProbability = 0.5;
 	this->probMeasure2 = fabs(angle - angle2);
 	return angle;
+}
+
+void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage)
+{
+	double angle = detectSkew( outerContour);
+	int angleDeg = angle * 180 / M_PI;
+	int sigma = 3;
+	int range = 3;
+	for (int i = angleDeg-sigma*range; i <= angleDeg+sigma*range; i++)
+	{
+		int j = i;
+		if(j < 0) j += 180;
+		if (j >= 180) j -= 180;
+
+		histogram[j] = histogram[j] + this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+	}
 }
 
 } /* namespace cmp */
