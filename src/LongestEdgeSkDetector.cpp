@@ -118,8 +118,8 @@ double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& outerContour, 
 
 
 #ifdef VERBOSE
-cout << "edgesLengthInRange is: " << probMeasure2 << "\n";
-cout << "noOfEdgesInRange is: " << probMeasure1 << "\n";
+	cout << "edgesLengthInRange is: " << probMeasure2 << "\n";
+	cout << "noOfEdgesInRange is: " << probMeasure1 << "\n";
 #endif
 
 /*#ifdef VERBOSE
@@ -127,66 +127,81 @@ cout << "noOfEdgesInRange is: " << probMeasure1 << "\n";
 		cout << "angle is: " << angle << "\n";
 		#endif*/
 
-if(debugImage != NULL)
-{
-	cv::Mat drawing;
-	cv::Rect bbox = cv::boundingRect(outerContour);
-
-	int brd = 10;
-	drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
-	*debugImage = drawing;
-	Scalar color = Scalar( 255, 255, 255 );
-	std::vector<std::vector<cv::Point> > contours;
-	contours.push_back(outerContour);
-	int min_Y = INT_MAX;
-	int min_X = INT_MAX;
-	for (size_t i=0; i<outerContour.size(); i++) {
-		min_Y = MIN(min_Y, outerContour[i].y);
-		min_X = MIN(min_X, outerContour[i].x);
-	}
-	for(size_t j = 0; j < outerContour.size(); j++)
+	if(debugImage != NULL)
 	{
-		int index = j+1;
-		if(index >=  (outerContour.size()) )
+		cv::Mat drawing;
+		cv::Rect bbox = cv::boundingRect(outerContour);
+
+		int brd = 10;
+		drawing =  Mat::zeros( bbox.height*scalefactor+brd, bbox.width*scalefactor+brd, CV_8UC3 );
+		*debugImage = drawing;
+		Scalar color = Scalar( 255, 255, 255 );
+		std::vector<std::vector<cv::Point> > contours;
+		contours.push_back(outerContour);
+		int min_Y = INT_MAX;
+		int min_X = INT_MAX;
+		for (size_t i=0; i<outerContour.size(); i++) {
+			min_Y = MIN(min_Y, outerContour[i].y);
+			min_X = MIN(min_X, outerContour[i].x);
+		}
+		for(size_t j = 0; j < outerContour.size(); j++)
+		{
+			int index = j+1;
+			if(index >=  (outerContour.size()) )
+				index = 0;
+
+			cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color);
+			cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), 2, cv::Scalar(0, 255, 255), 1);
+
+			cv::Scalar color = cv::Scalar( 255, 255, 255 );
+			deltaX = outerContour[index].x - outerContour[j].x;
+			deltaY = outerContour[index].y - outerContour[j].y;
+			QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
+			actLength = sqrt(QactLength);
+			atanAngle=(deltaX)*1.0/(deltaY);
+			actAngle =atan(atanAngle);
+			if(actLength >= ( maxLength - edgeRatio * maxLength ))
+				color = cv::Scalar( 0, 0, 255 );
+			if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
+				cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2),
+						cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color, 1, 0);
+		}
+		int index = counter + 1;
+		if(counter == outerContour.size() - 1 )
 			index = 0;
-
-		cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color);
-		cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), 2, cv::Scalar(0, 255, 255), 1);
-
-		cv::Scalar color = cv::Scalar( 255, 255, 255 );
-		deltaX = outerContour[index].x - outerContour[j].x;
-		deltaY = outerContour[index].y - outerContour[j].y;
-		QactLength = (deltaX)*(deltaX) + (deltaY)*(deltaY);
-		actLength = sqrt(QactLength);
-		atanAngle=(deltaX)*1.0/(deltaY);
-		actAngle =atan(atanAngle);
-		if(actLength >= ( maxLength - edgeRatio * maxLength ))
-			color = cv::Scalar( 0, 0, 255 );
-		if((actAngle < (M_PI/2.0-range)) && (actAngle > (-M_PI/2.0+range)) )
-			cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2),
-					cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color, 1, 0);
+		cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2),
+				cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), cv::Scalar( 0, 255, 0 ), 1, 0);
+		cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
+		cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
 	}
-	int index = counter + 1;
-	if(counter == outerContour.size() - 1 )
-		index = 0;
-	cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2),
-			cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), cv::Scalar( 0, 255, 0 ), 1, 0);
-	cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
-	cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
+
+
+	int index = (int) (probMeasure2 - 1);
+	index = MIN(index, this->probabilities.size() - 1);
+	lastDetectionProbability = 0.5;
+
+	assert(anglesCount>0);
+	if(probMeasure2 == 2)
+		return - (anglesSum / anglesCount);
+
+	//y-souradnice je opacne
+	return -angle;
 }
 
+void LongestEdgeSkDetector::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)
+{
+	double angle = detectSkew( outerContour);
+	int angleDeg = angle * 180 / M_PI;
+	int sigma = 3;
+	int range = 3;
+	for (int i = angleDeg-sigma*range; i <= angleDeg+sigma*range; i++)
+	{
+		int j = i;
+		if(j < 0) j += 180;
+		if (j >= 180) j -= 180;
 
-int index = (int) (probMeasure2 - 1);
-index = MIN(index, this->probabilities.size() - 1);
-lastDetectionProbability = 0.5;
-
-assert(anglesCount>0);
-if(probMeasure2 == 2)
-	return - (anglesSum / anglesCount);
-
-//y-souradnice je opacne
-return -angle;
-
+		histogram[j] = weight * histogram[j] + this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+	}
 }
 
 } /* namespace cmp */

@@ -88,20 +88,28 @@ def draw_evaluation(data_dir):
     overview = genfromtxt('{0}/{1}'.format(data_dir, 'overview.csv'), delimiter=',', names=True, dtype=np.float)
     overview2 = genfromtxt('{0}/{1}'.format(data_dir, 'overview.csv'), delimiter=',', skip_header=1, dtype=np.float)
     
-    ind = np.arange(len(overview[0]))
-    width = 0.25 
-    rects1 = plt.bar(ind, overview[0], width, color='#4572A7')
-    rects2 = plt.bar(ind + width + 0.1, overview[1], width, color='#42ca2f')
     
-    plt.legend( (rects1[0], rects2[0]), ('Correct Classifications', 'Avg. Correct Letters') )
+    
+    ind = np.arange(len(overview[0]))
+    ind[ind.shape[0] - 2] += 0.5 
+    ind[ind.shape[0] - 1] += 0.5
+    width = 0.25 
+    overview0 = overview2[0][::-1]
+    overview1 = overview2[1][::-1]
+    rects1 = plt.bar(ind, overview0, width, color='#4572A7')
+    rects2 = plt.bar(ind + width + 0.1, overview1, width, color='#42ca2f')
+    
+    plt.legend( (rects1[0], rects2[0]), ('Correct Classifications', 'Avg. Correct Letters'), bbox_to_anchor=(0, 1.14) )
     det_names = []
     for i in range(len(overview.dtype.names)):
         det_names.append(overview.dtype.names[i].replace('_', '\n'))
+    det_names = det_names[::-1]
     plt.xticks(ind, det_names, rotation=17) 
     plt.ylabel("Correct Classification \%")
     
     ax2 = ax.twinx()
-    ax2.plot(ind, overview2[3, :], '#89A54E')
+    overview3 = overview2[3, :][::-1]
+    ax2.plot(ind, overview3, '#89A54E')
     ax2.set_ylabel('Standard Deviation', color='#89A54E')
     ax2.grid(b=False)
     
@@ -151,14 +159,79 @@ def draw_detectors_dependence(data_dir):
         plt.savefig('/tmp/{0}.eps'.format(pair_def[0]), format='eps')
         #plt.show()
 
+def plotWordsLength():
+    
+    fig, ax = plt.subplots()
+    plt.rc('text', usetex=True)
+    plt.rcParams['legend.loc'] = 'upper left'
+    
+    wordsAll = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/wordsAll/results.csv', delimiter=',', skip_header=1)
+    words2 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words2/results.csv', delimiter=',', skip_header=1)
+    words3 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words3/results.csv', delimiter=',', skip_header=1)
+    words4 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words4/results.csv', delimiter=',', skip_header=1)
+    
+    x1 = []
+    x2 = []
+    x23 = []
+    stdDev = []
+    labelsX = []
+    
+    correct2 = np.abs(words2[:, 1]) <= (3 * math.pi / 180)
+    x1.append(np.sum(correct2) / float(words2.shape[0]) * 100)
+    x2.append( (words2.shape[0] - np.sum(words2[:, 5] )) / float(words2.shape[0]) * 100)
+    x23.append( np.sum(words2[:, 5]) )
+    labelsX.append("2")
+    stdDev.append(np.std(words2[:, 1]))
+    correct3 = np.abs(words3[:, 1]) <= (3 * math.pi / 180)
+    x1.append(np.sum(correct3) / float(words3.shape[0]) * 100)
+    x2.append( (words3.shape[0] - np.sum(words3[:, 5] )) / float(words3.shape[0]) * 100)
+    x23.append( np.sum(words3[:, 5]) )
+    labelsX.append("3")
+    stdDev.append(np.std(words3[:, 1]))
+    correct4 = np.abs(words4[:, 1]) <= (3 * math.pi / 180)
+    x2.append( (words4.shape[0] - np.sum(words4[:, 5] )) / float( words4.shape[0] ) * 100)
+    x1.append(np.sum(correct4) / float( words4.shape[0] ) * 100 )
+    x23.append( np.sum(words4[:, 5]) )
+    labelsX.append("4")
+    stdDev.append(np.std(words4[:, 1]))
+    correctAll = np.abs(wordsAll[:, 1]) <= (3 * math.pi / 180)
+    x1.append(np.sum(correctAll) / float(wordsAll.shape[0] ) * 100 )
+    x2.append( ( wordsAll.shape[0] - np.sum(wordsAll[:, 5])) / float(wordsAll.shape[0] ) * 100 )
+    x23.append( np.sum(wordsAll[:, 5]) )
+    labelsX.append("All")
+    stdDev.append(np.std(wordsAll[:, 1]))
+    
+    ind = np.arange(len(x1))
+    width = 0.25 
+    rects1 = plt.bar(ind, x1, width, color='#4572A7')
+    rects2 = plt.bar(ind + width + 0.1, x2, width, color='red')
+    
+    plt.legend( (rects1[0], rects2[0]), ('Correct Classifications', 'Improved'), bbox_to_anchor=(0, 1.14) )
+    plt.ylabel("Correct Classification \%")
+    plt.xticks(ind, labelsX) 
+    plt.xlabel("Word Length")
+    
+    ax2 = ax.twinx()
+    ax2.plot(np.asarray(ind) + 0.25, stdDev, '#89A54E')
+    ax2.set_ylabel('Standard Deviation', color='#89A54E')
+    ax2.grid(b=False)
+    plt.subplots_adjust(bottom=0.2)
+    
+    plt.savefig('/tmp/wordClasss.eps' , format='eps')
+    print( x23 )
+    
+    
+
 if __name__ == '__main__':
     
     init_plotting()
     
-    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/11Run'
-    data_dir = '/tmp/11Run'
+    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts3'
+    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/12Run'
+    #data_dir = '/tmp/11Run'
+    #plotWordsLength()
     draw_evaluation(data_dir)
-    draw_detectors_dependence(data_dir)
+    #draw_detectors_dependence(data_dir)
     
     
         

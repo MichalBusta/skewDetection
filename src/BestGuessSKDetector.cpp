@@ -108,8 +108,31 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 		outerContour = apCont;
 	}
 
+	double histogram[180];
+	memset (histogram, 0, 180 * sizeof(double));
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
+		this->detectors[i]->voteInHistogram(outerContour, histogram, this->weights[i], debugImage);
+	}
+
+	int ignoreAngle = 30;
+	int maxI = 0;
+	double totalLen = 0;
+	double maxVal = 0;
+	for(int i=0; i < 180; i++)
+	{
+		if (i > ignoreAngle && i < (180-ignoreAngle))
+		{
+			if (histogram[i] > histogram[maxI]) maxI = i;
+			totalLen += histogram[i];
+			maxVal = MAX(maxVal, histogram[i]);
+		}
+	}
+	/*
+	for(size_t i = 0; i < this->detectors.size(); i++)
+	{
+
+
 		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
 		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
 		{
@@ -123,6 +146,9 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
 #endif
 	return angles[bestDetIndex];
+	*/
+	double angle = maxI*M_PI/180-M_PI/2;
+	return angle;
 }
 
 void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage)
@@ -148,7 +174,7 @@ void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, s
 	}
 }
 
-void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, cv::Mat* debugImage)
+void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
 {
 	std::vector<cv::Point>& outerContour = contourOrig;
 	if(this->epsilon > 0)
@@ -162,7 +188,7 @@ void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, 
 	}
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
-		this->detectors[i]->voteInHistogram(outerContour, histogram, debugImage);
+		this->detectors[i]->voteInHistogram(outerContour, histogram, this->weights[i], debugImage);
 	}
 }
 

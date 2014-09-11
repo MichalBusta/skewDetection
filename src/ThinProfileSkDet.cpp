@@ -360,7 +360,7 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	return angle;
 }
 
-void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage)
+void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)
 {
 	double angle = detectSkew( outerContour);
 	int angleDeg = angle * 180 / M_PI;
@@ -372,7 +372,7 @@ void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, do
 		if(j < 0) j += 180;
 		if (j >= 180) j -= 180;
 
-		histogram[j] = histogram[j] + this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+		histogram[j] =  histogram[j] + weight * this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
 	}
 }
 

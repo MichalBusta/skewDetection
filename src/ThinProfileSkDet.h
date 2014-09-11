@@ -35,7 +35,7 @@ public:
 
 	virtual double detectSkew( std::vector<cv::Point>& contours, cv::Mat* debugImage = NULL );
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage);
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
 
 	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
 	int ignoreAngle;

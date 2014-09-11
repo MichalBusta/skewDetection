@@ -21,12 +21,14 @@ public:
 
 	virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL );
 
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
 	/* ve stupnich */
 	double ignoreAngle;
 	/* udava % rozsah pro odhad pravdepodobnosti (kolik dalsich hran je s delkou longestEdge +- edgeRatio * longestEdge ) */
 	double edgeRatio;
 
 	std::vector<double> probabilities;
+
 };
 
 } /* namespace cmp */

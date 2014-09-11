@@ -77,10 +77,7 @@ public:
 
 	}
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, cv::Mat* debugImage){
-
-	}
-
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage) = 0;
 	/**
 	 * Descendants have to implement this method
 	 *
@@ -142,7 +139,7 @@ class MockSkewDetector : public SkewDetector
  *
  * @return the merged image
  */
-inline cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing, int verticalDisplacement, std::vector<cv::Point>* imagesCenters )
+inline cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing, int verticalDisplacement, std::vector<cv::Point>* imagesCenters, cv::Scalar color = cv::Scalar(0, 0, 0) )
 {
 	int sw = 0;
 	int sh = 0;
@@ -154,16 +151,21 @@ inline cv::Mat mergeHorizontal(std::vector<cv::Mat>& imagesToMerge, int spacing,
 
 
 
-	cv::Mat mergedImage = cv::Mat::zeros(sh, sw, imagesToMerge[0].type());
+	cv::Mat mergedImage = cv::Mat::zeros(sh, sw, imagesToMerge[0].type()) + color;
 	int wOffset = 0;
 
 	int i = 0;
 	for( std::vector<cv::Mat>::iterator it =  imagesToMerge.begin(); it < imagesToMerge.end(); it++ )
 	{
 		int hoffset = (i % 2 ) * verticalDisplacement;
+		if( it->rows < mergedImage.rows)
+		{
+			hoffset += (mergedImage.rows - it->rows) / 2;
+		}
 		if(it->cols == 0)
 			continue;
 		cv::Rect roi = cv::Rect(wOffset, hoffset, it->cols, it->rows);
+		mergedImage(roi) = cv::Scalar(0, 0, 0);
 		mergedImage(roi) += *it;
 		wOffset += it->cols + spacing;
 		if(imagesCenters != NULL)

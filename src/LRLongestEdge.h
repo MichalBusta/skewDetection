@@ -33,6 +33,10 @@ namespace cmp
 
 		/** pri true bude hledat levou nejdelsi hranu, pri false pravou */
 		bool left;
+
+		virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage){
+
+		}
 	};
 
 } /* namespace cmp */

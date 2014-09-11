@@ -254,7 +254,8 @@ else{
 
 	//drawing the debug images from detectors
 
-	for (size_t i =0; i<rowImages.size(); i++) {
+	for (size_t i =0; i<rowImages.size(); i++)
+	{
 		int imageCount =0;
 		int rowWidth=0;
 		for (size_t i1=0; i1<rowImages[i].size(); i1++) {
@@ -264,18 +265,17 @@ else{
 			cv::Mat temp;
 
 #ifdef VERBOSE
-imshow("ts", rowImages[i][i1]);
-cv::waitKey(0);
+			imshow("ts", rowImages[i][i1]);
+			cv::waitKey(0);
 #endif
 
-try {
-	rowImages[i][i1].copyTo(histogram(roi));
+			try {
+				rowImages[i][i1].copyTo(histogram(roi));
+			} catch (...) {
 
-} catch (...) {
+			}
 
-}
-
-rowWidth += rowImages[i][i1].cols+imgBufferBar;
+			rowWidth += rowImages[i][i1].cols+imgBufferBar;
 		}
 		imageCount++;
 	}
@@ -317,7 +317,7 @@ double DiscreteVotingWordSkDet2::detectContoursSkew( std::vector<std::vector<cv:
 		cv::Mat tempDebug;
 		debugImage = &tempDebug;
 #endif
-		localDetector->voteInHistogram(*contours[i], histogram, debugImage);
+		localDetector->voteInHistogram(*contours[i], histogram, 1.0, debugImage);
 #ifdef VERBOSE
 		cv::imshow("temp", tempDebug);
 		cv::waitKey(0);
@@ -387,10 +387,11 @@ double DiscreteVotingWordSkDet2::detectContoursSkew( std::vector<std::vector<cv:
 		int histHeight = 100;
 		int colWidth = histWidth / noOfGroups;
 
-		histogramImg = cv::Mat::zeros(histHeight, histWidth, CV_8UC3);
-		cv::line(histogramImg, cv::Point(90, 0), cv::Point(90, histogramImg.rows), cv::Scalar(255, 255, 255) );
-		cv::line(histogramImg, cv::Point(90 + 45, 0), cv::Point(90 + 45, histogramImg.rows), cv::Scalar(200, 200, 200) );
-		cv::line(histogramImg, cv::Point(45, 0), cv::Point(45, histogramImg.rows), cv::Scalar(200, 200, 200) );
+		histogramImg = cv::Mat::zeros(histHeight, histWidth, CV_8UC3) + cv::Scalar(255, 255, 255);
+		cv::line(histogramImg, cv::Point(0, 0), cv::Point(0, histogramImg.rows), cv::Scalar(0, 0, 0) );
+		cv::line(histogramImg, cv::Point(90, 0), cv::Point(90, histogramImg.rows), cv::Scalar(0, 0, 0) );
+		cv::line(histogramImg, cv::Point(90 + 45, 0), cv::Point(90 + 45, histogramImg.rows), cv::Scalar(100, 100, 100) );
+		cv::line(histogramImg, cv::Point(45, 0), cv::Point(45, histogramImg.rows), cv::Scalar(100, 100, 100) );
 		double norm = histHeight / maxVal;
 		int graphWidth =noOfGroups*colWidth;
 		for (int i =0; i <noOfGroups; i++) {
@@ -398,6 +399,7 @@ double DiscreteVotingWordSkDet2::detectContoursSkew( std::vector<std::vector<cv:
 
 			cv::rectangle(histogramImg, cv::Point(i*colWidth, histHeight), cv::Point(colWidth*i+colWidth, histHeight-colHeight), cv::Scalar(0,0,255),CV_FILLED);
 		}
+		cv::line(histogramImg, cv::Point(0, histogramImg.rows - 1), cv::Point(180, histogramImg.rows - 1), cv::Scalar(100, 100, 100) );
 		*debugImage = histogramImg;
 
 #ifdef VERBOSE
@@ -494,7 +496,7 @@ double DiscreteVotingWordSkDet2::computeAngle(std::vector<double>& angles, std::
 			groupProbs2[idx] = colHeight;
 			cv::rectangle(histogram, cv::Point(idx*colWidth, histHeight - offset), cv::Point(colWidth*idx+colWidth, histHeight-colHeight + offset), colors[i], CV_FILLED);
 		}
-
+		cv::line(histogram, cv::Point(0, histogram.rows - 1), cv::Point(180, histogram.rows - 1), cv::Scalar(0, 0, 0) );
 		*debugImage = histogram;
 		cv::Mat& draw = *debugImage;
 

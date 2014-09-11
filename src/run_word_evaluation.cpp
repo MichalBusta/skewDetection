@@ -50,8 +50,40 @@ int main( int argc, char **argv)
 	cv::Ptr<BestGuessSKDetector> detector = new BestGuessSKDetector();
 	std::vector<cv::Ptr<ContourWordSkewDetector> > detectors;
 	detectors.push_back(new DiscreteVotingWordSkDet2(detector));
-	evaluator.detectorNames.push_back("CommonVoting");
-	evaluator.detectorCaptions.push_back("Common Voting");
+	evaluator.registerDetector( NULL, "CommonVoting", "Common Voting" );
+	//evaluator.detectorNames.push_back("CommonVoting");
+	//evaluator.detectorCaptions.push_back("Common Voting");
+	/*
+	for( double w1 = 0.1; w1 <= 1.5; w1+= 0.1 ){
+		for( double w2 = 0.1; w2 <= 1; w2+= 0.1 ){
+			std::ostringstream os;
+			os << "BG-" << w1 << "-" << w2;
+
+			std::vector<cv::Ptr<ContourSkewDetector> > detectorsw;
+			std::vector<std::string> detectorNames;
+			std::vector<double> weights;
+			weights.push_back(1.0);
+			detectorNames.push_back("VertDom");
+			detectorsw.push_back(new VerticalDomSkDet());
+			weights.push_back(1.0);
+			detectorNames.push_back("VertCH");
+			detectorsw.push_back(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
+			weights.push_back(w1);
+			detectorNames.push_back("Centers");
+			detectorsw.push_back(new CentersSkDet());
+
+			weights.push_back(w2);
+			detectorNames.push_back("ThinProf");
+			detectorsw.push_back( new ThinProfileSkDet());
+
+			cv::Ptr<BestGuessSKDetector> det = new BestGuessSKDetector(detectorsw, weights, detectorNames);
+
+			detectors.push_back(new DiscreteVotingWordSkDet2(det));
+			evaluator.detectorNames.push_back(os.str());
+			evaluator.detectorCaptions.push_back(os.str());
+		}
+	}
+	*/
 	/*
 
 	for(double i = 0.1; i < 5; i+= 0.2)

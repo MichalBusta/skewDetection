@@ -199,7 +199,12 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 #ifdef DO_PARALLEL
 			omp_set_lock(&lock);
 #endif
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex) );
+			int isWorst = 0;
+			if( fabs(angleDiff) >  fabs(def.skewAngle) && fabs(angleDiff) > ANGLE_TOLERANCE )
+			{
+				isWorst = 1;
+			}
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex, isWorst) );
 
 			results.back().measure1 = detectors[i]->probMeasure1;
 			results.back().measure2 = detectors[i]->probMeasure2;
@@ -277,7 +282,12 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 				}
 			}
 		}
-		results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex) );
+		int isBestWorst = 0;
+		if( fabs(bestAngleDiff) >  fabs(def.skewAngle) )
+		{
+			isBestWorst = 1;
+		}
+		results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex, isBestWorst) );
 		if( fabs(bestAngleDiff) > ANGLE_MIN)
 			bestResults.push_back(bestResult);
 
@@ -352,8 +362,12 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 			double detectedAngle = wordSkewDetector->detectContoursSkew(contoursWord, 0, probability, &debugImage );
 			double angleDiff = detectedAngle - def.skewAngle;
 
-
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex) );
+			int isWorst = 0;
+			if( fabs(angleDiff) >  fabs(def.skewAngle) )
+			{
+				isWorst = 1;
+			}
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex, isWorst) );
 
 			results.back().measure1 = 0;
 			results.back().measure2 = 0;
@@ -386,7 +400,7 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 				std::vector<cv::Mat> toMerge;
 				toMerge.push_back(src);
 				toMerge.push_back(debugImage);
-				cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL);
+				cv::Mat dispImage = mergeHorizontal(toMerge, 1, 0, NULL, cv::Scalar(255, 255, 255));
 
 				//cv::imshow("ts2", dispImage);
 				//cv::waitKey(0);
@@ -462,22 +476,25 @@ void SkewEvaluator::writeResults()
 		classMap[ results[i].classificator ].count++;
 		classMap[ results[i].classificator ].classIndex = results[i].classificator;
 		classMap[ results[i].classificator ].sumDiff = classMap[ results[i].classificator ].sumDiff + results[i].angleDiff*results[i].angleDiff;
+		classMap[ results[i].classificator ].isWorst += results[i].isWorst;
 
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].classIndex = results[i].classificator;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].count++;
 		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff = resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].sumDiff + results[i].angleDiff*results[i].angleDiff;
+		resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].isWorst += results[i].isWorst;
 
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].count++;
 		alphabetMap[ results[i].classificator ][ results[i].alphabet ].classIndex = results[i].classificator;
+		alphabetMap[ results[i].classificator ][ results[i].alphabet ].isWorst += results[i].isWorst;
 
 		letters[ results[i].letter ] = true;
-		if( fabs(results[i].angleDiff) < ANGLE_TOLERANCE )
+		if( fabs(results[i].angleDiff) <= ANGLE_TOLERANCE )
 		{
 			classMap[ results[i].classificator ].correctClassCont++;
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 			alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
 		}
-		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << std::endl;
+		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << "," << results[i].isWorst << std::endl;
 	}
 	out_csv.close();
 	//Writing the report
@@ -550,12 +567,13 @@ void SkewEvaluator::writeResults()
 
 		report_detector << "\t\t\t<th colspan=\"6\">Sum</th>\n";
 		report_detector << "\t\t</tr>\n";
-		report_detector << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t\t<th>avg % Correct Letters</th>\n" << "\t\t\t<th>avg % Correct Alphabet</th>\n" << "\t\t</tr>\n";
+		report_detector << "\t\t<tr>\n" << subtitle << "\t\t\t<th>Total</th>\n" << "\t\t\t<th>Correct</th>\n" << "\t\t\t<th>% Correct</th>\n" << "\t\t\t<th>Variance</th>\n" << "\t\t\t<th>avg % Correct Letters</th>\n" << "\t\t\t<th>avg % Correct Alphabet</th> <th>Worst</th><th>Worst%</th>\n" << "\t\t</tr>\n";
 		report_detector << "\t\t<tr>\n";
 
 		int total = 0;
 		int correct = 0;
 		double variance = 0.0;
+		double worst = 0;
 		int alphabetIndex = 0;
 		sumCorrectAlphabetPercent[classMap[i].classIndex] = 0.0;
 		sumCorrectLetterPercent[classMap[i].classIndex] = 0.0;
@@ -569,18 +587,25 @@ void SkewEvaluator::writeResults()
 			int alphabetCorrect = 0;
 			double alphabetVariance = 0.0;
 			double sumCorrectPercent = 0.0;
+			int alphabetWorst = 0;
 			int letterIndex = 0;
 			for(std::map<std::string, AcumResult>::iterator iterator = it->second.begin(); iterator != it->second.end(); iterator++)
 			{
 				alphabetTotal = alphabetTotal + iterator->second.count;
 				alphabetCorrect = alphabetCorrect + iterator->second.correctClassCont;
 				alphabetVariance = alphabetVariance + iterator->second.sumDiff;
+				alphabetWorst += iterator->second.isWorst;
 				letterIndex++;
 				sumCorrectPercent = sumCorrectPercent + double(iterator->second.correctClassCont)/double(iterator->second.count)*100;
 			}
 			total = total + alphabetTotal;
 			correct = correct + alphabetCorrect;
 			variance = variance + alphabetVariance;
+			worst += alphabetWorst;
+			if(alphabetVariance > 0)
+			{
+				alphabetVariance = sqrt(alphabetVariance / alphabetTotal);
+			}
 
 			sumCorrectAlphabetPercent[classMap[i].classIndex] = sumCorrectAlphabetPercent[classMap[i].classIndex] + double(alphabetCorrect)/double(alphabetTotal)*100;
 			sumCorrectLetterPercent[classMap[i].classIndex] = sumCorrectLetterPercent[classMap[i].classIndex] + sumCorrectPercent;
@@ -634,10 +659,15 @@ void SkewEvaluator::writeResults()
 		sumCorrectAlphabetPercent[classMap[i].classIndex] = sumCorrectAlphabetPercent[classMap[i].classIndex]/double(alphabetIndex);
 		sumCorrectLetterPercent[classMap[i].classIndex] = sumCorrectLetterPercent[classMap[i].classIndex]/double(letterTotal);
 
+		if(variance > 0)
+		{
+			variance = sqrt(variance / total);
+		}
+
 		table_overview << "\t\t</tr>\n";
 		report_overview << "\t\t\t<td class=\"border_left\">" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
 
-		report_detector << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td>\n" << "\t\t</tr>\n";
+		report_detector << "\t\t\t<td>" << total << "</td>\n" << "\t\t\t<td>" << correct << "</td>\n" << "\t\t\t<td>" << double(correct)/double(total)*100 << "</td>\n" << "\t\t\t<td>" << variance << "</td>\n" << "\t\t\t<td>" << sumCorrectLetterPercent[classMap[i].classIndex] << "</td>\n" << "\t\t\t<td>" << sumCorrectAlphabetPercent[classMap[i].classIndex] << "</td><td>" << worst << "</td><td>" << worst / (double) total << "</td>\n" << "\t\t</tr>\n";
 		report_detector << "\t</table>\n";
 
 		ResultsWriter::writeWorstDetectorResults( results,  classMap[i].classIndex, 100, report_detector, outputDirectory, detectorNames );

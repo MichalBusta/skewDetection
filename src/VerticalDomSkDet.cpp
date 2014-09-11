@@ -38,7 +38,7 @@ VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int s
 	probabilities.push_back(0.89);
 	probabilities.push_back(0.95);
 
-	borderForVis = 10;
+	borderForVis = 5;
 
 }
 
@@ -69,6 +69,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
 		int ang = angle;
+		//ignoreAngle = 0;
 		//hist[ang] = hist[ang] + length;
 		//if (hist[ang] > hist[highestCol]) highestCol = ang;
 
@@ -138,9 +139,10 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 	{
 		int height = 100;
 		double norm = height / maxHistVal;
-		cv::Mat histogram = Mat::zeros(height, 180, CV_8UC3);
+		cv::Mat histogram = Mat::zeros(height, 180, CV_8UC3) + cv::Scalar(255, 255, 255);
+		cv::rectangle(histogram, Rect(0, 0, 1, height), Scalar(0,0,0), CV_FILLED);
 		cv::rectangle(histogram, Rect(45, 0, 1, height), Scalar(100,100,100), CV_FILLED);
-		cv::rectangle(histogram, Rect(90, 0, 1, height), Scalar(255,255,255), CV_FILLED);
+		cv::rectangle(histogram, Rect(90, 0, 1, height), Scalar(0,0,0), CV_FILLED);
 		cv::rectangle(histogram, Rect(135, 0, 1, height), Scalar(100,100,100), CV_FILLED);
 
 		for(int i=0;i<int(180);i++)
@@ -152,9 +154,9 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
-		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
+		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis*2, bbox.width*scalefactor+borderForVis*2, CV_8UC3 ) + cv::Scalar(255, 255, 255);
 
-		Scalar color = Scalar( 255, 255, 255 );
+		Scalar color = Scalar( 0, 0, 0 );
 		std::vector<std::vector<cv::Point> > contours;
 		contours.push_back(contour);
 
@@ -163,33 +165,43 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 		//get contour max
 		for (size_t i=0; i<contour.size(); i++) {
 			miny = MIN(contour[i].y, miny);
-			minx = MIN(contour[i].x, minx);
+			minx = MIN(contour[i].x, minx);//  borderForVis / 2;
 		}
+
+		minx -= 2;
+		miny -= 2;
 
 		for (size_t i = 0; i < contour.size(); i++)
 		{
 			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
 
-			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
+			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 255, 0, 0 ), 2);
 
 			cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), cv::Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), color);
 
 			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
 			if (ang < 0) ang = ang + M_PI;
-			if (fabs(ang) < correctAngle*M_PI/180)
+			if (ang >= M_PI) ang -= M_PI;
+
+			if (fabs(ang - maxI * M_PI / 180.0) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y- miny)*scalefactor), Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
+				cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y- miny)*scalefactor), Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), Scalar( 29, 207, 34 ), 2);
 			}
 		}
 		std::vector<cv::Mat> imagesToMerge;
 		imagesToMerge.push_back(drawing);
 		imagesToMerge.push_back(histogram);
-		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL );
+		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL, cv::Scalar(255, 255, 255) );
+		/*
+		cv::imshow("img", *debugImage);
+		cv::waitKey(0);
+		cv::imwrite("/tmp/verticalDominant.png", *debugImage);
+		*/
 	}
 	return maxI*M_PI/180-M_PI/2;
 }
 
-void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, cv::Mat* debugImage)
+void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
 {
 	memset (hist, 0, 180 * sizeof(double));
 	std::vector<cv::Point>& contour = contourOrig;
@@ -334,7 +346,7 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 
 	for(int i=0; i < 180; i++)
 	{
-		histogram[i] += hist[i] / maxHistVal * this->lastDetectionProbability;
+		histogram[i] += weight * hist[i] / maxHistVal * this->lastDetectionProbability;
 	}
 }
 
