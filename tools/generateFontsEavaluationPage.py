@@ -208,7 +208,7 @@ for i in range(0x0041, 0x005B):
 specific_fonts = ['Twelve Ton Fishstick', '20.000 dollar bail', 'Airacobra Alt', 'Alan Den', 'Alexis Bold', 'Alien', 'All Caps', 'Amalgam', 'Babes In Toyland NF', 'BadaBoom BB', 'Cactus', 'Data Control', 'NeverSayDie', 'Postmaster', 'SF Atarian System', 'Super Ultra 911', 'Turntablz BB']
 for i in range(0x0061, 0x007B):
     writer.process(unichr(i), outputDirAlphabet, str(i), False, specific_fonts)
-
+'''
 #GREEK
 outputDirAlphabet = "{0}/Greek".format(outputDir)
 specific_fonts = ['Alpha Beta', 'AlphaFlightSolidSmallCaps', 'Dark Side', 'DilleniaUPC', 'El Wonko', 'EucrosiaUPC', 'FreesiaUPC', 'Garuda', 'Hack & Slash', 'IrisUPC', 'JasmineUPC', 'Kinnari', 'KodchiangUPC', 'Loma', 'Microsoft PhagsPa', 'Plantagenet Cherokee', 'Umpush', 'Waree', 'AlphaFlightSolidSmallCaps-Regular', 'Cardo', 'Hnias', 'PalatinoLinotype',  ]
@@ -232,6 +232,7 @@ outputDirAlphabet = "{0}/Runic".format(outputDir)
 specific_fonts = ['Segoe UI Symbol', 'FreeMono-Medium', 'Hnias', 'Code2000', 'EversonMonoUnicode', 'Junicode', 'Quivira']
 for i in range(0x16A0, 0x16F1):
     writer.process(unichr(i), outputDirAlphabet, str(i), True, specific_fonts)
+'''
 '''
 TODO RUNIC RANGE:     odebrat (16EB - 16ED), 
 	  GREGORIAN RANGE: oderat 10C6, (10C8 - 10CC), 10CE, 10CF

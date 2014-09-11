@@ -45,8 +45,6 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 	vector<Point> hull;
 	convexHull( contour, hull );
 
-	ignoreAngle = 0;
-
 	int topMost = 0;
 	int bottomMost = 0;
 	for(int i=0;i<hull.size();i++)

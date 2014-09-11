@@ -48,7 +48,6 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Mat* debugImage)
 {
 	memset (hist, 0, 180 * sizeof(double));
-	this->ignoreAngle = 0;
 
 	std::vector<cv::Point>& contour = contourOrig;
 	if(doConvexHull){

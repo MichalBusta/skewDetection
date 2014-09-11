@@ -25,6 +25,7 @@
 #	include <omp.h>
 #endif
 
+bool doBestPossible = false;
 
 namespace cmp
 {
@@ -59,8 +60,11 @@ void SkewEvaluator::evaluate( const std::string& evalDir )
 {
 
 	//add best possible detector
-	detectorNames.push_back("BestPossible");
-	detectorCaptions.push_back("Best Possible");
+	if(doBestPossible)
+	{
+		detectorNames.push_back("BestPossible");
+		detectorCaptions.push_back("Best Possible");
+	}
 
 	std::vector<std::string> facesDir = IOUtils::GetDirectoriesInDirectory(evalDir, "*", true);
 	//for all alphabets
@@ -204,7 +208,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			{
 				isWorst = 1;
 			}
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex, isWorst) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex, isWorst, def.skewAngle) );
 
 			results.back().measure1 = detectors[i]->probMeasure1;
 			results.back().measure2 = detectors[i]->probMeasure2;
@@ -287,9 +291,12 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 		{
 			isBestWorst = 1;
 		}
-		results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex, isBestWorst) );
-		if( fabs(bestAngleDiff) > ANGLE_MIN)
-			bestResults.push_back(bestResult);
+		if(doBestPossible)
+		{
+			results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex, isBestWorst, def.skewAngle) );
+			if( fabs(bestAngleDiff) > ANGLE_MIN)
+				bestResults.push_back(bestResult);
+		}
 
 		if( debug )
 		{
@@ -367,7 +374,7 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 			{
 				isWorst = 1;
 			}
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex, isWorst) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex, isWorst, def.skewAngle) );
 
 			results.back().measure1 = 0;
 			results.back().measure2 = 0;
@@ -494,7 +501,7 @@ void SkewEvaluator::writeResults()
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 			alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
 		}
-		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << "," << results[i].isWorst << std::endl;
+		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << "," << results[i].isWorst << ',' << results[i].letter << "," << std::endl;
 	}
 	out_csv.close();
 	//Writing the report
@@ -936,6 +943,20 @@ void SkewEvaluator::writeResults()
 void SkewEvaluator::generateDistortions(cv::Mat& source,
 		std::vector<SkewDef>& distortions)
 {
+
+	if(false)
+	{
+		float angleD = -20;
+		double angleRad = angleD * M_PI / 180;
+		double y= tan (angleRad);
+		cv::Mat transformed;
+		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
+		affineTransform.at<float>(0, 1) = y;
+		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+
+		distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
+		return;
+	}
 	int x;
 	float y;
 	float min = -40;
@@ -954,6 +975,21 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
 
 		distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
+	}
+
+	if(false)
+	{
+		for(x=-40;x<=40;x=x+10)
+		{
+			double angleRad = x * M_PI / 180;
+			y= tan (angleRad);
+			cv::Mat transformed;
+			cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
+			affineTransform.at<float>(0, 1) = y;
+			cv::warpAffine(source, transformed, affineTransform, cv::Size(source.cols * 2, source.rows * 2), cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+
+			distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
+		}
 	}
 }
 

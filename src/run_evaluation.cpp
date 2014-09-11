@@ -52,7 +52,7 @@ int main( int argc, char **argv)
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, false), "LeftHullLongest" );
 	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge", "Longest Edge" );
 	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom", "Vertical Dominant" );
-	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess", "Non-Maximum Suppression" );
+	//evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess", "Non-Maximum Suppression" );
 
 	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
 	//evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 38, 3), "VerticalDom-38" );

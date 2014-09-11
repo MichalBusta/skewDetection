@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include <math.h>
+#include <cmath>
 
 #include "SkewDetection.h"
 
@@ -59,19 +60,21 @@ struct EvaluationResult
 
 	double probability;
 
+	double gtAngle;
+
 	int isWorst;
 
 
-	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex, int isWorst)
+	EvaluationResult(double angleDiff, std::string alphabet, std::string letter, int classificator, size_t imageId, size_t faceIndex, int isWorst, double gtAngle)
     :
 			angleDiff(angleDiff), alphabet(alphabet), letter(letter),classificator(classificator), imageId(imageId), faceIndex(faceIndex),
-			measure1(0.0), measure2(0.0), probability(0.0), isWorst(isWorst)
+			measure1(0.0), measure2(0.0), probability(0.0), isWorst(isWorst),  gtAngle(gtAngle)
     {
         
 	}
 	;
 	
-	EvaluationResult() : angleDiff(0), measure1(0.0), measure2(0.0), classificator(-1), faceIndex(0), imageId(0), probability(0), isWorst(0) { };
+	EvaluationResult() : angleDiff(0), measure1(0.0), measure2(0.0), classificator(-1), faceIndex(0), imageId(0), probability(0), isWorst(0), gtAngle(0) { };
 
 	static bool SortByAbsAngleDiff(const EvaluationResult& obj1, const EvaluationResult& obj2)
 	{
