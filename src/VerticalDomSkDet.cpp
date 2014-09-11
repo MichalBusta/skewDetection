@@ -39,7 +39,6 @@ VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int s
 	probabilities.push_back(0.95);
 
 	borderForVis = 5;
-
 }
 
 VerticalDomSkDet::~VerticalDomSkDet() {
