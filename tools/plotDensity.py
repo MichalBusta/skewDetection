@@ -55,31 +55,41 @@ def init_plotting():
     plt.gca().xaxis.set_ticks_position('bottom')
     plt.gca().yaxis.set_ticks_position('left')
     
-def draw_evaluation(data_dir):
+
+def plotPDF(det_data, output_file):
     
-    detector_results = genfromtxt('{0}/{1}'.format(data_dir, 'results.csv'), delimiter=',', skip_header=0)
-    mask_vertical = detector_results[:, 0] == 3 
-    vert = detector_results[mask_vertical, :]
-    
-    #with sns.axes_style("white"):
-    #    grid = sns.jointplot(vert[:, 1], vert[:, 4], kind="hex", stat_func = None);
-    #plt.show()
-    correct = np.abs(vert[:, 1]) <= (3 * math.pi / 180)
-    to_hist_corr = vert[correct, 4]
-    hist_corr, bin_edges = np.histogram(to_hist_corr, bins=10)
-    hist_all,  be = np.histogram(vert[:, 4], bins=bin_edges)
+    correct = np.abs(det_data[:, 1]) <= (3 * math.pi / 180)
+    to_hist_corr = det_data[correct, 4]
+    bins  = 20
+    hist_corr, bin_edges = np.histogram(to_hist_corr, bins=bins)
+    hist_all,  be = np.histogram(det_data[:, 4], bins=bin_edges)
     his = hist_corr / hist_all.astype(np.float)
     
-    plt.plot(be[0:10], his)
+    plt.plot(be[0:bins], his)
     plt.rc('text', usetex=True)
     plt.xlabel(r'P($\hat{ \alpha }$)')
     plt.ylabel("Correct Classifications in $\%$")
     #plt.plot(vert[:, 1], vert[:, 4], 'o')
     plt.grid(True)
     plt.subplots_adjust(bottom=0.25)
-    plt.savefig('/tmp/VerticalDomPDF.eps')
-    plt.close()
+    plt.savefig(output_file)
+    plt.close()    
+
+def draw_evaluation(data_dir):
     
+    detector_results = genfromtxt('{0}/{1}'.format(data_dir, 'results.csv'), delimiter=',', skip_header=0)
+    mask_vertical = detector_results[:, 0] == 3 
+    vert = detector_results[mask_vertical, :]
+    
+    mask_verticalch = detector_results[:, 0] == 5 
+    vertch = detector_results[mask_verticalch, :]
+    
+    #with sns.axes_style("white"):
+    #    grid = sns.jointplot(vert[:, 1], vert[:, 4], kind="hex", stat_func = None);
+    #plt.show()
+    
+    plotPDF(vert, '/tmp/VerticalDomPDF.eps')
+    plotPDF(vertch, '/tmp/VerticalDomCHPDF.eps')
 
     fig, ax = plt.subplots()
     fig.set_size_inches(8, 4)
@@ -127,7 +137,7 @@ def draw_detectors_dependence(data_dir):
     entries.append(('correlationTable_TopBottomCenter_VerticalDom.csv', 'Symmetric Glyph', 'Vertical Dominant'))
     entries.append(('correlationTable_VerticalDom_VertDomCH.csv', 'Vertical Dominant', 'Vertical Dominant on Convex Hull'))
     
-    max_val = 40
+    #max_val = 40
     
     for pair_def in entries: 
     
@@ -137,26 +147,28 @@ def draw_detectors_dependence(data_dir):
         x = np.abs(x)
         x = x * 180 / math.pi
         x = x.astype(np.int)
-        x[x > max_val] = max_val
+        #x[x > max_val] = max_val
         y = my_data[:, 1]
         y = np.abs(y)
         y = y * 180 / math.pi
         y = y.astype(np.int)
-        y[y > max_val] = max_val
+        #y[y > max_val] = max_val
         fig = plt.figure()
         fig.set_size_inches(6, 4)
         ax = plt.gca()
-        ax.set_axis_bgcolor('#fffdc6')
-        plt.hist2d(x, y, bins=max_val, norm=LogNorm(), cmap="YlOrRd")
+        #ax.set_axis_bgcolor('#fffdc6')
+        plt.hist2d(x, y, bins=40, norm=LogNorm(), cmap="YlOrRd")
         plt.colorbar()
         plt.xlabel(pair_def[1])
         plt.ylabel(pair_def[2])
         plt.subplots_adjust(bottom=0.15)
+        plt.savefig('/tmp/{0}.eps'.format(pair_def[0]), format='eps')
+        
         #with sns.axes_style("white"):
-        #    grid = jointplot(x, y, kind="hex", stat_func = None, xlim=(-0.1, 20), ylim=(-0.1, 20));
+        #    grid = sns.jointplot(x, y, kind="hex", stat_func = None, xlim=(-0.1, 20), ylim=(-0.1, 20));
         #    grid.set_axis_labels(pair_def[1], pair_def[2])
         
-        plt.savefig('/tmp/{0}.eps'.format(pair_def[0]), format='eps')
+        
         #plt.show()
 
 def plotWordsLength():
@@ -227,11 +239,11 @@ if __name__ == '__main__':
     init_plotting()
     
     data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts3'
-    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/12Run'
+    #data_dir = '/datagrid/personal/TextSpotter/SkewDetection/14Run'
     #data_dir = '/tmp/11Run'
     #plotWordsLength()
-    draw_evaluation(data_dir)
-    #draw_detectors_dependence(data_dir)
+    #draw_evaluation(data_dir)
+    draw_detectors_dependence(data_dir)
     
     
         

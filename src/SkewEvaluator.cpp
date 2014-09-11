@@ -888,9 +888,7 @@ void SkewEvaluator::writeResults()
 		detResults[er.classificator].push_back(er);
 
 	}
-
 	//create detector pairs
-
 	pairedDetectors = 0;
 
 	for (int i = 0; i<classMap.size(); i++) {
@@ -907,20 +905,14 @@ void SkewEvaluator::writeResults()
 	//writing the table as a csv file
 
 	for (int i=0; i<detPairs.size(); i++) {
-
-
 		//open&create the file
 		std::fstream correlationTable;
 		std::ostringstream os;
 		os << outputDirectory << "/correlationTable"<<"_" << detectorNames[detPairs[i].first] << "_" << detectorNames[detPairs[i].second] <<".csv";
 		correlationTable.open(os.str().c_str(), std::fstream::out);
-
 		//write column titles
-
 		correlationTable << detectorNames[detPairs[i].first] <<"," <<detectorNames[detPairs[i].second]<< "\n";
-
 		//writing the data
-
 		for (int idx =0; idx < detResults[detPairs[i].first].size(); idx++) {
 
 			correlationTable << fabs(detResults[detPairs[i].first][idx].angleDiff)<< ",";
@@ -946,9 +938,15 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 {
 	int x;
 	float y;
-	for(x=-40;x<=40;x=x+10)
+	float min = -40;
+	float max = 40;
+	for(int i = 0; i < 10; i++ )
 	{
-		double angleRad = x * M_PI / 180;
+		float r = (float)rand() / (float)RAND_MAX;
+		float angleD =  min + r * (max - min);
+
+
+		double angleRad = angleD * M_PI / 180;
 		y= tan (angleRad);
 		cv::Mat transformed;
 		cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
