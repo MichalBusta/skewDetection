@@ -25,12 +25,12 @@
 #	include <omp.h>
 #endif
 
-bool doBestPossible = false;
+bool doBestPossible = true;
 
 namespace cmp
 {
 
-SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug, bool writeImages ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0), writeImages( writeImages )
+SkewEvaluator::SkewEvaluator( std::string outputDirectory, bool debug, bool writeImages, int distAngleMethod ) : outputDirectory(outputDirectory), debug( debug ), nextImageId(0), writeImages( writeImages ), distAngleMethod(distAngleMethod)
 {
 	if(!IOUtils::PathExist(outputDirectory))
 	{
@@ -191,6 +191,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 	{
 		SkewDef& def = distortions[j];
 		double bestAngleDiff = M_PI;
+		double bestAngle = M_PI;
 		EvaluationResult bestResult;
 #pragma omp parallel for
 		for(int i = 0; i < (int) detectors.size(); i++ )
@@ -208,7 +209,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			{
 				isWorst = 1;
 			}
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex, isWorst, def.skewAngle) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, i, def.imageId, faceIndex, isWorst, def.skewAngle, detectedAngle) );
 
 			results.back().measure1 = detectors[i]->probMeasure1;
 			results.back().measure2 = detectors[i]->probMeasure2;
@@ -217,6 +218,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 			if( fabs(angleDiff) <  fabs(bestAngleDiff) )
 			{
 				bestAngleDiff = angleDiff;
+				bestAngle = detectedAngle;
 				bestResult = results.back();
 			}
 
@@ -293,7 +295,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
 		}
 		if(doBestPossible)
 		{
-			results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex, isBestWorst, def.skewAngle) );
+			results.push_back( EvaluationResult(bestAngleDiff, alphabet, letter, detectorNames.size() - 1, def.imageId, faceIndex, isBestWorst, def.skewAngle, bestAngle) );
 			if( fabs(bestAngleDiff) > ANGLE_MIN)
 				bestResults.push_back(bestResult);
 		}
@@ -374,7 +376,7 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 			{
 				isWorst = 1;
 			}
-			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex, isWorst, def.skewAngle) );
+			results.push_back( EvaluationResult(angleDiff, alphabet, letter, k, def.imageId, faceIndex, isWorst, def.skewAngle, detectedAngle) );
 
 			results.back().measure1 = 0;
 			results.back().measure2 = 0;
@@ -470,6 +472,9 @@ void SkewEvaluator::writeResults()
 	std::map<int, double> sumCorrectLetterPercent;
 	std::vector<MeasuresHist> detectorMeasures;
 
+	std::map<std::string, int> alphabetNamesMap;
+	int alphabetIdx = 0;
+
 	if(results.size() == 0)
 	{
 		//TODO write somethin to out html
@@ -501,7 +506,14 @@ void SkewEvaluator::writeResults()
 			resMap[ results[i].classificator ][ results[i].alphabet ][ results[i].letter ].correctClassCont++;
 			alphabetMap[ results[i].classificator ][ results[i].alphabet ].correctClassCont++;
 		}
-		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << "," << results[i].isWorst << ',' << results[i].letter << "," << std::endl;
+
+		if(alphabetNamesMap.find(results[i].alphabet) == alphabetNamesMap.end())
+		{
+			alphabetNamesMap[results[i].alphabet] = alphabetIdx++;
+		}
+		int alphaIdx = alphabetNamesMap[results[i].alphabet];
+
+		out_csv << results[i].classificator << "," << results[i].angleDiff << ","<< results[i].measure1 << "," << results[i].measure2 << "," << results[i].probability << "," << results[i].isWorst << ',' << results[i].letter << "," << results[i].faceIndex << ',' << results[i].estimAngle << ',' << results[i].gtAngle << "," << alphaIdx << std::endl;
 	}
 	out_csv.close();
 	//Writing the report
@@ -944,7 +956,7 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		std::vector<SkewDef>& distortions)
 {
 
-	if(false)
+	if(distAngleMethod == 0)
 	{
 		float angleD = -20;
 		double angleRad = angleD * M_PI / 180;
@@ -957,6 +969,8 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 		distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
 		return;
 	}
+	if(distAngleMethod == 1)
+	{
 	int x;
 	float y;
 	float min = -40;
@@ -976,13 +990,14 @@ void SkewEvaluator::generateDistortions(cv::Mat& source,
 
 		distortions.push_back( SkewDef( - angleRad, transformed, nextImageId++) );
 	}
+	}
 
-	if(false)
+	if(distAngleMethod == 2)
 	{
-		for(x=-40;x<=40;x=x+10)
+		for(int x=-40;x<=40;x=x+10)
 		{
 			double angleRad = x * M_PI / 180;
-			y= tan (angleRad);
+			float y= tan (angleRad);
 			cv::Mat transformed;
 			cv::Mat affineTransform = cv::Mat::eye(2, 3, CV_32F);
 			affineTransform.at<float>(0, 1) = y;

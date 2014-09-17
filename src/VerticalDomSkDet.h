@@ -14,7 +14,7 @@ namespace cmp{
 
 	class VerticalDomSkDet : public ContourSkewDetector {
 	public:
-		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.022, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
+		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.014, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
 		virtual ~VerticalDomSkDet();
 
 		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);

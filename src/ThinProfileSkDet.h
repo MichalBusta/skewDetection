@@ -29,7 +29,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.018, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.023, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02);
 
 	virtual ~ThinProfileSkDet();
 

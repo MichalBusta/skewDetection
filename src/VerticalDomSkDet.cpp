@@ -49,16 +49,17 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 {
 	memset (hist, 0, 180 * sizeof(double));
 
-	std::vector<cv::Point>& contour = contourOrig;
-	if(doConvexHull){
-		std::vector<cv::Point> chull;
-		cv::convexHull(contour, chull);
-		contour = chull;
+	std::vector<cv::Point> wcont;
+	std::vector<cv::Point>* contour = &contourOrig;
+	if(doConvexHull)
+	{
+		cv::convexHull(*contour, wcont);
+		contour = &wcont;
 	}
 
-	cv::Point prev = contour.back();
+	cv::Point prev = (*contour).back();
 	double maxHistVal = 0;
-	for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
+	for(std::vector<cv::Point>::iterator it = (*contour).begin(); it < (*contour).end(); )
 	{
 		cv::Point pt = *it;
 		cv::Point vector = pt - prev;
@@ -67,7 +68,7 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 		if (angle >= 180) angle -= 180;
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
-		int ang = angle;
+		int ang = round(angle);
 		//ignoreAngle = 0;
 		//hist[ang] = hist[ang] + length;
 		//if (hist[ang] > hist[highestCol]) highestCol = ang;
@@ -149,44 +150,53 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 			int rectH = norm * hist[i];
 			cv::rectangle(histogram, Rect(i, height-rectH, 1, rectH), Scalar(0,0,255), CV_FILLED);
 		}
+		cv::rectangle(histogram, Rect(0, height - 1, 180, 1), Scalar(0,0,0), CV_FILLED);
 
 
 		Mat& drawing =  *debugImage;
-		cv::Rect bbox = cv::boundingRect(contour);
+		cv::Rect bbox = cv::boundingRect((*contour));
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis*2, bbox.width*scalefactor+borderForVis*2, CV_8UC3 ) + cv::Scalar(255, 255, 255);
 
 		Scalar color = Scalar( 0, 0, 0 );
 		std::vector<std::vector<cv::Point> > contours;
-		contours.push_back(contour);
+		contours.push_back((*contour));
 
 		int miny = INT_MAX;
 		int minx = INT_MAX;
 		//get contour max
-		for (size_t i=0; i<contour.size(); i++) {
-			miny = MIN(contour[i].y, miny);
-			minx = MIN(contour[i].x, minx);//  borderForVis / 2;
+		for (size_t i=0; i<(*contour).size(); i++) {
+			miny = MIN((*contour)[i].y, miny);
+			minx = MIN((*contour)[i].x, minx);//  borderForVis / 2;
 		}
 
 		minx -= 2;
 		miny -= 2;
 
-		for (size_t i = 0; i < contour.size(); i++)
+		if(doConvexHull)
 		{
-			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
+			for (size_t i = 0; i < contourOrig.size(); i++)
+			{
+				size_t i2 = (i==contourOrig.size()-1) ? 0 : i+1;
+				cv::line(drawing, cv::Point((contourOrig[i].x - minx)*scalefactor,(contourOrig[i].y - miny)*scalefactor), cv::Point((contourOrig[i2].x - minx)*scalefactor,(contourOrig[i2].y- miny)*scalefactor), color);
+			}
+		}
 
-			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 255, 0, 0 ), 2);
+		for (size_t i = 0; i < (*contour).size(); i++)
+		{
+			size_t i2 = (i==(*contour).size()-1) ? 0 : i+1;
+			cv::circle(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y - miny)*scalefactor), 2, Scalar( 255, 0, 0 ), 2);
+			cv::line(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y - miny)*scalefactor), cv::Point(((*contour)[i2].x - minx)*scalefactor,((*contour)[i2].y- miny)*scalefactor), color, 2);
 
-			cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), cv::Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), color);
-
-			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
+			double ang = atan2(double((*contour)[i2].y-(*contour)[i].y), double((*contour)[i2].x-(*contour)[i].x));
 			if (ang < 0) ang = ang + M_PI;
 			if (ang >= M_PI) ang -= M_PI;
 
 			if (fabs(ang - maxI * M_PI / 180.0) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y- miny)*scalefactor), Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), Scalar( 29, 207, 34 ), 2);
+				cv::line(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y- miny)*scalefactor), Point(((*contour)[i2].x - minx)*scalefactor,((*contour)[i2].y- miny)*scalefactor), Scalar( 29, 207, 34 ), 2);
 			}
 		}
+
 		std::vector<cv::Mat> imagesToMerge;
 		imagesToMerge.push_back(drawing);
 		imagesToMerge.push_back(histogram);
@@ -203,17 +213,17 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
 {
 	memset (hist, 0, 180 * sizeof(double));
-	std::vector<cv::Point>& contour = contourOrig;
+	std::vector<cv::Point> wcont;
+	std::vector<cv::Point>* contour = &contourOrig;
 	if(doConvexHull)
 	{
-		std::vector<cv::Point> chull;
-		cv::convexHull(contour, chull);
-		contour = chull;
+		cv::convexHull(*contour, wcont);
+		contour = &wcont;
 	}
 
-	cv::Point prev = contour.back();
+	cv::Point prev = (*contour).back();
 	double maxHistVal = 0;
-	for(std::vector<cv::Point>::iterator it = contour.begin(); it < contour.end(); )
+	for(std::vector<cv::Point>::iterator it = (*contour).begin(); it < (*contour).end(); )
 	{
 		cv::Point pt = *it;
 		cv::Point vector = pt - prev;
@@ -222,7 +232,7 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 		if (angle >= 180) angle -= 180;
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
 
-		int ang = angle;
+		int ang = round(angle);
 		//hist[ang] = hist[ang] + length;
 		//if (hist[ang] > hist[highestCol]) highestCol = ang;
 
@@ -305,34 +315,34 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 
 
 		Mat& drawing =  *debugImage;
-		cv::Rect bbox = cv::boundingRect(contour);
+		cv::Rect bbox = cv::boundingRect(*contour);
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
 
 		Scalar color = Scalar( 255, 255, 255 );
 		std::vector<std::vector<cv::Point> > contours;
-		contours.push_back(contour);
+		contours.push_back(*contour);
 
 		int miny = INT_MAX;
 		int minx = INT_MAX;
 		//get contour max
-		for (size_t i=0; i<contour.size(); i++) {
-			miny = MIN(contour[i].y, miny);
-			minx = MIN(contour[i].x, minx);
+		for (size_t i=0; i<(*contour).size(); i++) {
+			miny = MIN((*contour)[i].y, miny);
+			minx = MIN((*contour)[i].x, minx);
 		}
 
-		for (size_t i = 0; i < contour.size(); i++)
+		for (size_t i = 0; i < (*contour).size(); i++)
 		{
-			size_t i2 = (i==contour.size()-1) ? 0 : i+1;
+			size_t i2 = (i==(*contour).size()-1) ? 0 : i+1;
 
-			cv::circle(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
+			cv::circle(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
 
-			cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y - miny)*scalefactor), cv::Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), color);
+			cv::line(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y - miny)*scalefactor), cv::Point(((*contour)[i2].x - minx)*scalefactor,((*contour)[i2].y- miny)*scalefactor), color);
 
-			double ang = atan2(double(contour[i2].y-contour[i].y), double(contour[i2].x-contour[i].x));
+			double ang = atan2(double((*contour)[i2].y-(*contour)[i].y), double((*contour)[i2].x-(*contour)[i].x));
 			if (ang < 0) ang = ang + M_PI;
 			if (fabs(ang) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, cv::Point((contour[i].x - minx)*scalefactor,(contour[i].y- miny)*scalefactor), Point((contour[i2].x - minx)*scalefactor,(contour[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
+				cv::line(drawing, cv::Point(((*contour)[i].x - minx)*scalefactor,((*contour)[i].y- miny)*scalefactor), Point(((*contour)[i2].x - minx)*scalefactor,((*contour)[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
 			}
 		}
 		std::vector<cv::Mat> imagesToMerge;

@@ -255,13 +255,13 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect(contour);
-		drawing =  Mat::zeros( scalefactor*bbox.height+brd, scalefactor*bbox.width+brd, CV_8UC3 );
+		drawing =  Mat::zeros( scalefactor*bbox.height+brd, scalefactor*bbox.width+brd, CV_8UC3 ) + cv::Scalar(255, 255, 255);
 
 
-		double minY = bbox.y;
-		double minX = bbox.x;
+		double minY = bbox.y - 1;
+		double minX = bbox.x - 1;
 
-		Scalar color = Scalar( 255, 255, 255 );
+		Scalar color = Scalar( 0, 0, 0 );
 		std::vector<std::vector<cv::Point> > contours;
 		contours.push_back(contour);
 
@@ -319,13 +319,16 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* d
 		resVector.y *= scalefactor;
 
 		drawContours( drawing, contours, 0, color, 1, 8);
+		std::vector<std::vector<cv::Point> > contoursHull;
+		contoursHull.push_back(hull);
+		drawContours( drawing, contoursHull, 0, cv::Scalar(255, 128, 0), 1, 8);
 
 		//cmp::filterContour(contours[0]);
 
 		// drawing the thinnest profile
 		for(int i=0;i<hull.size();i++)
 		{
-			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 255 ), 2);
+			cv::circle(drawing, hull[i], 2, Scalar( 255, 0, 0 ), 2);
 		}
 		cv::line(drawing, resPoint-resVector*100, resPoint+resVector*100, Scalar( 0, 0, 255 ), 2);
 		cv::line(drawing, resPoint2-resVector*100, resPoint2+resVector*100, Scalar( 0, 0, 255 ), 2);

@@ -101,7 +101,7 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 	if(this->epsilon > 0)
 	{
 		cv::Rect rect= cv::boundingRect(outerContour);
-		int size = MIN(rect.width, rect.height);
+		int size = rect.height;
 		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
 		approxPolyDP(outerContour, apCont, absEpsilon, true);
@@ -158,7 +158,7 @@ void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, s
 	if(this->epsilon > 0)
 	{
 		cv::Rect rect= cv::boundingRect(outerContour);
-		int size = MIN(rect.width, rect.height);
+		int size = rect.height;
 		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
 		approxPolyDP(outerContour, apCont, absEpsilon, true);
@@ -180,7 +180,7 @@ void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, 
 	if(this->epsilon > 0)
 	{
 		cv::Rect rect= cv::boundingRect(outerContour);
-		int size = MIN(rect.width, rect.height);
+		int size = rect.height;
 		double absEpsilon = epsilon * size;
 		std::vector<cv::Point> apCont;
 		approxPolyDP(outerContour, apCont, absEpsilon, true);

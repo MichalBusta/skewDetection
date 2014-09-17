@@ -3,6 +3,8 @@ import os
 import sys, getopt
 from xml.dom.minidom import Document
 
+import numpy as np
+
 class FontTestWriter:
     'The font test suite writer'
     
@@ -13,13 +15,15 @@ class FontTestWriter:
     
     
  
-    def __init__(self, fontDirs):
+    def __init__(self, fontDirs, outputDir):
         
+        self.outputDir = outputDir
         #self.getFonts('/usr/share/fonts/truetype')
         #self.getFonts('/home/busta/data/cvut/textspotter/fonts')
         #self.getFonts('C:/SkewDetection/fonts')
         for fDir in fontDirs:
             self.getFonts(fDir)
+        
         
     
     def getFonts(self, startDir):
@@ -51,6 +55,38 @@ class FontTestWriter:
                 self.fonts.append(font)
                 self.capitals.append(capitals)
                 
+                fontName = font.getname()[0]
+                if fontName == 'NanumGothicCoding':
+                    fontName = 'Nanum\nGothic'
+                elif fontName == 'Alfa Slab One':
+                    fontName = 'Alfa\nSlab'
+                elif fontName == 'Stint Ultra Expanded':
+                    fontName = 'Stint Ultra\n Expanded'
+                elif fontName == 'Abril Fatface':
+                    fontName = 'Abril\nFatface'
+                elif fontName == 'Droid Serif':
+                    fontName = 'Droid\nSerif'                        
+                
+                im = Image.new("RGB", (20, 80))
+                draw = ImageDraw.Draw(im)
+                
+                split = fontName.split("\n")
+                w, h = draw.textsize(split[0], font=font)
+                if len(split) > 1:
+                    w2, h2 = draw.textsize(split[1], font=font)
+                    h = 2 * h
+                    w = max( (w, w2) ) 
+                im = Image.new("RGB", (w+30, h + 80),  (255,)*3)
+                draw = ImageDraw.Draw(im)
+                
+                draw.text((20, 20), split[0], font=font, fill="#000000")
+                if len(split) > 1:
+                    draw.text((20, h), split[1], font=font, fill="#000000")
+                imageName = fontName.replace('\n', '')
+                imageName = imageName.replace(' ', '')
+                imageFile = '{0}/{1}-{2}.png'.format(self.outputDir, imageName, len(self.fonts))
+                im.save(imageFile)
+                
 
     def writeSentence(self, text, outputDir, chrName, font, capital):
     
@@ -58,7 +94,8 @@ class FontTestWriter:
         draw = ImageDraw.Draw(im)
     
         w, h = draw.textsize(text, font=font)
-        im = Image.new("RGB", (w+30, h+40),  (255,)*3)
+        w2, h = draw.textsize('I', font=font)
+        im = Image.new("RGB", (w+30, h+60),  (255,)*3)
         draw = ImageDraw.Draw(im)
         draw.text((20, 20), text, font=font, fill="#000000")
   
@@ -85,7 +122,7 @@ class FontTestWriter:
         if im.size[1] < 2:
             return 
             
-        im2 = Image.new("RGB", (w+30, h+40),  (0,)*3)
+        im2 = Image.new("RGB", (w+30, h+60),  (0,)*3)
         draw2 = ImageDraw.Draw(im2)
         draw2.fontmode = "1"
         draw2.text((0, 0), text, font=font, fill="#FFFFFF")
@@ -122,7 +159,7 @@ class FontTestWriter:
                         
                 if frame and hide:
                     return
-                
+        #im.crop(bbox2)        
         im.save(imageFile)
         
     def process(self, text, outputDir, chrName, allowed = False, specific_fonts = None):
@@ -188,10 +225,10 @@ if len(fontDirs) == 0:
     print 'generateFontsEavaluationPage.py -f <fontDir> -o <outputDir>'
     sys.exit(2)
 
-writer = FontTestWriter(fontDirs)
-
 if not os.path.exists(outputDir):
     os.mkdir( outputDir )
+    
+writer = FontTestWriter(fontDirs, outputDir)
   
 #LATIN     
 outputDirAlphabet = "{0}/Latin".format(outputDir)

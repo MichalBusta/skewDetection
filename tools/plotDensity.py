@@ -10,8 +10,6 @@ import pandas as pd
 from scipy import stats
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import seaborn as sns
-from distributions import jointplot
 import math
 
 import cv2
@@ -56,40 +54,129 @@ def init_plotting():
     plt.gca().yaxis.set_ticks_position('left')
     
 
-def plotPDF(det_data, output_file):
+def plotPDF(det_data, det_data2, output_file):
     
+    fig, ax = plt.subplots(figsize=(6,6))
     correct = np.abs(det_data[:, 1]) <= (3 * math.pi / 180)
     to_hist_corr = det_data[correct, 4]
-    bins  = 20
+    bins  = 10
     hist_corr, bin_edges = np.histogram(to_hist_corr, bins=bins)
     hist_all,  be = np.histogram(det_data[:, 4], bins=bin_edges)
-    his = hist_corr / hist_all.astype(np.float)
+    his = hist_corr / hist_all.astype(np.float) * 100
     
-    plt.plot(be[0:bins], his)
+    rects1 = plt.plot(be[0:bins], his)
+    
+    
+    correct2 = np.abs(det_data2[:, 1]) <= (3 * math.pi / 180)
+    to_hist_corr2 = det_data2[correct2, 4]
+    hist_corr2, bin_edges2 = np.histogram(to_hist_corr2, bins=bins)
+    hist_all2,  be2 = np.histogram(det_data2[:, 4], bins=bin_edges2)
+    his2 = hist_corr2 / hist_all2.astype(np.float) * 100
+    rects2 = plt.plot(be2[0:bins], his2, 'g')
+    
     plt.rc('text', usetex=True)
     plt.xlabel(r'P($\hat{ \alpha }$)')
     plt.ylabel("Correct Classifications in $\%$")
+    
+    plt.legend( (rects1[0], rects2[0]), ('Vertical Dominant', 'Vert. Dom. CHull'), bbox_to_anchor=(1.0, 0.2) )
+    
     #plt.plot(vert[:, 1], vert[:, 4], 'o')
-    plt.grid(True)
+    plt.grid(False)
     plt.subplots_adjust(bottom=0.25)
     plt.savefig(output_file)
-    plt.close()    
-
+    plt.close()  
+    
+def print_summary(data_dir):  
+    '''
+    '''
+    detector_results = genfromtxt('{0}/{1}'.format(data_dir, 'results.csv'), delimiter=',', skip_header=0)
+    detectors = np.unique(detector_results[:, 0]).astype(np.int)
+    scripts = np.unique(detector_results[:, 10]).astype(np.int)
+    
+    det_names = {}
+    det_names[0] = "VD"
+    det_names[1] = "VC"
+    det_names[2] = "LE"
+    det_names[3] = "TP"
+    det_names[4] = "SG"
+    det_names[5] = "NMS"
+    det_names[6] = "BP"
+    
+    script_names = {}
+    script_names[0] = 'Cyrillic'
+    script_names[1] = 'Georgian'
+    script_names[2] = 'Greek'
+    script_names[3] = 'Latin'
+    script_names[4] = 'Runnic'
+    
+    
+    f = open('/tmp/scripts.tex', 'w')
+    f.write('\\begin{tabular}')
+    f.write('{l|')
+    for script in scripts:
+        f.write('rr|')
+    f.write('rr}\n\\hline\n')
+    
+    f.write('Script:')
+    for script in scripts:
+        f.write('& \\multicolumn{{2}}{{l|}}{{{0}}}'.format(script_names[script]) )
+    f.write('& \\multicolumn{{2}}{{l}}{{{0}}}'.format('All') )
+    f.write('\\\\\n')
+    
+    f.write('Estim. ')
+    for script in scripts:
+        f.write('& Corr \\% & $\\sigma [^{\circ}]$')
+    f.write('& Corr \\% & $\\sigma [^{\circ}]$')
+    f.write('\\\\\\hline\n')    
+    
+    for det in detectors:
+        det_mask = detector_results[:, 0] == det
+        det_results_all = detector_results[det_mask, :]
+        f.write('{0}'.format(det_names[det]))
+        
+        for script in scripts:
+             
+            script_mask = det_results_all[:, 10] == script
+            results_sc = det_results_all[script_mask, :]
+            
+            angles_diff = results_sc[:, 8] - results_sc[:, 9];
+            angles_diff_deg = angles_diff * 180 / math.pi
+            std_dev = np.std(angles_diff_deg)
+            correct_mask = np.abs(angles_diff) < (math.pi / 60)
+            correct = np.count_nonzero(correct_mask)
+            
+            f.write('& {0:0.1f} & {1:0.1f} '.format( correct / float(angles_diff.shape[0]) * 100, std_dev ) )
+            
+        angles_diff_det = det_results_all[:, 8] - det_results_all[:, 9];
+        angles_diff_det_deg = angles_diff_det * 180 / math.pi   
+        std_det_dev = np.std(angles_diff_det_deg)
+        correct_mask = np.abs(angles_diff_det) < (math.pi / 60)
+        correct = np.count_nonzero(correct_mask)
+        
+        f.write('& {0:0.1f} & {1:0.1f} '.format( correct / float(angles_diff_det.shape[0]) * 100, std_det_dev ) )
+            
+        f.write('\\\\\n')
+        if det == 4:
+            f.write('\\hline\n')
+            
+    f.write('\\end{tabular}')
+    
+    
+    
 def draw_evaluation(data_dir):
     
     detector_results = genfromtxt('{0}/{1}'.format(data_dir, 'results.csv'), delimiter=',', skip_header=0)
-    mask_vertical = detector_results[:, 0] == 3 
+    mask_vertical = detector_results[:, 0] == 0 
     vert = detector_results[mask_vertical, :]
     
-    mask_verticalch = detector_results[:, 0] == 5 
+    mask_verticalch = detector_results[:, 0] == 1 
     vertch = detector_results[mask_verticalch, :]
     
     #with sns.axes_style("white"):
     #    grid = sns.jointplot(vert[:, 1], vert[:, 4], kind="hex", stat_func = None);
     #plt.show()
     
-    plotPDF(vert, '/tmp/VerticalDomPDF.eps')
-    plotPDF(vertch, '/tmp/VerticalDomCHPDF.eps')
+    plotPDF(vert, vertch,  '/tmp/VerticalDomPDF.eps')
 
     fig, ax = plt.subplots()
     fig.set_size_inches(8, 4)
@@ -97,8 +184,6 @@ def draw_evaluation(data_dir):
     #plot weak detectors
     overview = genfromtxt('{0}/{1}'.format(data_dir, 'overview.csv'), delimiter=',', names=True, dtype=np.float)
     overview2 = genfromtxt('{0}/{1}'.format(data_dir, 'overview.csv'), delimiter=',', skip_header=1, dtype=np.float)
-    
-    
     
     ind = np.arange(len(overview[0]))
     ind[ind.shape[0] - 2] += 0.5 
@@ -137,7 +222,7 @@ def draw_detectors_dependence(data_dir):
     entries.append(('correlationTable_TopBottomCenter_VerticalDom.csv', 'Symmetric Glyph', 'Vertical Dominant'))
     entries.append(('correlationTable_VerticalDom_VertDomCH.csv', 'Vertical Dominant', 'Vertical Dominant on Convex Hull'))
     
-    #max_val = 40
+    max_val = 40
     
     for pair_def in entries: 
     
@@ -147,22 +232,22 @@ def draw_detectors_dependence(data_dir):
         x = np.abs(x)
         x = x * 180 / math.pi
         x = x.astype(np.int)
-        #x[x > max_val] = max_val
+        x[x > max_val] = max_val
         y = my_data[:, 1]
         y = np.abs(y)
         y = y * 180 / math.pi
         y = y.astype(np.int)
-        #y[y > max_val] = max_val
+        y[y > max_val] = max_val
         fig = plt.figure()
-        fig.set_size_inches(6, 4)
+        fig.set_size_inches(5, 4)
         ax = plt.gca()
         #ax.set_axis_bgcolor('#fffdc6')
-        plt.hist2d(x, y, bins=40, norm=LogNorm(), cmap="YlOrRd")
+        plt.hist2d(x, y, bins=35, norm=LogNorm(), cmap="YlOrRd")
         plt.colorbar()
-        plt.xlabel(pair_def[1])
-        plt.ylabel(pair_def[2])
+        plt.xlabel( '$|\\hat{{\\alpha}} - \\alpha_{{gen}}| $ {0}'.format(pair_def[1]))
+        plt.ylabel('$|\\hat{{\\alpha}} - \\alpha_{{gen}}| $ {0}'.format(pair_def[2]))
         plt.subplots_adjust(bottom=0.15)
-        plt.savefig('/tmp/{0}.eps'.format(pair_def[0]), format='eps')
+        plt.savefig('/tmp/{0}.eps'.format(pair_def[0][:-4]), format='eps')
         
         #with sns.axes_style("white"):
         #    grid = sns.jointplot(x, y, kind="hex", stat_func = None, xlim=(-0.1, 20), ylim=(-0.1, 20));
@@ -238,12 +323,14 @@ if __name__ == '__main__':
     
     init_plotting()
     
-    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts3'
+    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts4'
     #data_dir = '/datagrid/personal/TextSpotter/SkewDetection/14Run'
     #data_dir = '/tmp/11Run'
     #plotWordsLength()
     #draw_evaluation(data_dir)
-    draw_detectors_dependence(data_dir)
+    #data_dir = '/tmp/testRes'
+    print_summary(data_dir)
+    #draw_detectors_dependence(data_dir)
     
     
         

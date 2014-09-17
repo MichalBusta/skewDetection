@@ -113,9 +113,11 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 	float angle=0, angle2 = 0, deltaX=0, deltaY=0;
 	deltaX = TM.x - BM.x;
 	deltaY = BM.y - TM.y;
-	angle = atan((deltaX)*1.0/(deltaY));
+	if(deltaY != 0)
+		angle = atan((deltaX)*1.0/(deltaY));
 	float deltaX2 = (TLX2 + TRX2) / 2 - (BLX2 + BRX2) / 2;
-	angle2 = atan((deltaX2)*1.0/(deltaY));
+	if(deltaY != 0)
+		angle2 = atan((deltaX2)*1.0/(deltaY));
 	//uhel promenne angle je v radianech
 
 	if(debugImage != NULL)

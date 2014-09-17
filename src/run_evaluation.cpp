@@ -31,30 +31,29 @@ int main( int argc, char **argv)
 		return -1;
 	}
     
-	SkewEvaluator evaluator( argv[2], false, true );
+	SkewEvaluator evaluator( argv[2], false, true, 1 );
     
 	/** LR Longest Edge */
 	/**
      //evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, IGNORE_ANGLE, 0.005, false), "LF-0.005" );
      /** LR Longest Edge */
-	/**
-     for (double precision = 0.005; precision <= 0.4; precision += 0.005)
-     {
-     std::stringstream ignoreAngleToStr;
-     ignoreAngleToStr << precision;
-     evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.028, 1, precision), "L-"+ignoreAngleToStr.str() );
-     }
-    */
-
+	/*
+	SkewEvaluator evaluator( argv[2], false, false );
+	for (double epsilon = 0.00; epsilon <= 0.2; epsilon += 0.001)
+	{
+		std::stringstream ignoreAngleToStr;
+		ignoreAngleToStr << epsilon;
+		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, epsilon), "L-"+ignoreAngleToStr.str(), "L-"+ignoreAngleToStr.str() );
+	}
+	*/
+	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom", "Vertical Dominant" );
+	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.014, 3, 3, IGNORE_ANGLE, 3, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
+	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge", "Longest Edge" );
 	evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfile", "Thinnest Profile" );
 	evaluator.registerDetector(new CentersSkDet(), "TopBottomCenter", "Symmetric Glyph" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, true), "RightHullLongest" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, false), "LeftHullLongest" );
-	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge", "Longest Edge" );
-	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom", "Vertical Dominant" );
-	//evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess", "Non-Maximum Suppression" );
-
-	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
+	evaluator.registerDetector(new BestGuessSKDetector(), "BestGuess", "Non-Maximum Suppression" );
 	//evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 38, 3), "VerticalDom-38" );
 
 
