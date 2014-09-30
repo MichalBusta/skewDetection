@@ -31,7 +31,7 @@ BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon)
     weights.push_back(1.0);
     detectorNames.push_back("CentersSkDet");
 
-
+    /*
 	detectors.push_back( new ThinProfileSkDet() );
 	weights.push_back(0.5);
     detectorNames.push_back("ThinProfileSkDet");

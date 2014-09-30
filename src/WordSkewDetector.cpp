@@ -22,9 +22,9 @@ WordSkewDetector::~WordSkewDetector(){
 
 }
 
-ContourWordSkewDetector::ContourWordSkewDetector(cv::Ptr<ContourSkewDetector> detector) : WordSkewDetector()
+ContourWordSkewDetector::ContourWordSkewDetector() : WordSkewDetector()
 {
-	this->localDetector = detector;
+
 }
 
 ContourWordSkewDetector::~ContourWordSkewDetector()
@@ -34,49 +34,21 @@ ContourWordSkewDetector::~ContourWordSkewDetector()
 
 
 
-double ContourWordSkewDetector::detectSkew(std::vector<Blob1>& blobs, double lineK, cv::Mat* debugImage)
+double ContourWordSkewDetector::detectSkew(std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage)
 {
 
-	std::vector<double> probs;
-	std::vector<double> angles;
-	std::vector<int> detectorsIndex;
-	int noImg = blobs.size();
-	for (int i = 0; i<noImg; i++)
+	std::vector<std::vector<cv::Point>* > contours;
+	std::vector<std::vector<std::vector<cv::Point> > > contoursFound;
+	contoursFound.resize(blobs.size());
+	for (size_t i = 0; i< blobs.size(); i++)
 	{
-		angles.push_back(localDetector->detectSkew(blobs[i].mask, lineK, debugImage));
-		detectorsIndex.push_back(0);
-#ifdef VERBOSE
 
-cv::imshow("temp", *tempDebugPtr);
-cv::waitKey(0);
-#endif
-probs.push_back(localDetector->lastDetectionProbability);
+		/** find the contour */
+		std::vector<cv::Vec4i> hierarchy;
+		findContours( blobs[i].mask, contoursFound[i], hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, cv::Point(0, 0) );
+		contours.push_back( &contoursFound[i][0] );
 	}
-	double probability = 0;
-	return computeAngle(angles, probs, detectorsIndex, probability, debugImage);
+	return detectContoursSkew( contours, lineK, probability, debugImage );
 }
 
-double ContourWordSkewDetector::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage)
-{
-	std::vector<double> probs;
-	std::vector<double> angles;
-	std::vector<int> detectorsIndex;
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-#ifdef VERBOSE
-		cv::Mat tempDebug;
-		debugImage = &tempDebug;
-#endif
-		localDetector->getSkewAngles(*contours[i], angles, probs, detectorsIndex, debugImage);
-#ifdef VERBOSE
-		cv::imshow("temp", tempDebug);
-		cv::waitKey(0);
-#endif
-	}
-	double angle = computeAngle(angles, probs, detectorsIndex, probability, debugImage);
-#ifdef VERBOSE
-	std::cout << "Detected skew angle is: " << angle << " with prob.: " << probability << std::endl;
-#endif
-	return angle;
-}
-}
+}//namespace cmp

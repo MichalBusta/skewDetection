@@ -96,6 +96,8 @@ public:
 
 protected:
 
+	void approximateContour(std::vector<cv::Point>& contour, std::vector<cv::Point>& contourOut);
+
 	//@see cv::findContorurs
 	int approximatioMethod;
 	/** the constant in approximation method @see cv::approxPolyDP */

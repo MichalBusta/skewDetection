@@ -150,7 +150,8 @@ namespace cmp {
                     letters.push_back(words[i1][i2].letter);
                 }
                 assert(letters.size()==imgs.size());
-                angle=detectors[i]->detectSkew(imgs, 0.0, &debugImage);
+                double probability = 0;
+                angle= detectors[i]->detectSkew( imgs, 0.0, probability, &debugImage );
                 
                 angleDifference = angle-reference[idx];
                 

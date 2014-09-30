@@ -17,44 +17,42 @@
 
 namespace cmp{
 
-    struct Blob1{
-        
-        cv::Mat mask;
-        cv::Rect bBox;
-        
-        Blob1(cv::Mat mask, cv::Rect bBox = cv::Rect()){
-            this->mask = mask;
-            this->bBox = bBox;
-            
-        };
-    };
-    
-    class WordSkewDetector
-    {
-    public:
-        
-        WordSkewDetector();
-        virtual ~WordSkewDetector();
-        
-        virtual double detectSkew( std::vector<Blob1>& blobs, double lineK, cv::Mat* debugImage =NULL) = 0;
+struct Blob{
 
-    };
-    class ContourWordSkewDetector : public WordSkewDetector
-    {
-    public:
-        
-        ContourWordSkewDetector(cv::Ptr<ContourSkewDetector> detector);
-        virtual ~ContourWordSkewDetector();
-       
-        virtual double detectSkew( std::vector<Blob1>& blobs, double lineK, cv::Mat* debugImage =NULL);
-        
-        virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
+	cv::Mat mask;
+	cv::Rect bBox;
 
-    protected:
-        
-        cv::Ptr<ContourSkewDetector> localDetector;
-        
-        virtual double computeAngle(std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detectorsIndex, double& probability, cv::Mat* debugImage = NULL)=0;
-    };
+	Blob(cv::Mat mask, cv::Rect bBox = cv::Rect()){
+		this->mask = mask;
+		this->bBox = bBox;
+
+	};
+};
+
+class WordSkewDetector
+{
+public:
+
+	WordSkewDetector();
+	virtual ~WordSkewDetector();
+
+	virtual double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL) = 0;
+
+};
+
+/**
+ * Interface definition for skew estimation from the contours skew
+ */
+ class ContourWordSkewDetector : public WordSkewDetector
+ {
+ public:
+
+	ContourWordSkewDetector();
+	virtual ~ContourWordSkewDetector();
+
+	virtual double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL);
+
+	virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL) = 0;
+ };
 }
 #endif /* defined(__SkewDetection__WordSkewDetector__) */

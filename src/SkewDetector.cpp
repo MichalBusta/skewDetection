@@ -100,6 +100,18 @@ ContourSkewDetector::ContourSkewDetector( int approximatioMethod, double epsilon
 
 }
 
+void ContourSkewDetector::approximateContour(std::vector<cv::Point>& contour, std::vector<cv::Point>& contourOut)
+{
+	if(this->epsilon > 0)
+	{
+		cv::Rect rect= cv::boundingRect(contour);
+		int size = rect.height;
+		double absEpsilon = epsilon * size;
+		std::vector<cv::Point> apCont;
+		approxPolyDP(contour, contourOut, absEpsilon, true);
+	}
+}
+
 /**
  * The skew detection
  *
@@ -122,16 +134,10 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 	if( contours.size() > 1)
 		ContourSkewDetector::getBigestContour( contours, hierarchy );
 
-	if(this->epsilon > 0)
-	{
-		cv::Rect rect= cv::boundingRect(contours[0]);
-		int size = rect.height;
-		double absEpsilon = epsilon * size;
-		std::vector<cv::Point> apCont;
-		approxPolyDP(contours[0], apCont, absEpsilon, true);
-		contours[0] = apCont;
-	}
-
+	std::vector<cv::Point> apCont;
+	approximateContour(contours[0], apCont);
+	if(apCont.size() > 0)
+		return detectSkew(apCont, debugImage );
 	return detectSkew(contours[0], debugImage );
 }
 

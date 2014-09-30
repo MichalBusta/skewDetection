@@ -298,7 +298,7 @@ void ResultsWriter::writeBestResults(
 	outStream << "<h3>Best result for letter (worst->best)</h3>\n";
 
 	outStream << "<table id=\"detectors_right_images\">\n";
-	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Preview</td></tr>\n";
+	outStream << "<tr><td>Angle Difference</td><td>Detector</td><td>Letter</td><td>Measure1</td><td>Measure2</td><td>Preview</td></tr>\n";
 	int resultsCount = 0;
 	LetterCheck.clear();
 	for(int i = (int) work.size() -1; i >= 0; i--)
@@ -308,7 +308,7 @@ void ResultsWriter::writeBestResults(
 
 		std::ostringstream pictureLink;
 		pictureLink << detectorNames[work[i].classificator] << "/" << work[i].alphabet << "/" << work[i].letter << "/" << work[i].imageId << ".png";
-		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" <<  work[i].measure1 << "</td><td>" << "<img src=\"" << pictureLink.str() << "\"/>" << "</td></tr>\n";
+		outStream << "<tr><td>" << work[i].angleDiff << "</td><td>" << detectorNames[work[i].classificator] << "</td><td>&#" << work[i].letter << ";</td><td>" <<  work[i].measure1 << "</td><td>" << work[i].measure2 << "</td><td><img src=\"" << pictureLink.str() << "\"/>" << "</td></tr>\n";
 
 		LetterCheck.insert(work[i].letter);
 

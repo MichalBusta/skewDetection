@@ -218,7 +218,8 @@ double LongestBitgEstimator::detectSkew( std::vector<cv::Point>& outerContour, c
 	double maxLength=0;
 	double actAngle=0;
 	double deltaX=0, deltaY=0;
-	int counter=0;
+	int ptIdxStart=-1;
+	int ptIdxEnd=0;
 	double range = ignoreAngle*M_PI/180;
 
 	vector<double> actAngles;
@@ -238,7 +239,7 @@ double LongestBitgEstimator::detectSkew( std::vector<cv::Point>& outerContour, c
 		cv::Point start = outerContour[convexityDefectsSet[i][0]];
 		cv::Point end = outerContour[convexityDefectsSet[i][1]];
 
-		cv::Point vector = start - end;
+		cv::Point vector =  end - start;
 		double currentAngle = atan2(double (vector.y), double (vector.x))*180/M_PI;
 		if (currentAngle < 0) currentAngle += 180;
 		if (currentAngle >= 180) currentAngle -= 180;
@@ -254,7 +255,8 @@ double LongestBitgEstimator::detectSkew( std::vector<cv::Point>& outerContour, c
 		{
 			maxLength=length;
 			angle = currentAngle * M_PI/180;
-			counter=convexityDefectsSet[i][0];
+			ptIdxStart=convexityDefectsSet[i][0];
+			ptIdxEnd = convexityDefectsSet[i][1];
 		}
 	}
 
@@ -327,42 +329,21 @@ double LongestBitgEstimator::detectSkew( std::vector<cv::Point>& outerContour, c
 			int index = j+1;
 			if(index >=  (outerContour.size()) )
 				index = 0;
-
-			cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color);
-			cv::circle(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2), 2, Scalar( 255, 0, 0 ), 2);
-
-			cv::Scalar color = cv::Scalar( 0, 0, 0 );
-
-			cv::Point vector = outerContour[index] - outerContour[j];
-			double currentAngle = atan2(double (vector.y), double (vector.x))*180/M_PI;
-			if (currentAngle < 0) currentAngle += 180;
-			if (currentAngle >= 180) currentAngle -= 180;
-
-			if (! (currentAngle > ignoreAngle && currentAngle < (180-ignoreAngle)) )
-			{
-				continue;
-			}
-
-			double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
-			//if(length >= ( maxLength - edgeRatio * maxLength ))
-			//	color = cv::Scalar( 0, 0, 255 );
-
 			cv::line(drawing, cv::Point((outerContour[j].x-min_X)*scalefactor + brd / 2,(outerContour[j].y-min_Y)*scalefactor + brd / 2),
-					cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color, 1, 0);
+			cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), color, 1, 0);
 		}
-		int index = counter + 1;
-		if(counter == outerContour.size() - 1 )
-			index = 0;
-		cv::line(drawing,cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2),
-				cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), cv::Scalar( 0, 255, 0 ), 2, 0);
-		//cv::circle(drawing, cv::Point((outerContour[counter].x-min_X)*scalefactor + brd / 2,(outerContour[counter].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
-		//cv::circle(drawing, cv::Point((outerContour[index].x-min_X)*scalefactor + brd / 2,(outerContour[index].y-min_Y)*scalefactor + brd / 2), 4, cv::Scalar( 0, 255, 0 ), 1, 0);
+
+		if(ptIdxStart != -1)
+		{
+			cv::line(drawing,cv::Point((outerContour[ptIdxStart].x-min_X)*scalefactor + brd / 2,(outerContour[ptIdxStart].y-min_Y)*scalefactor + brd / 2),
+			cv::Point((outerContour[ptIdxEnd].x-min_X)*scalefactor + brd / 2,(outerContour[ptIdxEnd].y-min_Y)*scalefactor + brd / 2), cv::Scalar( 0, 255, 0 ), 2, 0);
+		}
 	}
 
 
 	int index = (int) (probMeasure2 - 1);
 	index = MIN(index, this->probabilities.size() - 1);
-	if(actAnglesOrig.size() > 0)
+	if(ptIdxStart != -1)
 		lastDetectionProbability = 0.5;
 
 	//y-souradnice je opacne

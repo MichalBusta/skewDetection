@@ -94,13 +94,22 @@ def print_summary(data_dir):
     scripts = np.unique(detector_results[:, 10]).astype(np.int)
     
     det_names = {}
-    det_names[0] = "VD"
-    det_names[1] = "VC"
-    det_names[2] = "LE"
-    det_names[3] = "TP"
-    det_names[4] = "SG"
-    det_names[5] = "NMS"
-    det_names[6] = "BP"
+    detc = 0
+    det_names[detc] = "VD"
+    detc += 1
+    det_names[detc] = "VC"
+    detc += 1
+    det_names[detc] = "LE"
+    detc += 1
+    det_names[detc] = "TP"
+    detc += 1
+    det_names[detc] = "SG"
+    detc += 1
+    #det_names[detc] = "LB"
+    #detc += 1
+    det_names[detc] = "NMS"
+    detc += 1
+    det_names[detc] = "BP"
     
     script_names = {}
     script_names[0] = 'Cyrillic'
@@ -125,8 +134,8 @@ def print_summary(data_dir):
     
     f.write('Estim. ')
     for script in scripts:
-        f.write('& Corr \\% & $\\sigma [^{\circ}]$')
-    f.write('& Corr \\% & $\\sigma [^{\circ}]$')
+        f.write('& $<3^{\circ}$[\\%] & $\\sigma [^{\circ}]$')
+    f.write('& $<3^{\circ}$[\\%] & $\\sigma [^{\circ}]$')
     f.write('\\\\\\hline\n')    
     
     for det in detectors:
@@ -267,6 +276,19 @@ def plotWordsLength():
     words3 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words3/results.csv', delimiter=',', skip_header=1)
     words4 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words4/results.csv', delimiter=',', skip_header=1)
     
+    
+    f = open('/tmp/words.tex', 'w')
+    f.write('\\begin{tabular}')
+    f.write('{l|')
+    for i in range(4):
+        f.write('rr|')
+    f.write('rr}\n\\hline\n')
+    
+    
+    for i in range(4):
+        f.write('& $<3^{\circ}$[\\%] & $\\sigma [^{\circ}]$')
+    f.write('\\\\\\hline\n')
+    
     x1 = []
     x2 = []
     x23 = []
@@ -275,11 +297,15 @@ def plotWordsLength():
     
     correct2 = np.abs(words2[:, 1]) <= (3 * math.pi / 180)
     x1.append(np.sum(correct2) / float(words2.shape[0]) * 100)
+    
+    f.write('{0:0.1f} & {1:0.1f}'.format(np.sum(correct2) / float(words2.shape[0]) * 100, np.std(words2[:, 1]) * 180 / math.pi ))
+    
     x2.append( (words2.shape[0] - np.sum(words2[:, 5] )) / float(words2.shape[0]) * 100)
     x23.append( np.sum(words2[:, 5]) )
     labelsX.append("2")
     stdDev.append(np.std(words2[:, 1]))
     correct3 = np.abs(words3[:, 1]) <= (3 * math.pi / 180)
+    f.write('& {0:0.1f} & {1:0.1f}'.format(np.sum(correct3) / float(words3.shape[0]) * 100, np.std(words3[:, 1] * 180/math.pi)))
     x1.append(np.sum(correct3) / float(words3.shape[0]) * 100)
     x2.append( (words3.shape[0] - np.sum(words3[:, 5] )) / float(words3.shape[0]) * 100)
     x23.append( np.sum(words3[:, 5]) )
@@ -289,6 +315,7 @@ def plotWordsLength():
     x2.append( (words4.shape[0] - np.sum(words4[:, 5] )) / float( words4.shape[0] ) * 100)
     x1.append(np.sum(correct4) / float( words4.shape[0] ) * 100 )
     x23.append( np.sum(words4[:, 5]) )
+    f.write('& {0:0.1f} & {1:0.1f}'.format(np.sum(correct4) / float(words4.shape[0]) * 100, np.std(words4[:, 1] * 180/math.pi)))
     labelsX.append("4")
     stdDev.append(np.std(words4[:, 1]))
     correctAll = np.abs(wordsAll[:, 1]) <= (3 * math.pi / 180)
@@ -296,8 +323,9 @@ def plotWordsLength():
     x2.append( ( wordsAll.shape[0] - np.sum(wordsAll[:, 5])) / float(wordsAll.shape[0] ) * 100 )
     x23.append( np.sum(wordsAll[:, 5]) )
     labelsX.append("All")
+    f.write('& {0:0.1f} & {1:0.1f}'.format(np.sum(correctAll) / float(wordsAll.shape[0]) * 100, np.std(wordsAll[:, 1] * 180/math.pi)))
     stdDev.append(np.std(wordsAll[:, 1]))
-    
+    f.write('\\\\\\hline')
     ind = np.arange(len(x1))
     width = 0.25 
     rects1 = plt.bar(ind, x1, width, color='#4572A7')
@@ -316,6 +344,7 @@ def plotWordsLength():
     
     plt.savefig('/tmp/wordClasss.eps' , format='eps')
     print( x23 )
+    f.write('\\end{tabular}')
     
     
 
@@ -326,10 +355,10 @@ if __name__ == '__main__':
     data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts4'
     #data_dir = '/datagrid/personal/TextSpotter/SkewDetection/14Run'
     #data_dir = '/tmp/11Run'
-    #plotWordsLength()
+    plotWordsLength()
     #draw_evaluation(data_dir)
     #data_dir = '/tmp/testRes'
-    print_summary(data_dir)
+    #print_summary(data_dir)
     #draw_detectors_dependence(data_dir)
     
     

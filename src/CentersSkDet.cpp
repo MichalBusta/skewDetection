@@ -18,7 +18,7 @@ using namespace cv;
 namespace cmp
 {
 
-CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision)
+CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision, bool recursive, double zoneOffset) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), recursive(recursive), zoneOffset(zoneOffset)
 {
 
 }
@@ -28,7 +28,7 @@ CentersSkDet::~CentersSkDet()
 	// TODO Auto-generated destructor stub
 }
 
-double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
 {
 	//ziskani souradnic Y
 	cv::Rect bbox = cv::boundingRect(outerContour);
@@ -52,6 +52,9 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 	double addEdgeThickness = letterSize * precision;
 	double addEdgeThickness2 = letterSize * precision * 4;
 
+	topPoint = topPoint + (1.0 - zoneOffset) * letterSize;
+	bottomPoint = bottomPoint - (1.0 - zoneOffset) * letterSize;
+
 
 	//ziskani souradnic X
 	int TLX = bbox.x + bbox.width;
@@ -64,25 +67,25 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 	int BRX2 = 0;
 	for (int c = 0; c < outerContour.size();c++)
 	{
-		if(outerContour[c].y <= (topPoint + addEdgeThickness))
+		if(outerContour[c].y <= (topPoint + addEdgeThickness) && outerContour[c].y >= topPoint)
 		{
 			TLX = MIN(TLX, outerContour[c].x);
 			TRX = MAX(TRX, outerContour[c].x);
 		}
 
-		if(outerContour[c].y <= (topPoint + addEdgeThickness2))
+		if(outerContour[c].y <= (topPoint + addEdgeThickness2) && outerContour[c].y >= topPoint)
 		{
 			TLX2 = MIN(TLX2, outerContour[c].x);
 			TRX2 = MAX(TRX2, outerContour[c].x);
 		}
 
-		if(outerContour[c].y >= (bottomPoint - addEdgeThickness))
+		if(outerContour[c].y >= (bottomPoint - addEdgeThickness) && outerContour[c].y <= bottomPoint)
 		{
 			BLX = MIN(BLX, outerContour[c].x);
 			BRX = MAX(BRX, outerContour[c].x);
 		}
 
-		if(outerContour[c].y >= (bottomPoint - addEdgeThickness2))
+		if(outerContour[c].y >= (bottomPoint - addEdgeThickness2) && outerContour[c].y <= bottomPoint)
 		{
 			BLX2 = MIN(BLX2, outerContour[c].x);
 			BRX2 = MAX(BRX2, outerContour[c].x);
@@ -101,9 +104,9 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 	Point P4(bbox.width+bbox.x, bottomPoint - addEdgeThickness);
 
 	/*Point P1(0, topPoint + 100*precision);
-		Point P2(mask.cols, topPoint + 100*precision);
-		Point P3(0, bottomPoint - 100*precision);
-		Point P4(mask.cols, bottomPoint - 100*precision);*/
+			Point P2(mask.cols, topPoint + 100*precision);
+			Point P3(0, bottomPoint - 100*precision);
+			Point P4(mask.cols, bottomPoint - 100*precision);*/
 
 	//ziskani prostrednich bodu
 	Point TM((TL.x + TR.x)/2.0,TL.y);
@@ -123,10 +126,11 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 	if(debugImage != NULL)
 	{
 		int borderForVis=10;
+		bbox.y -= 1;
 
 		Mat& drawing =  *debugImage;
-		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
-		Scalar color = Scalar( 255, 255, 255 );
+		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 ) + cv::Scalar(255, 255, 255);
+		Scalar color = Scalar( 0, 0, 0 );
 		std::vector<cv::Point> outerContourNorm;
 		for(size_t j = 0; j < outerContour.size(); j++)
 		{
@@ -165,16 +169,39 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 		BM.x *=scalefactor;
 		BM.y *=scalefactor;
 
-		cv::line(drawing, P1-offset, P2-offset, cv::Scalar(255, 255, 0), 1 );
-		cv::line(drawing, P3-offset, P4-offset, cv::Scalar(255, 255, 0), 1 );
-		cv::line(drawing, (TL - offset), (TR - offset), cv::Scalar(0, 255, 0), 2 );
-		cv::line(drawing, (BL - offset), (BR - offset), cv::Scalar(0, 255, 0), 2 );
+		cv::line(drawing, TL-offset, TR-offset, cv::Scalar(50, 50, 50), 1 );
+		cv::line(drawing, P1-offset, P2-offset, cv::Scalar(50, 50, 50), 1 );
+		cv::line(drawing, BL-offset, BR-offset, cv::Scalar(50, 50, 50), 1 );
+		cv::line(drawing, P3-offset, P4-offset, cv::Scalar(50, 50, 50), 1 );
+		//cv::line(drawing, (TL - offset), (TR - offset), cv::Scalar(0, 255, 0), 2 );
+		//cv::line(drawing, (BL - offset), (BR - offset), cv::Scalar(0, 255, 0), 2 );
 		cv::circle(drawing, (TM - offset), 4, cv::Scalar(0, 0, 255), 2);
 		cv::circle(drawing, (BM - offset), 4, cv::Scalar(0, 0, 255), 2);
 	}
-	this->lastDetectionProbability = 0.5;
+	this->lastDetectionProbability = 0.53;
 	this->probMeasure2 = fabs(angle - angle2);
 	return angle;
+}
+
+double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+{
+	double angleAcc = 0;
+	std::vector<cv::Point> workCont = outerContour;
+	while(true)
+	{
+		double angle = doEstimate( workCont, debugImage );
+		angleAcc += angle;
+		if(fabs(angle) < (M_PI / 180) || !recursive )
+		{
+			break;
+		}
+		double skewValue = (float) tan(angle);
+		for( size_t i = 0; i < workCont.size(); i++ )
+		{
+			workCont[i].x = workCont[i].x + skewValue * workCont[i].y;
+		}
+	}
+	return angleAcc;
 }
 
 void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)

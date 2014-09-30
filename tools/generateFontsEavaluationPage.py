@@ -18,7 +18,7 @@ class FontTestWriter:
     def __init__(self, fontDirs, outputDir):
         
         self.outputDir = outputDir
-        #self.getFonts('/usr/share/fonts/truetype')
+        #self.getFonts('/usr/share/fonts/truetype/uralic')
         #self.getFonts('/home/busta/data/cvut/textspotter/fonts')
         #self.getFonts('C:/SkewDetection/fonts')
         for fDir in fontDirs:

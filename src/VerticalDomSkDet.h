@@ -1,9 +1,9 @@
 /*
-* VerticalDomSkDet.h
-*
-*  Created on: Jul 12, 2013
-*      Author: cidlijak
-*/
+ * VerticalDomSkDet.h
+ *
+ *  Created on: Jul 12, 2013
+ *      Author: cidlijak
+ */
 
 #ifndef VERTICALDOMSKDET_H_
 #define VERTICALDOMSKDET_H_
@@ -12,33 +12,61 @@
 
 namespace cmp{
 
-	class VerticalDomSkDet : public ContourSkewDetector {
-	public:
-		VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.014, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
-		virtual ~VerticalDomSkDet();
+class VerticalDomSkDet : public ContourSkewDetector {
+public:
+	VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.014, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
+	virtual ~VerticalDomSkDet();
 
-		virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
-        
-		virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
+	virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
 
-	private:
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
 
-		double* hist;
-		/** parametr sigma u normaloveho rozdeleni */
-		int sigma;
-		/** pocet ovlivnenych binu = sigma*range */
-		int range;
-		/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
-		int ignoreAngle;
-		/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
-		int correctAngle;
-		/** debug purpose - add border around the letter **/
-		int borderForVis;
+private:
 
-		bool doConvexHull;
+	double* hist;
+	/** parametr sigma u normaloveho rozdeleni */
+	int sigma;
+	/** pocet ovlivnenych binu = sigma*range */
+	int range;
+	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
+	int ignoreAngle;
+	/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
+	int correctAngle;
+	/** debug purpose - add border around the letter **/
+	int borderForVis;
 
-		std::vector<double> probabilities;
-	};
+	bool doConvexHull;
+
+	std::vector<double> probabilities;
+};
+
+class VertDomChullSkDet : public ContourSkewDetector {
+public:
+	VertDomChullSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.014, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false);
+	virtual ~VertDomChullSkDet();
+
+	virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL);
+
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
+
+private:
+
+	double* hist;
+	/** parametr sigma u normaloveho rozdeleni */
+	int sigma;
+	/** pocet ovlivnenych binu = sigma*range */
+	int range;
+	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
+	int ignoreAngle;
+	/** zobrazi vizualizaci, pokud je uhel v toleranci; ve stupnich */
+	int correctAngle;
+	/** debug purpose - add border around the letter **/
+	int borderForVis;
+
+	bool doConvexHull;
+
+	std::vector<double> probabilities;
+};
 
 }
 //namespace cmp

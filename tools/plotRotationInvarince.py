@@ -41,13 +41,13 @@ if __name__ == '__main__':
     
     init_plotting()
     
-    fig, ax = plt.subplots(figsize=(10,8))
+    fig, ax = plt.subplots(figsize=(10,7))
     plt.rc('text', usetex=True)
     
     data_dir = '/tmp/minSetFixAngle2'
     resultsAll = np.genfromtxt('{0}/results.csv'.format(data_dir), delimiter=',', skip_header=0)
     detectors = np.unique(resultsAll[:, 0]).astype(np.int)
-    detectors = detectors[0:-1]
+    #detectors = detectors[0:-1]
     
     det_names = {}
     colors = []
@@ -66,8 +66,14 @@ if __name__ == '__main__':
     angles = np.unique(resultsAll[:, 9])
     
     labels = []
+    count = 0
     for angle in angles:
-        labels.append('{0:0.0f}'.format(angle * 180 / math.pi))
+        if count % 2 == 0:
+            labels.append('{0:0.0f}'.format(angle * 180 / math.pi))
+        else:
+            labels.append('')
+        count += 1
+        
     labelsAll = []
     ticks = angles * 180 / math.pi
     ticksAll = []
@@ -77,12 +83,18 @@ if __name__ == '__main__':
         vert = resultsAll[mask_vertical, :]
         data = []
         labels = []
+        count = 0
         for angle in angles:
             angle_mask = vert[:, 9] == angle
             vert_angle = vert[angle_mask, :]
             data.append((vert_angle[:, 8] - vert_angle[:, 9]) * 180 / math.pi)
             ticksAll.append(angle * 180 / math.pi + offset)
-            labelsAll.append('{0:0.0f}'.format(angle * 180 / math.pi))
+            if count % 2 == 0:
+                labelsAll.append('{0:0.0f}'.format(angle * 180 / math.pi))
+            else:
+                labelsAll.append('')
+            count += 1
+            
             
         bp = plt.boxplot(data, notch=0, sym='b+', whis=1.5, widths=5, positions=(ticks + offset))
         
@@ -91,7 +103,7 @@ if __name__ == '__main__':
         
         offset += 100
         
-    
+    plt.ylim((-60, 60))
         
     plt.xlabel('Generated Skew Angle $\\alpha_{{gen}}$')
     plt.xticks(ticksAll, labelsAll)
@@ -100,7 +112,7 @@ if __name__ == '__main__':
     textOffset = 0
     for det_no in detectors:
         ax.text(0.18 + textOffset, 0.01, det_names[det_no], verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes, fontsize=10)
-        textOffset += 0.26
+        textOffset += 0.2
     
     plt.savefig('/tmp/rotationInv.eps' , format='eps')
     
