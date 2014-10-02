@@ -25,7 +25,8 @@ namespace cmp{
 
 
 VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int sigma, int range, int ignoreAngle,
-		int correctAngle, bool doConvexHull): ContourSkewDetector(approximatioMethod, epsilon), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle), doConvexHull(doConvexHull) {
+		int correctAngle, bool doConvexHull, bool recursive): ContourSkewDetector(approximatioMethod, epsilon), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle), doConvexHull(doConvexHull), recursive(recursive)
+{
 	// TODO Auto-generated constructor stub
 
 	hist = new double[180];
@@ -45,7 +46,51 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 	delete [] hist;
 }
 
-double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Mat* debugImage)
+double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage)
+{
+
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contour, workCont);
+	}else
+	{
+		workCont = contour;
+	}
+
+
+	double angleAcc = 0;
+	std::vector<cv::Point2d> workContf;
+	workContf.resize(workCont.size());
+	int level = 0;
+	while(true)
+	{
+		double angle = doEstimate( workCont, debugImage );
+		angleAcc += angle;
+		if(fabs(angle) < (M_PI / 90) || !recursive || level > 10)
+		{
+			break;
+		}
+		double skewValue = tan(angle);
+		if(level == 0)
+		{
+			for(size_t i = 0; i < workCont.size(); i++ )
+			{
+				workContf[i] = workCont[i];
+			}
+		}
+
+		for( size_t i = 0; i < workCont.size(); i++ )
+		{
+			workContf[i].x += skewValue * workContf[i].y;
+			workCont[i].x = round(workContf[i].x);
+		}
+		level++;
+	}
+	return angleAcc;
+}
+
+double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Mat* debugImage)
 {
 	memset (hist, 0, 180 * sizeof(double));
 
@@ -201,20 +246,31 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Ma
 		imagesToMerge.push_back(drawing);
 		imagesToMerge.push_back(histogram);
 		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL, cv::Scalar(255, 255, 255) );
-		/*
-		cv::imshow("img", *debugImage);
-		cv::waitKey(0);
-		cv::imwrite("/tmp/verticalDominant.png", *debugImage);
-		*/
+		if(recursive || true)
+		{
+			cv::imshow("img", *debugImage);
+			cv::waitKey(0);
+			//cv::imwrite("/tmp/verticalDominant.png", *debugImage);
+		}
 	}
 	return maxI*M_PI/180-M_PI/2;
 }
 
-void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
+void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
+
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contourOrig, workCont);
+	}else
+	{
+		workCont = contourOrig;
+	}
+
 	memset (hist, 0, 180 * sizeof(double));
 	std::vector<cv::Point> wcont;
-	std::vector<cv::Point>* contour = &contourOrig;
+	std::vector<cv::Point>* contour = &workCont;
 	if(doConvexHull)
 	{
 		cv::convexHull(*contour, wcont);
@@ -359,6 +415,7 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 		imagesToMerge.push_back(drawing);
 		imagesToMerge.push_back(histogram);
 		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL );
+
 		//cv::imshow("ts", *debugImage);
 		//cv::waitKey(0);
 	}
@@ -383,8 +440,18 @@ VertDomChullSkDet::~VertDomChullSkDet() {
 	delete [] hist;
 }
 
-double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::Mat* debugImage)
+double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage)
 {
+
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contour, workCont);
+	}else
+	{
+		workCont = contour;
+	}
+
 	memset (hist, 0, 180 * sizeof(double));
 	double histc[180];
 	memset (histc, 0, 180 * sizeof(double));
@@ -392,15 +459,15 @@ double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::M
 	std::vector<cv::Point> wcont;
 
 	cv::vector<int> convexHull_IntIdx;
-	cv::convexHull(contourOrig, convexHull_IntIdx, true);
+	cv::convexHull(workCont, convexHull_IntIdx, true);
 	std::vector<cv::Vec4i> convexityDefectsSet;
-	cv::convexityDefects(contourOrig, convexHull_IntIdx, convexityDefectsSet);
+	cv::convexityDefects(workCont, convexHull_IntIdx, convexityDefectsSet);
 
 	double maxHistValC = 0;
 	for( size_t i = 0; i <  convexityDefectsSet.size(); i++)
 	{
-		cv::Point pt = contourOrig[convexityDefectsSet[i][1]];
-		cv::Point vector = pt - contourOrig[convexityDefectsSet[i][0]];
+		cv::Point pt = workCont[convexityDefectsSet[i][1]];
+		cv::Point vector = pt - workCont[convexityDefectsSet[i][0]];
 		double angle = atan2(double (vector.y), double (vector.x))*180/M_PI;
 		if (angle < 0) angle += 180;
 		if (angle >= 180) angle -= 180;
@@ -422,9 +489,9 @@ double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::M
 		}
 	}
 
-	cv::Point prev = contourOrig.back();
+	cv::Point prev = workCont.back();
 	double maxHistVal = 0;
-	for(std::vector<cv::Point>::iterator it = contourOrig.begin(); it < contourOrig.end(); )
+	for(std::vector<cv::Point>::iterator it = workCont.begin(); it < workCont.end(); )
 	{
 		cv::Point pt = *it;
 		cv::Point vector = pt - prev;
@@ -510,34 +577,34 @@ double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::M
 
 
 		Mat& drawing =  *debugImage;
-		cv::Rect bbox = cv::boundingRect(contourOrig);
+		cv::Rect bbox = cv::boundingRect(workCont);
 		drawing =  Mat::zeros( bbox.height*scalefactor+borderForVis, bbox.width*scalefactor+borderForVis, CV_8UC3 );
 
 		Scalar color = Scalar( 255, 255, 255 );
 		std::vector<std::vector<cv::Point> > contours;
-		contours.push_back(contourOrig);
+		contours.push_back(workCont);
 
 		int miny = INT_MAX;
 		int minx = INT_MAX;
 		//get contour max
-		for (size_t i=0; i < contourOrig.size(); i++) {
-			miny = MIN(contourOrig[i].y, miny);
-			minx = MIN(contourOrig[i].x, minx);
+		for (size_t i=0; i < workCont.size(); i++) {
+			miny = MIN(workCont[i].y, miny);
+			minx = MIN(workCont[i].x, minx);
 		}
 
-		for (size_t i = 0; i < contourOrig.size(); i++)
+		for (size_t i = 0; i < workCont.size(); i++)
 		{
-			size_t i2 = (i== contourOrig.size()-1) ? 0 : i+1;
+			size_t i2 = (i== workCont.size()-1) ? 0 : i+1;
 
-			cv::circle(drawing, cv::Point((contourOrig[i].x - minx)*scalefactor,(contourOrig[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
+			cv::circle(drawing, cv::Point((workCont[i].x - minx)*scalefactor,(workCont[i].y - miny)*scalefactor), 2, Scalar( 0, 0, 255 ), 1);
 
-			cv::line(drawing, cv::Point((contourOrig[i].x - minx)*scalefactor,(contourOrig[i].y - miny)*scalefactor), cv::Point((contourOrig[i2].x - minx)*scalefactor,(contourOrig[i2].y- miny)*scalefactor), color);
+			cv::line(drawing, cv::Point((workCont[i].x - minx)*scalefactor,(workCont[i].y - miny)*scalefactor), cv::Point((workCont[i2].x - minx)*scalefactor,(workCont[i2].y- miny)*scalefactor), color);
 
-			double ang = atan2(double(contourOrig[i2].y-contourOrig[i].y), double(contourOrig[i2].x-contourOrig[i].x));
+			double ang = atan2(double(workCont[i2].y-workCont[i].y), double(workCont[i2].x-workCont[i].x));
 			if (ang < 0) ang = ang + M_PI;
 			if (fabs(ang) < correctAngle*M_PI/180)
 			{
-				cv::line(drawing, cv::Point((contourOrig[i].x - minx)*scalefactor,(contourOrig[i].y- miny)*scalefactor), Point((contourOrig[i2].x - minx)*scalefactor,(contourOrig[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
+				cv::line(drawing, cv::Point((workCont[i].x - minx)*scalefactor,(workCont[i].y- miny)*scalefactor), Point((workCont[i2].x - minx)*scalefactor,(workCont[i2].y- miny)*scalefactor), Scalar( 0, 255, 0 ), 1);
 			}
 		}
 		std::vector<cv::Mat> imagesToMerge;
@@ -550,18 +617,25 @@ double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contourOrig, cv::M
 	return maxI*M_PI/180-M_PI/2;
 }
 
-void VertDomChullSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
+void VertDomChullSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
 	memset (hist, 0, 180 * sizeof(double));
 	double histc[180];
 	memset (histc, 0, 180 * sizeof(double));
 
-	std::vector<cv::Point> wcont;
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contourOrig, workCont);
+	}else
+	{
+		workCont = contourOrig;
+	}
 
 	cv::vector<int> convexHull_IntIdx;
-	cv::convexHull(contourOrig, convexHull_IntIdx, true);
+	cv::convexHull(workCont, convexHull_IntIdx, true);
 	std::vector<cv::Vec4i> convexityDefectsSet;
-	cv::convexityDefects(contourOrig, convexHull_IntIdx, convexityDefectsSet);
+	cv::convexityDefects(workCont, convexHull_IntIdx, convexityDefectsSet);
 
 	double maxHistValC = 0;
 	for( size_t i = 0; i <  convexityDefectsSet.size(); i++)

@@ -12,8 +12,6 @@
 #include "CentersSkDet.h"
 #include "VerticalDomSkDet.h"
 #include "LongestEdgeSkDetector.h"
-#include "LeftRightHullSkDet.h"
-#include "LRLongestEdge.h"
 #include "BestGuessSKDetector.h"
 
 #include "WordSkewDetector.h"

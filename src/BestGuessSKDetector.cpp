@@ -27,13 +27,13 @@ BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon)
     detectorNames.push_back("VertDomCH");
 
 
-    detectors.push_back( new CentersSkDet() );
+    detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9 ) );
     weights.push_back(1.0);
     detectorNames.push_back("CentersSkDet");
 
-    /*
-	detectors.push_back( new ThinProfileSkDet() );
-	weights.push_back(0.5);
+
+	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true, true) );
+	weights.push_back(1.0);
     detectorNames.push_back("ThinProfileSkDet");
     /*
 	detectors.push_back( new LongestEdgeSkDetector() );
@@ -92,7 +92,7 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 
 }
 
-double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, bool approximate, cv::Mat* debugImage )
 {
 	double bestProb = 0;
 	std::vector<double> angles;
@@ -107,7 +107,7 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 		approxPolyDP(outerContour, apCont, absEpsilon, true);
 		outerContour = apCont;
 	}
-
+	/*
 	double histogram[180];
 	memset (histogram, 0, 180 * sizeof(double));
 	for(size_t i = 0; i < this->detectors.size(); i++)
@@ -128,7 +128,7 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 			maxVal = MAX(maxVal, histogram[i]);
 		}
 	}
-	/*
+	*/
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
 
@@ -146,9 +146,10 @@ double BestGuessSKDetector::detectSkew( std::vector<cv::Point>& outerContour, cv
 	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;
 #endif
 	return angles[bestDetIndex];
-	*/
+	/*
 	double angle = maxI*M_PI/180-M_PI/2;
 	return angle;
+	*/
 }
 
 void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage)
@@ -174,7 +175,7 @@ void BestGuessSKDetector::getSkewAngles( std::vector<cv::Point>& outerContour, s
 	}
 }
 
-void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, cv::Mat* debugImage)
+void BestGuessSKDetector::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
 	std::vector<cv::Point>& outerContour = contourOrig;
 	if(this->epsilon > 0)

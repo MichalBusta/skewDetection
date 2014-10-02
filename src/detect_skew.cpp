@@ -51,9 +51,6 @@ int main( int argc, char **argv)
 	detectors.push_back( new CentersSkDet() );
 	detectors.push_back( new VerticalDomSkDet() );
 	detectors.push_back( new LongestEdgeSkDetector() );
-	detectors.push_back( new LeftRightHullSkDet() );
-	detectors.push_back( new LRLongestEdge() );
-	detectors.push_back( new LRLongestEdge(CV_CHAIN_APPROX_TC89_KCOS, 0.026, IGNORE_ANGLE, false) );
 
 	if(detector > detectors.size())
 	{

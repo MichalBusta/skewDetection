@@ -177,21 +177,25 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* 
 		//cv::line(drawing, (BL - offset), (BR - offset), cv::Scalar(0, 255, 0), 2 );
 		cv::circle(drawing, (TM - offset), 4, cv::Scalar(0, 0, 255), 2);
 		cv::circle(drawing, (BM - offset), 4, cv::Scalar(0, 0, 255), 2);
+
+		//cv::imshow("CentersSk", drawing);
+		//cv::waitKey(0);
 	}
-	this->lastDetectionProbability = 0.53;
+	this->lastDetectionProbability = 0.70;
 	this->probMeasure2 = fabs(angle - angle2);
 	return angle;
 }
 
-double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, bool approximate, cv::Mat* debugImage )
 {
 	double angleAcc = 0;
 	std::vector<cv::Point> workCont = outerContour;
+	int level = 0;
 	while(true)
 	{
 		double angle = doEstimate( workCont, debugImage );
 		angleAcc += angle;
-		if(fabs(angle) < (M_PI / 180) || !recursive )
+		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
 		{
 			break;
 		}
@@ -200,14 +204,16 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* 
 		{
 			workCont[i].x = workCont[i].x + skewValue * workCont[i].y;
 		}
+		level++;
 	}
 	return angleAcc;
 }
 
-void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)
+void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
-	double angle = detectSkew( outerContour);
+	double angle = detectSkew( outerContour, false, debugImage);
 	int angleDeg = angle * 180 / M_PI;
+ 	angleDeg += 90;
 	int sigma = 3;
 	int range = 3;
 	for (int i = angleDeg-sigma*range; i <= angleDeg+sigma*range; i++)
@@ -216,7 +222,7 @@ void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double
 		if(j < 0) j += 180;
 		if (j >= 180) j -= 180;
 
-		histogram[j] =  histogram[j] + weight * this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+		histogram[j] =  histogram[j] + weight * this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angleDeg)*(i - angleDeg)/(2*sigma*sigma));
 	}
 }
 

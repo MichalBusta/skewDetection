@@ -16,8 +16,8 @@ using namespace cv;
 
 namespace cmp {
 
-LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio) :
-				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio)
+LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio, bool recursive) :
+				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio), recursive(recursive)
 {
 	probabilities.push_back(0.7);
 	probabilities.push_back(0.25);
@@ -27,7 +27,38 @@ LongestEdgeSkDetector::~LongestEdgeSkDetector() {
 	// TODO Auto-generated destructor stub
 }
 
-double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage)
+double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage )
+{
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contour, workCont);
+	}else
+	{
+		workCont = contour;
+	}
+
+	double angleAcc = 0;
+	int level = 0;
+	while(true)
+	{
+		double angle = doEstimate( workCont, debugImage );
+		angleAcc += angle;
+		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
+		{
+			break;
+		}
+		double skewValue = (float) tan(angle);
+		for( size_t i = 0; i < workCont.size(); i++ )
+		{
+			workCont[i].x = workCont[i].x + skewValue * workCont[i].y;
+		}
+		level++;
+	}
+	return angleAcc;
+}
+
+double LongestEdgeSkDetector::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* debugImage)
 {
 	probMeasure1 = 0;
 	probMeasure2 = 0;
@@ -172,7 +203,7 @@ double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& outerContour, 
 
 	int index = (int) (probMeasure2 - 1);
 	index = MIN(index, this->probabilities.size() - 1);
-	lastDetectionProbability = 0.5;
+	lastDetectionProbability = 0.65;
 
 	assert(anglesCount>0);
 	//if(probMeasure2 == 2)
@@ -182,9 +213,9 @@ double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& outerContour, 
 	return angle - M_PI/2;
 }
 
-void LongestEdgeSkDetector::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)
+void LongestEdgeSkDetector::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
-	double angle = detectSkew( outerContour);
+	double angle = detectSkew( outerContour, approximate );
 	int angleDeg = angle * 180 / M_PI;
 	int sigma = 3;
 	int range = 3;
@@ -354,6 +385,7 @@ void LongestBitgEstimator::voteInHistogram( std::vector<cv::Point>& outerContour
 {
 	double angle = detectSkew( outerContour);
 	int angleDeg = angle * 180 / M_PI;
+	angleDeg += 90;
 	int sigma = 3;
 	int range = 3;
 	for (int i = angleDeg-sigma*range; i <= angleDeg+sigma*range; i++)
@@ -362,7 +394,7 @@ void LongestBitgEstimator::voteInHistogram( std::vector<cv::Point>& outerContour
 		if(j < 0) j += 180;
 		if (j >= 180) j -= 180;
 
-		histogram[j] = weight * histogram[j] + this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+		histogram[j] = weight * histogram[j] + this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angleDeg)*(i - angleDeg)/(2*sigma*sigma));
 	}
 }
 

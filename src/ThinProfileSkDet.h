@@ -33,9 +33,9 @@ public:
 
 	virtual ~ThinProfileSkDet();
 
-	virtual double detectSkew( std::vector<cv::Point>& contours, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( std::vector<cv::Point>& contours, bool approximate = false, cv::Mat* debugImage = NULL );
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
 
 	/** bude hledat odchylku v rozmezi <-90+ignoreAngle; 90-ignoreAngle>; ve stupnich */
 	int ignoreAngle;

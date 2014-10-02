@@ -116,7 +116,7 @@ def print_summary(data_dir):
     script_names[1] = 'Georgian'
     script_names[2] = 'Greek'
     script_names[3] = 'Latin'
-    script_names[4] = 'Runnic'
+    script_names[4] = 'Runic'
     
     
     f = open('/tmp/scripts.tex', 'w')
@@ -354,6 +354,7 @@ if __name__ == '__main__':
     
     data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts4'
     #data_dir = '/datagrid/personal/TextSpotter/SkewDetection/14Run'
+    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/15Run'
     #data_dir = '/tmp/11Run'
     plotWordsLength()
     #draw_evaluation(data_dir)

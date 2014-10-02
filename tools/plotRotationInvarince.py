@@ -44,10 +44,10 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(10,7))
     plt.rc('text', usetex=True)
     
-    data_dir = '/tmp/minSetFixAngle2'
+    data_dir = '/tmp/fixAngleStep'
     resultsAll = np.genfromtxt('{0}/results.csv'.format(data_dir), delimiter=',', skip_header=0)
     detectors = np.unique(resultsAll[:, 0]).astype(np.int)
-    #detectors = detectors[0:-1]
+    detectors = detectors[0:-2]
     
     det_names = {}
     colors = []

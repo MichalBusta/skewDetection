@@ -77,7 +77,7 @@ public:
 
 	}
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage) = 0;
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL) = 0;
 	/**
 	 * Descendants have to implement this method
 	 *
@@ -86,7 +86,7 @@ public:
 	 * @param debugImage
 	 * @return
 	 */
-	virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL ) = 0;
+	virtual double detectSkew( std::vector<cv::Point>& contour, bool approximate = false, cv::Mat* debugImage = NULL ) = 0;
 
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 

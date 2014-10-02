@@ -20,7 +20,8 @@ namespace cmp
 
 DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 {
-	detectors.push_back( new VerticalDomSkDet());
+
+	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022));
 	weights.push_back(1.0);
 	detectorNames.push_back("VertDom");
 
@@ -30,9 +31,21 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorNames.push_back("VertDomCH");
 
 
-	detectors.push_back( new CentersSkDet() );
+	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9) );
 	weights.push_back(1.0);
 	detectorNames.push_back("CentersSkDet");
+
+
+	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true, true) );
+	weights.push_back(1.0);
+	detectorNames.push_back("Thin Profile");
+
+	/*
+	detectors.push_back( new LongestEdgeSkDetector() );
+	weights.push_back(1.0);
+	detectorNames.push_back("LongestEdgeSkDetector");
+	*/
+
 
 }
 DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
@@ -44,16 +57,25 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 {
 	double histogram[180];
 	memset (histogram, 0, 180 * sizeof(double));
+
+	double epsilon = 0.014;
+
 	for (size_t i = 0; i < contours.size(); i++)
 	{
 		for( size_t detId = 0; detId < this->detectors.size(); detId++)
 		{
-			double skewAngle = this->detectors[detId]->detectSkew( *contours[i],  debugImage);
-			double angleDeg = skewAngle * 180 / M_PI + 45;
+			/*
+			double skewAngle = this->detectors[detId]->detectSkew( *contours[i], true,  debugImage);
+			double angleDeg = skewAngle * 180 / M_PI + 90;
 			assert(angleDeg >= 0);
 			assert(angleDeg <= 180);
-			histogram[(int) round(angleDeg)] = detectors[detId]->lastDetectionProbability;
+			histogram[(int) round(angleDeg)] += detectors[detId]->lastDetectionProbability;
 			//todo draw the image
+			 *
+			 */
+
+			this->detectors[detId]->voteInHistogram(*contours[i], histogram, this->weights[detId], true, debugImage);
+
 		}
 	}
 
@@ -122,6 +144,8 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 		cv::line(histogramImg, cv::Point(90, 0), cv::Point(90, histogramImg.rows), cv::Scalar(0, 0, 0) );
 		cv::line(histogramImg, cv::Point(90 + 45, 0), cv::Point(90 + 45, histogramImg.rows), cv::Scalar(100, 100, 100) );
 		cv::line(histogramImg, cv::Point(45, 0), cv::Point(45, histogramImg.rows), cv::Scalar(100, 100, 100) );
+		if(maxVal < 1)
+			maxVal = 1;
 		double norm = histHeight / maxVal;
 		int graphWidth =noOfGroups*colWidth;
 		for (int i =0; i <noOfGroups; i++) {

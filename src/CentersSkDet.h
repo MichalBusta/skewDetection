@@ -27,9 +27,9 @@ public:
 
 	virtual ~CentersSkDet();
 
-	virtual double detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( std::vector<cv::Point>& contour, bool approximate = false, cv::Mat* debugImage = NULL );
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage);
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
 
 	//precision urcuje cast pismene v desetinem tvaru, ktere tvori "horni hranici pismene"
 	float precision;

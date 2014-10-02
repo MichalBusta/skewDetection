@@ -40,10 +40,19 @@ ThinProfileSkDet::~ThinProfileSkDet()
 
 }
 
-double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, cv::Mat* debugImage )
+double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage )
 {
+
+	std::vector<cv::Point> workCont;
+	if( approximate )
+	{
+		approximateContour(contour, workCont);
+	}else
+	{
+		workCont = contour;
+	}
+
 	double angleAcc = 0;
-	std::vector<cv::Point> workCont = contour;
 	int level = 0;
 	while(true)
 	{
@@ -169,15 +178,16 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 		}
 
 		//normalize width
-		if(correctWidth)
-		{
-			if(fabs(sin(ang)) != 0 )
-				width = width / fabs(sin(ang));
-		}
 
 		ang = ang + M_PI/2;
 		while (ang > M_PI/2) ang = ang - M_PI;
 		while (ang <= -M_PI/2) ang = ang + M_PI;
+
+		if(correctWidth)
+		{
+			if(fabs(sin(ang)) != 0 )
+				width = width / fabs(cos(ang));
+		}
 
 
 		if((ang >= (M_PI/180*ignoreAngle-M_PI/2) && ang <= (M_PI/2-M_PI/180*ignoreAngle)))
@@ -389,14 +399,24 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 	assert(index<probabilities.size());
 	lastDetectionProbability = probMeasure2 * 0.5;
 	assert(lastDetectionProbability == lastDetectionProbability);
-	lastDetectionProbability = 0.5;
+	lastDetectionProbability = 0.6;
 	return angle;
 }
 
-void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, cv::Mat* debugImage)
+void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& contour, double *histogram, double weight,  bool approximate, cv::Mat* debugImage)
 {
+
+	std::vector<cv::Point> outerContour;
+	if( approximate )
+	{
+		approximateContour(contour, outerContour);
+	}else
+	{
+		outerContour = contour;
+	}
+
 	double angle = detectSkew( outerContour);
-	int angleDeg = angle * 180 / M_PI;
+	int angleDeg = angle * 180 / M_PI + 90;
 	int sigma = 3;
 	int range = 3;
 	for (int i = angleDeg-sigma*range; i <= angleDeg+sigma*range; i++)
@@ -405,7 +425,7 @@ void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, do
 		if(j < 0) j += 180;
 		if (j >= 180) j -= 180;
 
-		histogram[j] =  histogram[j] + weight * this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angle)*(i - angle)/(2*sigma*sigma));
+		histogram[j] =  histogram[j] + weight * this->lastDetectionProbability/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i - angleDeg)*(i - angleDeg)/(2*sigma*sigma));
 	}
 }
 

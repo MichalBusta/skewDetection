@@ -9,6 +9,7 @@ option (BUILD_DOC "Build the documentation" OFF)
 find_package( OpenCV REQUIRED )
 
 
+
 add_definitions("-std=c++0x")
 
 if (USE_OPENMP)
