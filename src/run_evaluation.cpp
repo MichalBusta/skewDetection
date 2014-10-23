@@ -46,15 +46,16 @@ int main( int argc, char **argv)
 		evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, epsilon), "L-"+ignoreAngleToStr.str(), "L-"+ignoreAngleToStr.str() );
 	}
 	*/
-	evaluator.registerDetector(new VerticalDomSkDet(), "VerticalDom", "Vertical Dominant" );
+	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, false, true), "VerticalDom", "Vertical Dominant" );
 	//evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.014, 3, 3, IGNORE_ANGLE, 3, false, true), "VerticalDomR", "Vertical Dominant R" );
-	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.014, 3, 3, IGNORE_ANGLE, 3, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
-	evaluator.registerDetector(new LongestEdgeSkDetector(), "LongestEdge", "Longest Edge" );
+	evaluator.registerDetector(new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, true, true), "VertDomCH", "Vertical Dominant on Convex Hull" );
+
+	evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_NONE, 0.02, IGNORE_ANGLE, 0.2, true), "LongestEdge", "Longest Edge" );
 	//evaluator.registerDetector(new LongestEdgeSkDetector(CV_CHAIN_APPROX_NONE, 0.02, IGNORE_ANGLE, 0.2, true), "LongestEdgeR", "Longest Edge R" );
 	//evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfileR", "Thinnest Profile Recursive" );
 	//evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, false), "ThinProfile", "Thinnest Profile" );
 	//evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, false, true), "ThinProfileW", "Thinnest Profile W" );
-	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true, true), "ThinProfileCW", "Thinnest Profile CW" );
+	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true), "ThinProfileCW", "Thinnest Profile CW" );
 	//evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, false), "TopBottomCenter", "Symmetric Glyph" );
 	//evaluator.registerDetector(new CentersSkDet(), "TopBottomCenterR", "Symmetric Glyph Recursive");
 	evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9), "TopBottomCenter-Z9", "Symmetric Glyph Z9" );

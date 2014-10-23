@@ -26,7 +26,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorNames.push_back("VertDom");
 
 
-	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_TC89_KCOS, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
+	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
 	weights.push_back(1.0);
 	detectorNames.push_back("VertDomCH");
 
@@ -36,7 +36,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorNames.push_back("CentersSkDet");
 
 
-	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true, true) );
+	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true) );
 	weights.push_back(1.0);
 	detectorNames.push_back("Thin Profile");
 

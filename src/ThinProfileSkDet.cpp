@@ -24,8 +24,8 @@ namespace cmp
 {
 int brd=10;
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool recursive, bool correctWidth) :
-				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), recursive(recursive), correctWidth(correctWidth)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool correctWidth) :
+				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), correctWidth(correctWidth)
 {
 	probabilities.push_back(0.48);
 	probabilities.push_back(0.79);
@@ -51,25 +51,8 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour, bool appro
 	{
 		workCont = contour;
 	}
-
-	double angleAcc = 0;
-	int level = 0;
-	while(true)
-	{
-		double angle = doEstimate( workCont, debugImage );
-		angleAcc += angle;
-		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
-		{
-			break;
-		}
-		double skewValue = (float) tan(angle);
-		for( size_t i = 0; i < workCont.size(); i++ )
-		{
-			workCont[i].x = workCont[i].x + skewValue * workCont[i].y;
-		}
-		level++;
-	}
-	return angleAcc;
+	double angle = doEstimate( workCont, debugImage );
+	return angle;
 }
 
 double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* debugImage )
@@ -185,7 +168,7 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 
 		if(correctWidth)
 		{
-			if(fabs(sin(ang)) != 0 )
+			if(fabs(cos(ang)) != 0 )
 				width = width / fabs(cos(ang));
 		}
 

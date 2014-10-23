@@ -16,8 +16,8 @@ using namespace cv;
 
 namespace cmp {
 
-LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio, bool recursive) :
-				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio), recursive(recursive)
+LongestEdgeSkDetector::LongestEdgeSkDetector(int approximatioMethod, double epsilon, double ignoreAngle, double edgeRatio, bool normalizeLength) :
+				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), edgeRatio(edgeRatio), normalizeLength(normalizeLength)
 {
 	probabilities.push_back(0.7);
 	probabilities.push_back(0.25);
@@ -37,25 +37,8 @@ double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& contour, bool 
 	{
 		workCont = contour;
 	}
-
-	double angleAcc = 0;
-	int level = 0;
-	while(true)
-	{
-		double angle = doEstimate( workCont, debugImage );
-		angleAcc += angle;
-		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
-		{
-			break;
-		}
-		double skewValue = (float) tan(angle);
-		for( size_t i = 0; i < workCont.size(); i++ )
-		{
-			workCont[i].x = workCont[i].x + skewValue * workCont[i].y;
-		}
-		level++;
-	}
-	return angleAcc;
+	double angle = doEstimate( workCont, debugImage );
+	return angle;
 }
 
 double LongestEdgeSkDetector::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* debugImage)
@@ -90,10 +73,17 @@ double LongestEdgeSkDetector::doEstimate( std::vector<cv::Point>& outerContour, 
 			continue;
 		}
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
+
+		if(normalizeLength)
+		{
+			double norm = sin(currentAngle * M_PI/180);
+			length *= norm;
+		}
 		actAngles.push_back(currentAngle * M_PI/180);
 		actLenghts.push_back(length);
 		if(length > maxLength)
 		{
+
 			maxLength=length;
 			angle = currentAngle * M_PI/180;
 			counter=c;

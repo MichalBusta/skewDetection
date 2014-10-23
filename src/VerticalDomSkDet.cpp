@@ -25,7 +25,8 @@ namespace cmp{
 
 
 VerticalDomSkDet::VerticalDomSkDet(int approximatioMethod, double epsilon, int sigma, int range, int ignoreAngle,
-		int correctAngle, bool doConvexHull, bool recursive): ContourSkewDetector(approximatioMethod, epsilon), sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle), doConvexHull(doConvexHull), recursive(recursive)
+		int correctAngle, bool doConvexHull, bool normalizeLength): ContourSkewDetector(approximatioMethod, epsilon),
+				sigma(sigma), range(range), ignoreAngle(ignoreAngle), correctAngle(correctAngle), doConvexHull(doConvexHull), normalizeLength(normalizeLength)
 {
 	// TODO Auto-generated constructor stub
 
@@ -60,34 +61,8 @@ double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, bool appro
 
 
 	double angleAcc = 0;
-	std::vector<cv::Point2d> workContf;
-	workContf.resize(workCont.size());
-	int level = 0;
-	while(true)
-	{
-		double angle = doEstimate( workCont, debugImage );
-		angleAcc += angle;
-		if(fabs(angle) < (M_PI / 90) || !recursive || level > 10)
-		{
-			break;
-		}
-		double skewValue = tan(angle);
-		if(level == 0)
-		{
-			for(size_t i = 0; i < workCont.size(); i++ )
-			{
-				workContf[i] = workCont[i];
-			}
-		}
-
-		for( size_t i = 0; i < workCont.size(); i++ )
-		{
-			workContf[i].x += skewValue * workContf[i].y;
-			workCont[i].x = round(workContf[i].x);
-		}
-		level++;
-	}
-	return angleAcc;
+	double angle = doEstimate( workCont, debugImage );
+	return angle;
 }
 
 double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Mat* debugImage)
@@ -112,6 +87,13 @@ double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Ma
 		if (angle < 0) angle += 180;
 		if (angle >= 180) angle -= 180;
 		double length = sqrt(vector.x*vector.x+vector.y*vector.y+0.0);
+
+		if(normalizeLength)
+		{
+			double norm = sin(angle * M_PI/180);
+			assert(norm >= 0);
+			length *= norm;
+		}
 
 		int ang = round(angle);
 		//ignoreAngle = 0;
@@ -246,12 +228,6 @@ double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Ma
 		imagesToMerge.push_back(drawing);
 		imagesToMerge.push_back(histogram);
 		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL, cv::Scalar(255, 255, 255) );
-		if(recursive || true)
-		{
-			cv::imshow("img", *debugImage);
-			cv::waitKey(0);
-			//cv::imwrite("/tmp/verticalDominant.png", *debugImage);
-		}
 	}
 	return maxI*M_PI/180-M_PI/2;
 }
@@ -416,8 +392,10 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 		imagesToMerge.push_back(histogram);
 		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL );
 
-		//cv::imshow("ts", *debugImage);
-		//cv::waitKey(0);
+		/*
+		cv::imshow("ts", *debugImage);
+		cv::waitKey(0);
+		*/
 	}
 
 	for(int i=0; i < 180; i++)
