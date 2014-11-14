@@ -137,8 +137,8 @@ double ContourSkewDetector::detectSkew(cv::Mat& mask, double lineK, cv::Mat* deb
 	std::vector<cv::Point> apCont;
 	approximateContour(contours[0], apCont);
 	if(apCont.size() > 0)
-		return detectSkew(apCont, debugImage );
-	return detectSkew(contours[0], debugImage );
+		return detectSkew(apCont, lineK, false, debugImage );
+	return detectSkew(contours[0], lineK, false, debugImage );
 }
 
 } /* namespace cmp */

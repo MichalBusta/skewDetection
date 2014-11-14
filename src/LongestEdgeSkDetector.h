@@ -19,9 +19,9 @@ public:
 
 	virtual ~LongestEdgeSkDetector();
 
-	virtual double detectSkew( std::vector<cv::Point>& contour, bool approximate = false, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( std::vector<cv::Point>& contour, double lineK, bool approximate = false, cv::Mat* debugImage = NULL );
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double lineK, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
 	/* ve stupnich */
 	double ignoreAngle;
 	/* udava % rozsah pro odhad pravdepodobnosti (kolik dalsich hran je s delkou longestEdge +- edgeRatio * longestEdge ) */

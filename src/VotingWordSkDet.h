@@ -33,9 +33,9 @@ public:
 
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
 
-	virtual double detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage = NULL );
+	virtual double detectSkew( std::vector<cv::Point>& outerContour, double lineK, cv::Mat* debugImage = NULL );
 
-	void getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage  = NULL);
+	void getSkewAngles( std::vector<cv::Point>& outerContour, double lineK, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage  = NULL);
 
 	std::vector<double> weights;
 private:

@@ -272,9 +272,9 @@ def plotWordsLength():
     plt.rcParams['legend.loc'] = 'upper left'
     
     wordsAll = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/wordsAll/results.csv', delimiter=',', skip_header=1)
-    words2 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words2/results.csv', delimiter=',', skip_header=1)
-    words3 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words3/results.csv', delimiter=',', skip_header=1)
-    words4 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words4/results.csv', delimiter=',', skip_header=1)
+    words2 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words21/results.csv', delimiter=',', skip_header=1)
+    words3 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words31/results.csv', delimiter=',', skip_header=1)
+    words4 = genfromtxt('/datagrid/personal/TextSpotter/SkewDetection/words41/results.csv', delimiter=',', skip_header=1)
     
     
     f = open('/tmp/words.tex', 'w')
@@ -343,7 +343,6 @@ def plotWordsLength():
     plt.subplots_adjust(bottom=0.2)
     
     plt.savefig('/tmp/wordClasss.eps' , format='eps')
-    print( x23 )
     f.write('\\end{tabular}')
     
     
@@ -354,7 +353,7 @@ if __name__ == '__main__':
     
     data_dir = '/datagrid/personal/TextSpotter/SkewDetection/WinFonts4'
     #data_dir = '/datagrid/personal/TextSpotter/SkewDetection/14Run'
-    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/15Run'
+    data_dir = '/datagrid/personal/TextSpotter/SkewDetection/16Run'
     #data_dir = '/tmp/11Run'
     plotWordsLength()
     #draw_evaluation(data_dir)

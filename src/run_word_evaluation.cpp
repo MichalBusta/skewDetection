@@ -26,7 +26,7 @@ static void help()
 
 int main( int argc, char **argv)
 {
-	if( argc < 3)
+  	if( argc < 3)
 	{
 		help();
 		return -1;

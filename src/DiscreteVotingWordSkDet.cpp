@@ -27,7 +27,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 
 
 	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
-	weights.push_back(1.0);
+	weights.push_back(0.9);
 	detectorNames.push_back("VertDomCH");
 
 
@@ -40,11 +40,9 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	weights.push_back(1.0);
 	detectorNames.push_back("Thin Profile");
 
-	/*
 	detectors.push_back( new LongestEdgeSkDetector() );
 	weights.push_back(1.0);
 	detectorNames.push_back("LongestEdgeSkDetector");
-	*/
 
 
 }
@@ -64,17 +62,20 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 	{
 		for( size_t detId = 0; detId < this->detectors.size(); detId++)
 		{
+
 			/*
 			double skewAngle = this->detectors[detId]->detectSkew( *contours[i], true,  debugImage);
+
+			cv::imshow("det", *debugImage);
+			cv::waitKey(0);
+
 			double angleDeg = skewAngle * 180 / M_PI + 90;
 			assert(angleDeg >= 0);
 			assert(angleDeg <= 180);
-			histogram[(int) round(angleDeg)] += detectors[detId]->lastDetectionProbability;
-			//todo draw the image
-			 *
-			 */
+			histogram[(int) round(angleDeg)] += detectors[detId]->lastDetectionProbability * weights[detId];
+*/
 
-			this->detectors[detId]->voteInHistogram(*contours[i], histogram, this->weights[detId], true, debugImage);
+			this->detectors[detId]->voteInHistogram(*contours[i], lineK, histogram, this->weights[detId], true, debugImage);
 
 		}
 	}

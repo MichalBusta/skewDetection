@@ -73,11 +73,11 @@ public:
 
 	virtual double detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugImage = NULL );
 
-	virtual void getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage){
+	virtual void getSkewAngles( std::vector<cv::Point>& outerContour, double lineK, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<int>& detecotrsId, cv::Mat* debugImage){
 
 	}
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL) = 0;
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double lineK, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL) = 0;
 	/**
 	 * Descendants have to implement this method
 	 *
@@ -86,7 +86,7 @@ public:
 	 * @param debugImage
 	 * @return
 	 */
-	virtual double detectSkew( std::vector<cv::Point>& contour, bool approximate = false, cv::Mat* debugImage = NULL ) = 0;
+	virtual double detectSkew( std::vector<cv::Point>& contour, double lineK,  bool approximate = false, cv::Mat* debugImage = NULL ) = 0;
 
 	static void getBigestContour( std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy );
 
