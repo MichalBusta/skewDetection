@@ -18,7 +18,7 @@ using namespace cv;
 namespace cmp
 {
 
-CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision, bool recursive, double zoneOffset) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), recursive(recursive), zoneOffset(zoneOffset)
+CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision, bool recursive, double zoneOffset, bool useMaxMin ) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), recursive(recursive), useMaxMin(useMaxMin) ,zoneOffset(zoneOffset)
 {
 
 }
@@ -27,6 +27,80 @@ CentersSkDet::~CentersSkDet()
 {
 	// TODO Auto-generated destructor stub
 }
+    
+/*
+ 
+ A complementary method for skew estimation. Improves performance on cyrillic alphabet.
+*/
+    
+double CentersSkDet::doEstimate2(std::vector<cv::Point> &contour, cv::Mat* debugImage){
+    
+    //get yMax
+    
+    int ymax, ymin, xmax,xmin;
+    
+    xmax =0;
+    xmin =INT_MAX;
+    ymax =0;
+    ymin =INT_MAX;
+    
+    for (int i=0; i<contour.size(); i++) {
+        
+        cv::Point pt = contour[i];
+        
+        xmax =MAX(xmax, pt.x);
+        xmin =MIN(xmin, pt.x);
+        ymax =MAX(ymax, pt.y);
+        ymin =MIN(ymin, pt.y);
+        
+        
+    }
+    
+    cv::Point TL = cv::Point(xmin,ymax);
+    cv::Point TR = cv::Point(xmax,ymax);
+    cv::Point BL = cv::Point(xmin,ymin);
+    cv::Point BR = cv::Point(xmax,ymin);
+    
+    cv::Point TLC, TRC, BLC, BRC;
+    TLC = BR;
+    TRC = BL;
+    BRC = TL;
+    BLC = TR;
+    
+    for (int i =0; i<contour.size(); i++) {
+        
+        Point pt = contour[i];
+        
+        if (norm(TLC-TL) > norm(pt-TL)) {
+            TLC = pt;
+        }
+        if (norm(TRC-TR) > norm(pt-TR)) {
+            TRC = pt;
+        }
+        if (norm(BRC-BR) > norm(pt-BR)) {
+            BRC = pt;
+        }
+        if (norm(BLC-BL) > norm(pt-BL)) {
+            BLC = pt;
+        }
+        
+    }
+    
+    cv::Point CB, CT;
+    
+    CT = cv::Point((TRC.x+TLC.x)/2, TRC.y);
+    CB = cv::Point((BRC.x+BLC.x)/2, BRC.y);
+    
+    float angle=0, deltaX=0, deltaY=0;
+    deltaX = CT.x - CB.x;
+    deltaY = CB.y - CT.y;
+    if(deltaY != 0)
+        angle = atan((deltaX)*1.0/(deltaY));
+    
+    return angle;
+    
+}
+    
 
 static inline double cross_product( cv::Point& a, cv::Point& b ){
    return a.x*b.y - a.y*b.x;
@@ -361,7 +435,13 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, double li
 	int level = 0;
 	while(true)
 	{
-		double angle = doEstimate( workCont, lineK, debugImage );
+
+        double angle;
+        if (useMaxMin)
+        	angle = doEstimate2( workCont, debugImage );
+		else
+			angle = doEstimate( workCont, lineK, debugImage );
+        
 		angleAcc += angle;
 		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
 		{

@@ -23,6 +23,7 @@ namespace cmp
 #define ANGLE_TOLERANCE M_PI/60.0
 
 //common functions
+void draw_polar_histogram(cv::Mat& img, double* histogram, cv::Scalar color);
 
 /**
  * @class cmp::SkewDetector

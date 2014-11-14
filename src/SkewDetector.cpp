@@ -12,6 +12,15 @@
 namespace cmp
 {
 
+void draw_polar_histogram(cv::Mat& img, double* histogram, int bins, cv::Scalar color)
+{
+	img = cv::Mat::zeros(100, 50, CV_8UC3) + cv::Scalar(255, 255, 255);
+	for( int i = 0; i < bins; i++ )
+	{
+
+	}
+}
+
 void ContourSkewDetector::filterValuesBySimiliarAngle(
 		const std::vector<double>& values, const std::vector<double>& angles,
 		std::vector<double>& valuesOut, std::vector<double>& anglesOut, double angleRange)
