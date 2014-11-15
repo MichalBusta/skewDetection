@@ -31,7 +31,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorNames.push_back("VertDomCH");
 
 
-	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9) );
+	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, false ,0.9) );
 	weights.push_back(1.0);
 	detectorNames.push_back("CentersSkDet");
 
