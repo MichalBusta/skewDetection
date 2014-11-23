@@ -52,7 +52,8 @@ int main( int argc, char **argv)
 	std::vector<cv::Ptr<ContourWordSkewDetector> > detectors;
 	detectors.push_back( new DiscreteVotingWordSkDet() );
     detectors.push_back( new SpacingProfileDetector() );
-	evaluator.registerDetector( NULL, "CommonVoting1", "Common Voting1" );
+	evaluator.registerDetector( NULL, "CommonVoting", "Common Voting" );
+    evaluator.registerDetector( NULL, "CommonVoting1", "Common Voting1" );
     
 	//evaluator.detectorNames.push_back("CommonVoting");
 	//evaluator.detectorCaptions.push_back("Common Voting");

@@ -35,7 +35,7 @@ namespace cmp {
         std::vector<cv::Point> spacingCountours;
         double hist[180];
         
-        ThinProfileSkDet detector = ThinProfileSkDet();
+        ThinProfileSkDet detector = ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023,IGNORE_ANGLE, 0.02,false,false);
         
         for (int i=0; i<spaceCount; i++) {
             
@@ -105,6 +105,7 @@ namespace cmp {
                 while (i != bot){
                     
                     if (i==0) {
+                        output.push_back(input[i]);
                         i = input.size();
                     }
                     else{
