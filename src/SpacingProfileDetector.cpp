@@ -7,7 +7,7 @@
 //
 
 #include "SpacingProfileDetector.h"
-#include "ThinProfileSkDet.cpp"
+#include "ThinProfileSkDet.h"
 
 namespace cmp {
     
@@ -57,7 +57,7 @@ namespace cmp {
         getFace(firstConvex, firstFaceContour);
         getFace(secondConvex, secondFaceContour, true);
         
-        invertMerge(firstFaceContour, secondFaceContour, outputCont);
+        invertMerge(firstFaceContour, secondFaceContour, outputCont, additionalSpacing);
         
     }
     
@@ -129,19 +129,83 @@ namespace cmp {
         }
     }
     
-    void SpacingProfileDetector::invertMerge(std::vector<cv::Point> firstFace, std::vector<cv::Point> secondFace, std::vector<cv::Point> &outputCont){
+    void SpacingProfileDetector::invertMerge(std::vector<cv::Point>& firstFace, std::vector<cv::Point>& secondFace, std::vector<cv::Point> &outputCont, double spacing){
         
-        //move both countours to x=0
+        deOffset(firstFace, spacing);
+        deOffset(secondFace);
+        outputCont.clear();
         
-    }
-    
-    void SpacingProfileDetector::deOffset(std::vector<cv::Point *>& cont){
+        //finding the top most points
+        int topMostIndex_1=0, topMostIndex_2=0;
         
-        for (int i=0; i<cont.size(); i++) {
+        if (firstFace[0].y<firstFace[firstFace.size()-1].y) {
+            
+            topMostIndex_1 = firstFace.size();
             
         }
         
+        if (secondFace[0].y<secondFace[secondFace.size()-1].y) {
+            
+            topMostIndex_2 = secondFace.size();
+            
+        }
+        
+        //merging countours
+        
+        outputCont = secondFace;
+        
+        if (topMostIndex_2 != 0) {
+            
+            if (topMostIndex_2 != 0) {
+                
+                for (auto iter = firstFace.end(); iter != firstFace.begin(); --iter) {
+                    
+                    outputCont.push_back(*iter);
+                    
+                }
+                
+            }
+            else {
+                
+                outputCont.insert(outputCont.end(), firstFace.begin(), firstFace.end());
+                
+            }
+        }
+        else {
+            
+            if (topMostIndex_2 != 0) {
+                
+                outputCont.insert(outputCont.end(), firstFace.begin(), firstFace.end());
+                
+            }
+            else {
+                
+                for (auto iter = firstFace.end(); iter != firstFace.begin(); --iter) {
+                    
+                    outputCont.push_back(*iter);
+                    
+                }
+                
+            }
+        }
     }
     
-    
+    void SpacingProfileDetector::deOffset(std::vector<cv::Point >& cont, int xOrigin){
+        
+        int minX=INT16_MAX;
+        
+        for (int i=0; i<cont.size(); i++) {
+            
+            minX = MIN(minX, cont[i].x);
+            
+        }
+        
+        minX += xOrigin;
+        
+        for (int i=0; i<cont.size(); i++) {
+            
+            cont[i].x -=minX;
+            
+        }
+    }
 }

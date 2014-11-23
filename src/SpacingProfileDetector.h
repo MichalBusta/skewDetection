@@ -35,14 +35,14 @@ namespace cmp {
         
         private:
         
-            void createMat(std::vector<cv::Point> rightChar,std::vector<cv::Point> leftChar, std::vector<cv::Point>& outputCont, double additionalSpacing = 0);
+            void createMat(std::vector<cv::Point> rightChar,std::vector<cv::Point> leftChar, std::vector<cv::Point>& outputCont, double additionalSpacing = 5);
         
-            void invertMerge(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace, std::vector<cv::Point>& outputCont);
+            void invertMerge(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace, std::vector<cv::Point>& outputCont, double spacing);
         
             size_t spaceCount;
         
             void getFace(std::vector<cv::Point> input, std::vector<cv::Point> output, bool getLeft = false);
         
-            void deOffset(std::vector<cv::Point*>& cont);
+            void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0);
     };
 }
