@@ -62,7 +62,7 @@ double VotingWordSkDet::detectSkew( cv::Mat& mask, double lineK, cv::Mat* debugI
 
 }
 
-double VotingWordSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+double VotingWordSkDet::detectSkew( std::vector<cv::Point>& outerContour, double lineK, cv::Mat* debugImage )
 {
 	double bestProb = 0;
 	std::vector<double> angles;
@@ -80,7 +80,7 @@ double VotingWordSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Ma
 
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
-		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, lineK, debugImage) );
 		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
 		{
 			bestDetIndex = i;
@@ -95,7 +95,7 @@ double VotingWordSkDet::detectSkew( std::vector<cv::Point>& outerContour, cv::Ma
 	return angles[bestDetIndex];
 }
 
-void VotingWordSkDet::getSkewAngles( std::vector<cv::Point>& outerContour, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage)
+void VotingWordSkDet::getSkewAngles( std::vector<cv::Point>& outerContour, double lineK, std::vector<double>& angles, std::vector<double>& probabilities, cv::Mat* debugImage)
 {
 	double bestProb = 0;
 	cv::Mat img;
@@ -111,7 +111,7 @@ void VotingWordSkDet::getSkewAngles( std::vector<cv::Point>& outerContour, std::
 
 	for(size_t i = 0; i < this->detectors.size(); i++)
 	{
-		angles.push_back( this->detectors[i]->detectSkew( outerContour, debugImage) );
+		angles.push_back( this->detectors[i]->detectSkew( outerContour, lineK, debugImage) );
 		probabilities.push_back(this->detectors[i]->lastDetectionProbability * weights[i]);
 	}
 }

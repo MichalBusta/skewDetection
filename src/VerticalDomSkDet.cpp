@@ -47,7 +47,7 @@ VerticalDomSkDet::~VerticalDomSkDet() {
 	delete [] hist;
 }
 
-double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage)
+double VerticalDomSkDet::detectSkew( std::vector<cv::Point>& contour, double lineK, bool approximate, cv::Mat* debugImage)
 {
 
 	std::vector<cv::Point> workCont;
@@ -232,7 +232,7 @@ double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Ma
 	return maxI*M_PI/180-M_PI/2;
 }
 
-void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
+void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, double lineK, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
 
 	std::vector<cv::Point> workCont;

@@ -18,7 +18,7 @@ using namespace cv;
 namespace cmp
 {
 
-CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision, bool recursive, bool useMaxMin ,double zoneOffset) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), recursive(recursive), useMaxMin(useMaxMin) ,zoneOffset(zoneOffset)
+CentersSkDet::CentersSkDet(int approximatioMethod, double epsilon, float precision, bool recursive, double zoneOffset, bool useMaxMin ) : ContourSkewDetector(approximatioMethod, epsilon),  precision(precision), recursive(recursive), useMaxMin(useMaxMin) ,zoneOffset(zoneOffset)
 {
 
 }
@@ -113,10 +113,133 @@ double CentersSkDet::doEstimate2(std::vector<cv::Point> &contour, cv::Mat* debug
 }
     
 
-double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* debugImage )
+static inline double cross_product( cv::Point& a, cv::Point& b ){
+   return a.x*b.y - a.y*b.x;
+}
+
+double distance_to_line( cv::Point& begin, cv::Point end_m_begin, cv::Point x ){
+   //translate the begin to the origin
+   //end -= begin;
+   x -= begin;
+
+   //¿do you see the triangle?
+   double area = cross_product(x, end_m_begin);
+   return area / norm(end_m_begin);
+}
+
+static void findTopBottomPoints(cv::Point center, std::vector<cv::Point>& outerContour, double lineK, cv::Point& top, cv::Point& bottom, double& distance)
 {
-	//ziskani souradnic Y
+	double c = center.y - lineK*center.x;
+	cv::Point center2(center.x + 100, (center.x + 100) * lineK + c);
+	cv::Point end_m_begin = center2 - center;
+	double maxDist = 0;
+	double minDist = 0;
+	for (int c = 0; c < outerContour.size();c++)
+	{
+		double dist =  distance_to_line(center, end_m_begin, outerContour[c]);
+		if( maxDist < dist)
+		{
+			bottom = outerContour[c];
+			maxDist = dist;
+		}
+		if(minDist > dist)
+		{
+			top = outerContour[c];
+			minDist = dist;
+		}
+	}
+	cv::Point top2(top.x + 100, (top.x + 100) * lineK + c);
+	end_m_begin = top2 - top;
+	distance = distance_to_line( top, end_m_begin, bottom );
+}
+
+struct SymPoints{
+	cv::Point leftTop;
+	cv::Point rightTop;
+	cv::Point leftBottom;
+	cv::Point rightBottom;
+};
+
+static void findPointsInBand(std::vector<cv::Point>& outerContour, cv::Point& center, double lineK, double letterSize, double delta, std::vector<double>& offsets,  std::vector<SymPoints>& symPoints )
+{
+	symPoints.clear();
+	symPoints.resize(offsets.size());
+	for(size_t i = 0; i < offsets.size(); i++)
+	{
+		symPoints[i].leftTop.x = INT_MAX;
+		symPoints[i].leftBottom.x = INT_MAX;
+	}
+
+	double c = center.y - lineK*center.x;
+	cv::Point center2(center.x + 100, (center.x + 100) * lineK + c);
+	cv::Point end_m_begin = center2 - center;
+	for(size_t i = 0; i < offsets.size(); i++)
+	{
+		double distCheck = letterSize * offsets[i] / 2;
+		double distCheckDelta = distCheck - delta;
+		for(size_t p = 0; p < outerContour.size(); p++)
+		{
+			double dist = distance_to_line(center, end_m_begin, outerContour[p]);
+			if( dist <= distCheck && dist > distCheckDelta )
+			{
+				if(symPoints[i].leftTop.x > outerContour[p].x)
+					symPoints[i].leftTop = outerContour[p];
+				if(symPoints[i].rightTop.x < outerContour[p].x)
+					symPoints[i].rightTop = outerContour[p];
+			}else if(-dist <= distCheck && -dist > distCheckDelta)
+			{
+				if(symPoints[i].leftBottom.x > outerContour[p].x)
+					symPoints[i].leftBottom = outerContour[p];
+				if(symPoints[i].rightBottom.x < outerContour[p].x)
+					symPoints[i].rightBottom = outerContour[p];
+			}
+		}
+	}
+}
+
+cv::Point mirror(cv::Point& p, cv::Point& p0, cv::Point& p1)
+{
+   long x2,y2;
+
+   double dx  = (double) (p1.x - p0.x);
+   double dy  = (double) (p1.y - p0.y);
+
+   double a   = (dx * dx - dy * dy) / (dx * dx + dy*dy);
+   double b   = 2 * dx * dy / (dx*dx + dy*dy);
+
+   x2  = round(a * (p.x - p0.x) + b*(p.y - p0.y) + p0.x);
+   y2  = round(b * (p.x - p0.x) - a*(p.y - p0.y) + p0.y);
+
+   cv::Point pm = Point((int)x2,(int)y2);
+
+   return pm;
+
+}
+
+double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, double lineK, cv::Mat* debugImage )
+{
+
+	cv::Point top;
+	cv::Point bottom;
+	double distance = 0;
 	cv::Rect bbox = cv::boundingRect(outerContour);
+	cv::Point center(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+	findTopBottomPoints(center, outerContour, lineK, top, bottom, distance);
+
+	double delta = distance * precision;
+
+	std::vector<double> offsets;
+	offsets.push_back(0.95);
+	offsets.push_back(0.9);
+	offsets.push_back(0.85);
+	offsets.push_back(0.80);
+	offsets.push_back(0.75);
+	offsets.push_back(0.7);
+	std::vector<SymPoints> symPoints;
+	findPointsInBand(outerContour, center, lineK, distance, delta, offsets, symPoints );
+
+	//ziskani souradnic Y
+	//cv::Rect bbox = cv::boundingRect(outerContour);
 	int topPoint = bbox.y + bbox.height;
 	int bottomPoint = 0;
 	for (int c = 0; c < outerContour.size();c++)
@@ -195,7 +318,9 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* 
 
 	//ziskani prostrednich bodu
 	Point TM((TL.x + TR.x)/2.0,TL.y);
+	cv::Point TMo = TM;
 	Point BM((BL.x + BR.x)/2.0,BR.y);
+	cv::Point BMo = BM;
 
 	//vypocet uhlu zkoseni
 	float angle=0, angle2 = 0, deltaX=0, deltaY=0;
@@ -207,6 +332,23 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* 
 	if(deltaY != 0)
 		angle2 = atan((deltaX2)*1.0/(deltaY));
 	//uhel promenne angle je v radianech
+
+	int symPointsCount = 0;
+	for(size_t i = 0; i < symPoints.size(); i++)
+	{
+		cv::Point mlt = mirror(symPoints[i].leftTop, TMo, BMo);
+		cv::Point delta = symPoints[i].rightTop - mlt;
+		double dist =  (delta.x * delta.x + delta.y * delta.y);
+		if( dist < (letterSize * 0.05 * letterSize * 0.05) )
+			symPointsCount++;
+		mlt = mirror(symPoints[i].leftBottom, TMo, BMo);
+		delta = symPoints[i].rightBottom - mlt;
+		dist =  (delta.x * delta.x + delta.y * delta.y);
+		if( dist < (letterSize * 0.05 * letterSize * 0.05) )
+			symPointsCount++;
+	}
+	this->probMeasure2 = symPointsCount / (2.0 * symPoints.size());
+
 
 	if(debugImage != NULL)
 	{
@@ -263,24 +405,53 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, cv::Mat* 
 		cv::circle(drawing, (TM - offset), 4, cv::Scalar(0, 0, 255), 2);
 		cv::circle(drawing, (BM - offset), 4, cv::Scalar(0, 0, 255), 2);
 
+		for(size_t i = 0; i < symPoints.size(); i++)
+		{
+			cv::Point mlt = mirror(symPoints[i].leftTop, TMo, BMo);
+			cv::Point delta = symPoints[i].rightTop - mlt;
+			double dist =  (delta.x * delta.x + delta.y * delta.y);
+			cv::Scalar color(0, 255, 0);
+			if( dist > (letterSize * 0.05 * letterSize * 0.05) )
+				color = cv::Scalar(0, 0, 255);
+			cv::Point normLeft((symPoints[i].leftTop.x - bbox.x)*scalefactor, (symPoints[i].leftTop.y - bbox.y)*scalefactor);
+			cv::circle(drawing, normLeft, 4, color, 2);
+			cv::Point normRight((symPoints[i].rightTop.x - bbox.x)*scalefactor, (symPoints[i].rightTop.y - bbox.y)*scalefactor);
+			cv::circle(drawing, normRight, 4, cv::Scalar(0, 255, 0), 2);
+			cv::line(drawing, normLeft, normRight, cv::Scalar(255, 0, 0), 1 );
+
+			mlt = mirror(symPoints[i].leftBottom, TMo, BMo);
+			delta = symPoints[i].rightBottom - mlt;
+			dist =  (delta.x * delta.x + delta.y * delta.y);
+			color = cv::Scalar(0, 255, 0);
+			if( dist > (letterSize * 0.05 * letterSize * 0.05) )
+				color = cv::Scalar(0, 0, 255);
+			cv::Point normLeftB((symPoints[i].leftBottom.x - bbox.x)*scalefactor, (symPoints[i].leftBottom.y - bbox.y)*scalefactor);
+			cv::circle(drawing, normLeftB, 4, color, 2);
+			cv::Point normRightB((symPoints[i].rightBottom.x - bbox.x)*scalefactor, (symPoints[i].rightBottom.y - bbox.y)*scalefactor);
+			cv::circle(drawing, normRightB, 4, cv::Scalar(0, 255, 0), 2);
+			cv::line(drawing, normLeftB, normRightB, cv::Scalar(255, 0, 0), 1 );
+		}
+
 		//cv::imshow("CentersSk", drawing);
 		//cv::waitKey(0);
 	}
-	this->lastDetectionProbability = 0.70;
-	this->probMeasure2 = fabs(angle - angle2);
+	this->lastDetectionProbability = this->probMeasure2;
 	return angle;
 }
 
-double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, bool approximate, cv::Mat* debugImage )
+double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, double lineK, bool approximate, cv::Mat* debugImage )
 {
 	double angleAcc = 0;
 	std::vector<cv::Point> workCont = outerContour;
 	int level = 0;
 	while(true)
 	{
+
         double angle;
-        if (useMaxMin) angle = doEstimate2( workCont, debugImage );
-		else angle = doEstimate( workCont, debugImage );
+        if (useMaxMin)
+        	angle = doEstimate2( workCont, debugImage );
+		else
+			angle = doEstimate( workCont, lineK, debugImage );
         
 		angleAcc += angle;
 		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )
@@ -297,7 +468,7 @@ double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, bool appr
 	return angleAcc;
 }
 
-void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
+void CentersSkDet::voteInHistogram( std::vector<cv::Point>& outerContour, double lineK, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
 	double angle = detectSkew( outerContour, false, debugImage);
 	int angleDeg = angle * 180 / M_PI;

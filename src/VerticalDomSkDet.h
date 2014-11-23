@@ -17,9 +17,9 @@ public:
 	VerticalDomSkDet(int approximatioMethod = CV_CHAIN_APPROX_TC89_KCOS, double epsilon = 0.014, int sigma = 3, int range = 3, int ignoreAngle = IGNORE_ANGLE, int correctAngle = 3, bool doConvexHull = false, bool normalizeLength = true);
 	virtual ~VerticalDomSkDet();
 
-	virtual double detectSkew( std::vector<cv::Point>& contour, bool approximate = false, cv::Mat* debugImage = NULL);
+	virtual double detectSkew( std::vector<cv::Point>& contour, double lineK, bool approximate = false, cv::Mat* debugImage = NULL);
 
-	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
+	virtual void voteInHistogram( std::vector<cv::Point>& outerContour, double lineK, double *histogram, double weight, bool approximate = false, cv::Mat* debugImage = NULL);
 
 private:
 

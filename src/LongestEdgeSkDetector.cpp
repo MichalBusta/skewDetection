@@ -27,7 +27,7 @@ LongestEdgeSkDetector::~LongestEdgeSkDetector() {
 	// TODO Auto-generated destructor stub
 }
 
-double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& contour, bool approximate, cv::Mat* debugImage )
+double LongestEdgeSkDetector::detectSkew( std::vector<cv::Point>& contour, double lineK, bool approximate, cv::Mat* debugImage )
 {
 	std::vector<cv::Point> workCont;
 	if( approximate )
@@ -203,7 +203,7 @@ double LongestEdgeSkDetector::doEstimate( std::vector<cv::Point>& outerContour, 
 	return angle - M_PI/2;
 }
 
-void LongestEdgeSkDetector::voteInHistogram( std::vector<cv::Point>& outerContour, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
+void LongestEdgeSkDetector::voteInHistogram( std::vector<cv::Point>& outerContour, double lineK, double *histogram, double weight, bool approximate, cv::Mat* debugImage)
 {
 	double angle = detectSkew( outerContour, approximate );
 	int angleDeg = angle * 180 / M_PI;

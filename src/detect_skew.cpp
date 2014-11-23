@@ -46,11 +46,11 @@ int main( int argc, char **argv)
 	}
 
 	std::vector<cv::Ptr<SkewDetector> > detectors;
-	detectors.push_back( new MockSkewDetector() );
-	detectors.push_back( new ThinProfileSkDet() );
+	//detectors.push_back( new MockSkewDetector() );
+	//detectors.push_back( new ThinProfileSkDet() );
 	detectors.push_back( new CentersSkDet() );
-	detectors.push_back( new VerticalDomSkDet() );
-	detectors.push_back( new LongestEdgeSkDetector() );
+	//detectors.push_back( new VerticalDomSkDet() );
+	//detectors.push_back( new LongestEdgeSkDetector() );
 
 	if(detector > detectors.size())
 	{
@@ -66,7 +66,7 @@ int main( int argc, char **argv)
 		cv::copyMakeBorder( tmp, img, 10, 10, 50, 50, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255) );
 		//invert image, so ink is white
 		cv::Mat imgRec = ~img;
-		cv::Mat debugImage;
+		cv::Mat debugImage = img;
 		double skew = detectors[detector]->detectSkew( imgRec,  0, &debugImage );
 
 		std::cout << "Detection Probability: " << detectors[detector]->lastDetectionProbability << std::endl;
