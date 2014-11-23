@@ -35,7 +35,7 @@ namespace cmp {
         
         private:
         
-            void createMat(std::vector<cv::Point> rightChar,std::vector<cv::Point> leftChar, std::vector<cv::Point>& outputCont, double additionalSpacing = 5);
+            void createMat(std::vector<cv::Point> rightChar,std::vector<cv::Point> leftChar, std::vector<cv::Point>& outputCont, double additionalSpacing =30);
         
             void invertMerge(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace, std::vector<cv::Point>& outputCont, double spacing);
         
