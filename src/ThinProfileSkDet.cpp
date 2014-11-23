@@ -156,7 +156,7 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 
 		if( width == 0 )
 		{
-			//todo this shoud not happen
+			//todo this should not happen
 			width = 1;
 		}
 
