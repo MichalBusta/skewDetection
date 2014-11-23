@@ -34,7 +34,7 @@ namespace cmp {
             
             std::vector<cv::Point> spaceProfile;
             createMat(contours[i+1][0], contours[i][0], spaceProfile);
-            detector.voteInHistogram(spaceProfile, hist, 1);
+            detector.voteInHistogram(spaceProfile, 1.0,hist, 1);
             
         }
         
