@@ -27,11 +27,11 @@ namespace cmp {
         
             SpacingProfileDetector();
         
-            virtual ~SpacingProfileDetector();
+            ~SpacingProfileDetector();
         
-            virtual double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL);
+            double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL);
         
-            virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL) = 0;
+            double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
         
         private:
         
@@ -41,7 +41,7 @@ namespace cmp {
         
             size_t spaceCount;
         
-            void getFace(std::vector<cv::Point> input, std::vector<cv::Point> output, bool getLeft = false);
+            void getFace(std::vector<cv::Point> input, std::vector<cv::Point>& output, bool getLeft = false);
         
             void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0);
     };

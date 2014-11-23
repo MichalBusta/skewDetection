@@ -19,11 +19,18 @@ namespace cmp {
         
     }
     
+    double SpacingProfileDetector::detectSkew(std::vector<Blob> &blobs, double lineK, double &probability,cv::Mat* debugImage){
+        return 0;
+    }
+    
     double SpacingProfileDetector::detectContoursSkew(std::vector<std::vector<cv::Point> *> &contours, double lineK, double& probability, cv::Mat* debugImage){
         
         spaceCount = contours.size()-1;
         
         assert(spaceCount>0);
+        
+        double angle=0;
+        double maxConfidence=0;
         
         std::vector<cv::Point> spacingCountours;
         double hist[180];
@@ -38,7 +45,19 @@ namespace cmp {
             
         }
         
-        return 0;
+        for (int i =0; i<180; i++) {
+            
+            if (hist[i]>maxConfidence) {
+                
+                maxConfidence = hist[i];
+                angle = i;
+                
+            }
+            
+            
+        }
+        
+        return angle;
         
     }
     
@@ -61,7 +80,7 @@ namespace cmp {
         
     }
     
-    void SpacingProfileDetector::getFace(std::vector<cv::Point> input, std::vector<cv::Point> output, bool getLeft){
+    void SpacingProfileDetector::getFace(std::vector<cv::Point> input, std::vector<cv::Point> &output, bool getLeft){
         
         int top=0;
         int bot=0;
