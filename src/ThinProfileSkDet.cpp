@@ -400,7 +400,7 @@ void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& contour, double 
 		outerContour = contour;
 	}
 
-	double angle = detectSkew( outerContour, lineK );
+	double angle = detectSkew( outerContour, lineK,false, debugImage );
 	int angleDeg = angle * 180 / M_PI + 90;
 	int sigma = 3;
 	int range = 3;
