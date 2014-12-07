@@ -51,7 +51,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage, std::vector<cv::Rect>* bounds)
 {
 	double histogram[180];
 	memset (histogram, 0, 180 * sizeof(double));

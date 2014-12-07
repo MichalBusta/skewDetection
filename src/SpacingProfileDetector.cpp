@@ -26,6 +26,11 @@ namespace cmp {
         
         std::vector<std::vector<cv::Point> > contours;
         std::vector<int> yPos;
+        std::vector<int> xPos;
+        
+        std::vector<double> widths;
+        std::vector<double> angles;
+        
         
         spaceCount = contours.size()-1;
         assert(spaceCount>0);
@@ -41,6 +46,7 @@ namespace cmp {
             
             contours.push_back(tempContours[0]);
             yPos.push_back(blob.bBox.y);
+            xPos.push_back(blob.bBox.x);
             
         }
         
@@ -62,18 +68,20 @@ namespace cmp {
             getFace(rightChar_Convex, backFace);
             
             int yOffset=0;
+            int xOffset=0;
             yOffset = abs(yPos[i] - yPos[i+1]);
+            xOffset = xPos[i] - xPos[i+1];
             
             if (yPos[i]>yPos[i+1]) {
                 deOffset(frontFace,0,yOffset);
-                deOffset(backFace,0,0);
+                deOffset(backFace,xOffset,0);
             }
             else{
                 deOffset(backFace,0,yOffset);
-                deOffset(frontFace,0,0);
+                deOffset(frontFace,xOffset,0);
             }
             
-            findProfiles(frontFace, backFace);
+            findProfiles(frontFace, backFace,angles,widths);
             
         }
         
@@ -82,96 +90,204 @@ namespace cmp {
         
     }
     
-    void SpacingProfileDetector::findProfiles(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace){
+    void SpacingProfileDetector::findProfiles(std::vector<cv::Point> leftFace,std::vector<cv::Point> rightFace,std::vector<double> angles, std::vector<double> widths){
         
-    }
-    
-    double SpacingProfileDetector::detectContoursSkew(std::vector<std::vector<cv::Point> *> &contours, double lineK, double& probability, cv::Mat* debugImage){
+        int topMostIndex=0, bottomMostIndex=0;
         
-        spaceCount = contours.size()-1;
+        int maxXIndex=0, minXIndex=0;
         
-        assert(spaceCount>0);
-        
-        double angle=0;
-        double maxConfidence=0;
-        
-        double hist[180];
-        memset (hist, 0, 180 * sizeof(double));
-        
-        ThinProfileSkDet detector = ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023,IGNORE_ANGLE, 0.02,false,true);
-        
-        for (int i=0; i<spaceCount; i++) {
-           
-            std::vector<cv::Point> spaceProfile = createMat(*contours[i+1], *contours[i]);
-           /*
-            cv::Mat img = cv::Mat::zeros(300, 300, CV_8UC3);
-            std::vector<std::vector<cv::Point>> cont;
+        if (leftFace[0].y<leftFace[leftFace.size()-1].y) {
             
-            cont.push_back(spaceProfile);
-            
-            cv::drawContours(img, cont, 0, cv::Scalar(255,0,0),1,8);
-            cv::imshow(" ", img);
-            cv::waitKey(0);
-            
-            */
-            
-            cv::Mat img;
-            
-            detector.voteInHistogram(spaceProfile, 0, hist, 1,false ,&img);
-            
-            //cv::imshow(" ", img);
-            //cv::waitKey(0);
-            
+            topMostIndex = leftFace.size();
             
         }
         
-        for (int i =0; i<180; i++) {
+        if (rightFace[0].y>rightFace[rightFace.size()-1].y) {
             
-            if (hist[i]>maxConfidence) {
+            bottomMostIndex = rightFace.size();
+            
+        }
+        
+        for (int i =0; i<rightFace.size(); i++) {
+            
+            rightFace[i].x < rightFace[minXIndex].x ? minXIndex=i:minXIndex;
+            
+        }
+        for (int i =0; i<leftFace.size(); i++) {
+            
+            leftFace[i].x > leftFace [maxXIndex].x ? maxXIndex=i:maxXIndex;
+            
+        }
+        
+        int leftVertex = topMostIndex, leftVertex_next;
+        int rightVertex = bottomMostIndex, rightVertex_next;
+        
+        bool xMax_left = false, xMax_right = false;
+        
+        topMostIndex == maxXIndex ? xMax_left=true:false;
+        bottomMostIndex == minXIndex ? xMax_right=true:false;
+        
+        while (true) {
+            
+            if (topMostIndex>bottomMostIndex) {
+                leftVertex_next=leftVertex-1;
+                rightVertex_next=rightVertex+1;
+            }
+            else{
+                leftVertex_next=leftVertex+1;
+                rightVertex_next=rightVertex-1;
+            }
+            
+            cv::Point leftEdge = leftFace[leftVertex]-leftFace[leftVertex_next];
+            cv::Point rightEdge = rightFace[rightVertex]-rightFace[rightVertex_next];
+            
+            double angle =0;
+            double width =-1;
+            
+            double angleA = atan(leftEdge.y/leftEdge.x);
+            double angleB = atan(rightEdge.y/rightEdge.x);
+            
+            
+            if (angleA < angleB) {
                 
-                maxConfidence = hist[i];
-                angle = i*M_PI/180-M_PI/2;
+                leftVertex=leftVertex_next;
+                
+                if (testBounds(leftEdge, leftFace[leftVertex], rightFace)){
+                    
+                    width = getWidth(getLine(leftEdge, leftFace[leftVertex]), rightFace[rightVertex]);
+                    angle=angleA;
+                    
+                    angle = angle + M_PI/2;
+                    while (angle > M_PI/2) angle = angle - M_PI;
+                    while (angle <= -M_PI/2) angle = angle+ M_PI;
+                    
+                    if(true)
+                    {
+                        if(fabs(cos(angle)) != 0 )
+                            width = width / fabs(cos(angle));
+                    }
+                }
+            }
+            
+            if (angleA > angleB) {
+                
+                rightVertex = rightVertex_next;
+                
+                if (testBounds(rightEdge, rightFace[rightVertex], leftFace)){
+                    
+                    width = getWidth(getLine(rightEdge, rightFace[rightVertex]), leftFace[leftVertex]);
+                    angle=angleB;
+                    
+                    angle = angle + M_PI/2;
+                    while (angle > M_PI/2) angle = angle - M_PI;
+                    while (angle <= -M_PI/2) angle = angle+ M_PI;
+                    
+                    if(true)
+                    {
+                        if(fabs(cos(angle)) != 0 )
+                            width = width / fabs(cos(angle));
+                    }
+                }
+            }
+            
+            if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE-M_PI/2) && angle <= (M_PI/2-M_PI/180*IGNORE_ANGLE)) {
+                
+                widths.push_back(width);
+                angles.push_back(angle);
+                
+            }
+        }
+    }
+    
+    bool SpacingProfileDetector::testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace){
+        
+        int bottomMostVertex=0;
+        int furthestVertex=0;
+        
+        cv::Vec3d line = getLine(edge, pivotVertex);
+        bool maxXcrossed = false;
+        
+        opposingFace[0].y>opposingFace[opposingFace.size()-1].y ? bottomMostVertex=(opposingFace.size()-1):0;
+        
+        for (int i =0; i< opposingFace.size(); i++) {
+            
+            opposingFace[i].x > opposingFace[furthestVertex].x ? furthestVertex = i:furthestVertex;
+            
+        }
+        
+        for (int i=0; i<opposingFace.size(); i++) {
+            
+            double yCoord = (line[0]*opposingFace[i].x+line[2])/line[1];
+            
+            if (maxXcrossed) {
+                
+                if (yCoord<opposingFace[i].y) return false;
+                
+            }
+            else {
+                
+                if (yCoord>opposingFace[i].y) return false;
                 
             }
             
-            
+            if (i==furthestVertex) {
+                maxXcrossed = true;
+            }
         }
         
-        return angle;
+        return true;
         
     }
     
-    std::vector<cv::Point> SpacingProfileDetector::createMat(std::vector<cv::Point> rightChar, std::vector<cv::Point> leftChar, double additionalSpacing)
-    {
-        std::vector<cv::Point> outputCont;
+    
+    double SpacingProfileDetector::detectContoursSkew(std::vector<std::vector<cv::Point> *> &contours, double lineK, double& probability, cv::Mat* debugImage, std::vector<cv::Rect>* bounds){
         
-        std::vector<cv::Point> firstFaceContour;
+        std::vector<int> yPos;
+        std::vector<int> xPos;
         
-        std::vector<cv::Point> secondFaceContour;
+        for (cv::Rect rect : *bounds) {
+            
+            xPos.push_back(rect.x);
+            yPos.push_back(rect.y);
+            
+        }
         
-        std::vector<cv::Point> firstConvex;
-        cv::convexHull(leftChar, firstConvex);
+        std::vector<double> widths;
+        std::vector<double> angles;
         
-        std::vector<cv::Point> secondConvex;
-        cv::convexHull(rightChar, secondConvex);
-        
-        getFace(firstConvex, firstFaceContour);
-        getFace(secondConvex, secondFaceContour, true);
-        
-        std::vector<std::vector<cv::Point>> cont;
-        
-        /*cv::Mat img = cv::Mat::zeros(300, 300, CV_8UC3);
-        cont.push_back(firstFaceContour);
-        cv::drawContours(img, cont, 0, cv::Scalar(255,0,0),1,8);
-        cv::imshow(" ", img);
-        cv::waitKey(0);
-        */
-        
-        
-        invertMerge(firstFaceContour, secondFaceContour, outputCont, additionalSpacing);
-        
-        return outputCont;
-        
+        for (int i=0; i<spaceCount; i++) {
+            
+            std::vector<cv::Point> leftChar = *contours[i];
+            std::vector<cv::Point> rightChar = *contours[i+1];
+            
+            std::vector<cv::Point> frontFace;
+            std::vector<cv::Point> backFace;
+            
+            std::vector<cv::Point> leftChar_Convex;
+            cv::convexHull(leftChar, leftChar_Convex);
+            
+            std::vector<cv::Point> rightChar_Convex;
+            cv::convexHull(rightChar, rightChar_Convex);
+            
+            getFace(leftChar_Convex, frontFace);
+            getFace(rightChar_Convex, backFace);
+            
+            int yOffset=0;
+            int xOffset=0;
+            yOffset = abs(yPos[i] - yPos[i+1]);
+            xOffset = xPos[i] - xPos[i+1];
+            
+            if (yPos[i]>yPos[i+1]) {
+                deOffset(frontFace,0,yOffset);
+                deOffset(backFace,xOffset,0);
+            }
+            else{
+                deOffset(backFace,0,yOffset);
+                deOffset(frontFace,xOffset,0);
+            }
+            
+            findProfiles(frontFace, backFace,angles,widths);
+        }
     }
     
     void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft){
@@ -269,7 +385,7 @@ namespace cmp {
                         output.push_back(input[i]);
                         i++;
                     }
-                
+                    
                 }
             }
             else {
@@ -288,73 +404,6 @@ namespace cmp {
                         output.push_back(input[i]);
                         i--;
                     }
-                }
-            }
-        }
-    }
-    
-    void SpacingProfileDetector::invertMerge(std::vector<cv::Point> firstFace, std::vector<cv::Point> secondFace, std::vector<cv::Point> &outputCont, double spacing){
-        
-        int xmax = 0;
-        
-        deOffset(secondFace);
-        
-        for (int i =0; i<secondFace.size(); i++) {
-            xmax = MAX(xmax, secondFace[i].x);
-        }
-        
-        deOffset(firstFace, spacing+xmax);
-        outputCont.clear();
-        
-        //finding the top most points
-        int topMostIndex_1=0, topMostIndex_2=0;
-        
-        if (firstFace[0].y<firstFace[firstFace.size()-1].y) {
-            
-            topMostIndex_1 = firstFace.size();
-            
-        }
-        
-        if (secondFace[0].y<secondFace[secondFace.size()-1].y) {
-            
-            topMostIndex_2 = secondFace.size();
-            
-        }
-        
-        //merging countours
-        
-        outputCont = secondFace;
-        
-        if (topMostIndex_2 != 0) {
-            
-            if (topMostIndex_2 != 0) {
-                
-                for (int i =firstFace.size()-1; i>0; i--) {
-                    
-                    outputCont.push_back(firstFace[i]);
-                    
-                }
-                
-            }
-            else {
-                
-                outputCont.insert(outputCont.end(), firstFace.begin(), firstFace.end());
-                
-            }
-        }
-        else {
-            
-            if (topMostIndex_2 != 0) {
-                
-                outputCont.insert(outputCont.end(), firstFace.begin(), firstFace.end());
-                
-            }
-            else {
-                
-                for (int i =firstFace.size()-1; i>0; i--) {
-                    
-                    outputCont.push_back(firstFace[i]);
-                    
                 }
             }
         }
@@ -383,9 +432,18 @@ namespace cmp {
         }
     }
     
-    void SpacingProfileDetector::correctYOffset(std::vector<std::vector<cv::Point> > contours, std::vector<cv::Rect> boundingBoxes){
+    cv::Vec3d SpacingProfileDetector::getLine(cv::Point edge, cv::Point point){
         
+        double ax = edge.y;
+        double by = -edge.x;
+        double c = -ax*point.x-by*point.y;
         
+        return cv::Vec3d{ax,by,c};
+    }
+    double SpacingProfileDetector::getWidth(cv::Vec3d line, cv::Point point){
+        
+        return (fabs(line[0]*point.x+line[1]*point.y+line[2]) / sqrt(line[0]*line[0]+line[1]*line[1]) );
         
     }
-    }
+    
+}

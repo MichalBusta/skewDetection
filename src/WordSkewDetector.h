@@ -52,7 +52,7 @@ public:
 
 	virtual double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL);
 
-	virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL) = 0;
+	virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL, std::vector<cv::Rect>* bounds=NULL) = 0;
  };
 }
 #endif /* defined(__SkewDetection__WordSkewDetector__) */

@@ -1,4 +1,4 @@
-//
+
 //  SpacingProfileDetector.h
 //  SkewDetection
 //
@@ -29,24 +29,26 @@ namespace cmp {
         
             ~SpacingProfileDetector();
         
-            double detectSkew( std::vector<Blob>& blobs, double lineK, double& probability, cv::Mat* debugImage =NULL);
+            using ContourWordSkewDetector::detectContoursSkew;
         
-            double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
+            double detectSkew( std::vector<Blob>& blobs ,double lineK, double& probability, cv::Mat* debugImage =NULL);
+        
+            double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL, std::vector<cv::Rect>* bounds=NULL);
         
         private:
         
-            std::vector<cv::Point> createMat(std::vector<cv::Point> rightChar,std::vector<cv::Point> leftChar, double additionalSpacing =3);
-        
-            void invertMerge(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace, std::vector<cv::Point>& outputCont, double spacing);
-        
-            void findProfiles(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace);
+            void findProfiles(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace,std::vector<double> angles, std::vector<double> widths);
         
             size_t spaceCount;
         
             void getFace(std::vector<cv::Point> &input, std::vector<cv::Point>& output, bool getLeft = false);
+            bool testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace);
         
             void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0, int yOrigin = 0);
         
-            void correctYOffset(std::vector<std::vector<cv::Point>> contours, std::vector<cv::Rect> boundingBoxes);
+            cv::Vec3d getLine(cv::Point edge, cv::Point point);
+        
+            double getWidth(cv::Vec3d line, cv::Point point);
+        
     };
 }

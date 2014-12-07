@@ -38,7 +38,7 @@ public:
 
 	virtual ~DiscreteVotingWordSkDet();
 
-	virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL);
+	virtual double detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage =NULL, std::vector<cv::Rect>* bounds=NULL);
 
 private:
 
