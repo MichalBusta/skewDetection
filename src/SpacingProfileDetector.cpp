@@ -140,9 +140,9 @@ namespace cmp {
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
     
-                    angle = angle + M_PI/2;
-                    while (angle > M_PI/2) angle = angle - M_PI;
-                    while (angle <= -M_PI/2) angle = angle+ M_PI;
+                    if (angle<0) {
+                        angle +=M_PI;
+                    }
                     
                     if(true)
                     {
@@ -161,9 +161,9 @@ namespace cmp {
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
        
-                    angle = angle + M_PI/2;
-                    while (angle > M_PI/2) angle = angle - M_PI;
-                    while (angle <= -M_PI/2) angle = angle+ M_PI;
+                    if (angle<0) {
+                        angle +=M_PI;
+                    }
                     
                     if(true)
                     {
@@ -175,7 +175,7 @@ namespace cmp {
                 control = true;
             }
             
-            if (width > 0/* && angle >= (M_PI/180*IGNORE_ANGLE-M_PI/2) && angle <= (M_PI/2-M_PI/180*IGNORE_ANGLE)*/) {
+            if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE) && angle <= M_PI-(M_PI/180*IGNORE_ANGLE)) {
                 
                 tempWidths.push_back(width);
                 tempAngles.push_back(angle);
@@ -187,7 +187,7 @@ namespace cmp {
         
         double index=0;
         
-        if (widths.size()==0) {
+        if (tempWidths.size()==0) {
             return;
         }
         
@@ -201,8 +201,6 @@ namespace cmp {
         angles.push_back(tempAngles[index]);
         widths.push_back(tempWidths[index]);
     }
-    
-    //FIXME
     
     bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex){
         
@@ -240,12 +238,12 @@ namespace cmp {
             
             if (maxXcrossed) {
                 
-                if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
+                if (yCoord>opposingFace[i].y && yCoord<opposingFace[furthestVertex].y) return false;
                 
             }
             else {
                 
-                if (yCoord>opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
+                if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
                 
             }
             
@@ -334,10 +332,10 @@ namespace cmp {
             
             findProfiles(frontFace, backFace,angles,widths);
             
-            /*if (widths.size()==0) {
-                cv::imshow(" ", img1);
-                cv::waitKey(0);
-            }*/
+            if (widths.size()==0) {
+                //cv::imshow(" ", img1);
+                //cv::waitKey(0);
+            }
 
         }
         double min_width=DBL_MAX;
@@ -430,7 +428,7 @@ namespace cmp {
             
         }
         
-        double ang = index*(M_PI/180);
+        double ang = index*(M_PI/180)-M_PI_2;
         
         debugImage = &histogram;
         
