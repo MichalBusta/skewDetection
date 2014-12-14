@@ -113,9 +113,14 @@ namespace cmp {
             std::vector<ImageData> temp;
             ImageData tempData;
             for (size_t i1 =0; i1 <lineIndices[i]; i1++) {
-
+                
                 tempData.imgName = imageData[index][5];
                 tempData.letter = imageData[index][6];
+                tempData.boundingBox.x = std::atoi(imageData[index][1].c_str());
+                tempData.boundingBox.y = std::atoi(imageData[index][2].c_str());
+                tempData.boundingBox.width = std::atoi(imageData[index][3].c_str());
+                tempData.boundingBox.height = std::atoi(imageData[index][4].c_str());
+                
                 temp.push_back(tempData);
                 index++;
             }
@@ -146,11 +151,12 @@ namespace cmp {
                     cv::copyMakeBorder(tempImg, tempImg, 5, 5,5,5, cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
                     //cv::imshow("test", tempImg);
                     //cv::waitKey(0);
-                    imgs.push_back(Blob(tempImg));
+                    imgs.push_back(Blob(tempImg, words[i1][i2].boundingBox));
                     letters.push_back(words[i1][i2].letter);
                 }
                 assert(letters.size()==imgs.size());
                 double probability = 0;
+                std::cout << "now processing " << wordDir;
                 angle= detectors[i]->detectSkew( imgs, 0.0, probability, &debugImage );
                 
                 angleDifference = angle-reference[idx];
@@ -190,7 +196,7 @@ namespace cmp {
         return outputString;
     }
     
-    void WordEvaluator::addWordDetector(cv::Ptr<DiscreteVotingWordSkDet> detector, std::string detectorID)
+    void WordEvaluator::addWordDetector(cv::Ptr<WordSkewDetector> detector, std::string detectorID)
     {
         detectors.push_back(detector);
         detectorIDs.push_back(detectorID);

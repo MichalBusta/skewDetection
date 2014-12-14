@@ -122,7 +122,7 @@ public:
 
 	void evaluateMat( cv::Mat& sourceImage, const std::string& alphabet, const std::string& letter, size_t faceIndex );
 
-	void evaluateWordsMat( std::vector<cv::Mat>& letterImages, const std::string& alphabet, const std::string& letter, size_t faceIndex, std::vector<cv::Ptr<ContourWordSkewDetector> >& wordSkewDetectors, std::string& wordImage);
+    void evaluateWordsMat( std::vector<cv::Mat>& letterImages, std::vector<cv::Rect>& bounds ,const std::string& alphabet, const std::string& letter, size_t faceIndex, std::vector<cv::Ptr<ContourWordSkewDetector> >& wordSkewDetectors, std::string& wordImage);
 
 	void registerDetector( cv::Ptr<SkewDetector> detector, const std::string& detectorName,  const std::string& detectorCaption);
 

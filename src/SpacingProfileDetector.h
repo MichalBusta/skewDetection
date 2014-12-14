@@ -37,12 +37,13 @@ namespace cmp {
         
         private:
         
-            void findProfiles(std::vector<cv::Point> firstFace,std::vector<cv::Point> secondFace,std::vector<double> angles, std::vector<double> widths);
+            void findProfiles(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace,std::vector<double>& angles, std::vector<double>& widths);
         
             size_t spaceCount;
         
             void getFace(std::vector<cv::Point> &input, std::vector<cv::Point>& output, bool getLeft = false);
-            bool testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace);
+        
+            bool testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace, bool convex);
         
             void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0, int yOrigin = 0);
         
