@@ -56,6 +56,8 @@ namespace cmp {
         
         int topMostIndex=0, bottomMostIndex=0;
         
+        std::vector<double> tempWidths, tempAngles;
+        
         int maxXIndex=0, minXIndex=0;
         
         if (leftFace[0].y<leftFace[leftFace.size()-1].y) {
@@ -122,9 +124,13 @@ namespace cmp {
             double width =-1;
             
             double angleA=0;
+            
             leftEdge.x > 0 ? angleA =atan(leftEdge.y/leftEdge.x) : M_PI_2;
+            
             double angleB =0;
+            
             rightEdge.x > 0 ? angleB = atan(rightEdge.y/rightEdge.x) : M_PI_2;
+            
             
             
             if ((angleA < angleB && hasNext_Left) || (!hasNext_Right && hasNext_Left)) {
@@ -133,10 +139,10 @@ namespace cmp {
                     
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
-                    
-                    /*angle = angle + M_PI/2;
+    
+                    angle = angle + M_PI/2;
                     while (angle > M_PI/2) angle = angle - M_PI;
-                    while (angle <= -M_PI/2) angle = angle+ M_PI;*/
+                    while (angle <= -M_PI/2) angle = angle+ M_PI;
                     
                     if(true)
                     {
@@ -154,10 +160,10 @@ namespace cmp {
                     
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
-                    
-                    /*angle = angle + M_PI/2;
+       
+                    angle = angle + M_PI/2;
                     while (angle > M_PI/2) angle = angle - M_PI;
-                    while (angle <= -M_PI/2) angle = angle+ M_PI;*/
+                    while (angle <= -M_PI/2) angle = angle+ M_PI;
                     
                     if(true)
                     {
@@ -171,14 +177,34 @@ namespace cmp {
             
             if (width > 0/* && angle >= (M_PI/180*IGNORE_ANGLE-M_PI/2) && angle <= (M_PI/2-M_PI/180*IGNORE_ANGLE)*/) {
                 
-                widths.push_back(width);
-                angles.push_back(angle);
+                tempWidths.push_back(width);
+                tempAngles.push_back(angle);
                 
             }
         }
+        
+        assert(tempAngles.size()==tempWidths.size());
+        
+        double index=0;
+        
+        if (widths.size()==0) {
+            return;
+        }
+        
+        for (int i =0; i<tempWidths.size(); i++) {
+            
+            if (tempWidths[index]<tempWidths[i]) {
+                index = i;
+            }
+        }
+        
+        angles.push_back(tempAngles[index]);
+        widths.push_back(tempWidths[index]);
     }
     
-    bool SpacingProfileDetector::testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace, bool convex){
+    //FIXME
+    
+    bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex){
         
         int bottomMostVertex=0;
         int topMostVertex;
@@ -210,11 +236,11 @@ namespace cmp {
         
         for (int i=bottomMostVertex; i!=topMostVertex; i+=increment) {
             
-            double yCoord = (line[0]*opposingFace[i].x+line[2])/line[1];
+            double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
             
             if (maxXcrossed) {
                 
-                if (yCoord<opposingFace[i].y && yCoord<opposingFace[furthestVertex].y) return false;
+                if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
                 
             }
             else {
@@ -308,10 +334,10 @@ namespace cmp {
             
             findProfiles(frontFace, backFace,angles,widths);
             
-            if (widths.size()==0) {
+            /*if (widths.size()==0) {
                 cv::imshow(" ", img1);
                 cv::waitKey(0);
-            }
+            }*/
 
         }
         double min_width=DBL_MAX;
@@ -356,20 +382,57 @@ namespace cmp {
             }
         }
         
+        int height = 300;
+        
+        cv::Mat histogram = cv::Mat::zeros(height, 380, CV_8UC3);
+        int maxI = ceil(double(IGNORE_ANGLE/histColWidth));
+        
+        double totalLen = 0.0;
+        double resLen = 0.0;
+        
+        for(int i=0;i<int(180/histColWidth);i++)
+        {
+            int rectH = hist[i] / maxHistValue * (height - 20);
+            cv::rectangle(histogram, cv::Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), cv::Scalar(0,0,255), CV_FILLED);
+            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
+            {
+                if (hist[i] > hist[maxI]) maxI = i;
+                totalLen += hist[i];
+            }
+        }
+        for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+        {
+            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
+            {
+                int j = i;
+                if (j<0) j = j + int(180/histColWidth);
+                if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+                
+                resLen += hist[j];
+            }
+        }
+        
+        if(totalLen > 0)
+            probMeasure2 = (resLen/totalLen);
+        //imshow("Hist", histogram);
+        //cv::waitKey(0);
+        
+        
         double width=0;
         double index=0;
         
         for (int i=0; i<180; i++) {
             
-            if (hist[i]>width) {
+            if (hist[i]>=width) {
                 width = hist[i];
                 index = i;
             }
             
         }
         
-        double ang = index*(M_PI/180)-M_PI_2;
-
+        double ang = index*(M_PI/180);
+        
+        debugImage = &histogram;
         
         return ang;
     }

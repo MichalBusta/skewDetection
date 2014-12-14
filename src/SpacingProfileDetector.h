@@ -29,6 +29,8 @@ namespace cmp {
         
             ~SpacingProfileDetector();
         
+        double probMeasure2;
+        
             using ContourWordSkewDetector::detectContoursSkew;
         
             double detectSkew( std::vector<Blob>& blobs ,double lineK, double& probability, cv::Mat* debugImage =NULL);
@@ -43,7 +45,7 @@ namespace cmp {
         
             void getFace(std::vector<cv::Point> &input, std::vector<cv::Point>& output, bool getLeft = false);
         
-            bool testBounds(cv::Point edge, cv::Point pivotVertex, std::vector<cv::Point> opposingFace, bool convex);
+            bool testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex);
         
             void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0, int yOrigin = 0);
         
