@@ -273,18 +273,30 @@ namespace cmp {
             int yOffset=0;
             int xOffset=0;
             yOffset = abs(yPos[i] - yPos[i+1]);
-            xOffset = /*abs(xPos[i] - xPos[i+1]) + */(*bounds)[i].width ;
+            xOffset = abs(xPos[i] + (*bounds)[i].width - xPos[i+1]) ;
             
             if (yPos[i]>yPos[i+1]) {
                 deOffset(frontFace,0,yOffset);
-                deOffset(backFace,xOffset,0);
+                
+                double xmax =0;
+                for(cv::Point pt : frontFace){
+                    xmax = MAX(pt.x, xmax);
+                }
+                
+                deOffset(backFace,xOffset+xmax,0);
             }
             else{
-                deOffset(backFace,xOffset,yOffset);
                 deOffset(frontFace,0,0);
+                double xmax =0;
+                
+                for(cv::Point pt : frontFace){
+                    xmax = MAX(pt.x, xmax);
+                }
+                
+                deOffset(backFace,xOffset+xmax,yOffset);
             }
             
-            /*cv::Mat img1(cv::Mat::zeros(100, 100, CV_8UC3));
+            cv::Mat img1(cv::Mat::zeros(100, 100, CV_8UC3));
             
             std::vector<std::vector<cv::Point> > ctr;
             ctr.push_back(frontFace);
@@ -294,12 +306,12 @@ namespace cmp {
             
             cv::drawContours(img1, ctr, 1, cv::Scalar(255,80,255));
             
-            cv::imshow(" ", img1);
-            
-            
-            cv::waitKey(0);*/
-            
             findProfiles(frontFace, backFace,angles,widths);
+            
+            if (widths.size()==0) {
+                cv::imshow(" ", img1);
+                cv::waitKey(0);
+            }
 
         }
         double min_width=DBL_MAX;
