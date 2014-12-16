@@ -69,17 +69,18 @@ namespace cmp {
         
         for (int i =0; i<rightFace.size(); i++) {
             
-            rightFace[i].x < rightFace[minXIndex].x ? minXIndex=i:minXIndex;
+            minXIndex = rightFace[i].x < rightFace[minXIndex].x ? i : minXIndex;
             
         }
         for (int i =0; i<leftFace.size(); i++) {
             
-            leftFace[i].x > leftFace [maxXIndex].x ? maxXIndex=i:maxXIndex;
+            maxXIndex = leftFace[i].x > leftFace [maxXIndex].x ? i : maxXIndex;
             
         }
         
         int leftVertex = topMostIndex, leftVertex_next = topMostIndex;
         int rightVertex = bottomMostIndex, rightVertex_next = bottomMostIndex;
+        
         bool control = true;
         
         bool hasNext_Right = true, hasNext_Left = true;
@@ -88,8 +89,34 @@ namespace cmp {
             
             control = false;
                 
-            if (leftVertex<leftFace.size()-1) leftVertex_next=leftVertex+1; else hasNext_Left = false;
-            if (rightVertex>0) rightVertex_next=rightVertex-1; else hasNext_Right = false;
+            if (leftVertex<leftFace.size()-1 && hasNext_Left){
+                
+                leftVertex_next=leftVertex+1;
+                
+            }
+            
+            else if(hasNext_Left){
+                
+                leftVertex_next=leftVertex;
+                leftVertex--;
+                
+                hasNext_Left = false;
+                
+            }
+            
+            if (rightVertex>0 && hasNext_Right){
+                
+                rightVertex_next=rightVertex-1;
+                
+            }
+            else if(hasNext_Right) {
+                
+                rightVertex_next=rightVertex;
+                rightVertex++;
+                
+                hasNext_Right = false;
+                
+            }
             
             cv::Point leftEdge = leftFace[leftVertex]-leftFace[leftVertex_next];
             cv::Point rightEdge = rightFace[rightVertex]-rightFace[rightVertex_next];
@@ -99,16 +126,26 @@ namespace cmp {
             double width =-1;
             
             double angleA=0;
-            
-            leftEdge.x > 0 ? angleA =atan(leftEdge.y/leftEdge.x) : angleA = M_PI_2;
-            
             double angleB =0;
+
             
-            rightEdge.x > 0 ? angleB = atan(rightEdge.y/rightEdge.x) : angleB = M_PI_2;
+            assert(leftEdge!=nonSense && rightEdge!=nonSense);
             
+            if (leftEdge.y==0) {
+                angleA=0;
+            }
+            else {
+                angleA = leftEdge.x > 0 ? atan(leftEdge.y/leftEdge.x) : M_PI_2;
+            }
             
+            if (rightEdge.y==0) {
+                angleB=0;
+            }
+            else {
+                 angleB = rightEdge.x > 0 ? atan(rightEdge.y/rightEdge.x) : M_PI_2;
+            }
             
-            if ((angleA < angleB && hasNext_Left) || (!hasNext_Right && hasNext_Left)) {
+            if (angleA <= angleB && hasNext_Left) {
                 
                 assert(leftEdge != nonSense);
                 
@@ -118,7 +155,7 @@ namespace cmp {
                     angle=angleA;
     
                     if (angle<0) {
-                        angle +=M_PI;
+                        angle += M_PI;
                     }
                     
                     if(true)
@@ -127,7 +164,8 @@ namespace cmp {
                             width = width / fabs(cos(angle));
                     }
                 }
-                leftVertex = leftVertex_next;
+                
+                leftVertex++;
                 control = true;
                 
                 if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE) && angle <= M_PI-(M_PI/180*IGNORE_ANGLE)) {
@@ -139,10 +177,9 @@ namespace cmp {
                     opposingPoints.push_back(rightFace[rightVertex]);
                     
                 }
-                
             }
             
-            else if (hasNext_Right){
+            else if (angleA>angleB && hasNext_Right){
                 
                 assert(rightEdge != nonSense);
                 
@@ -161,7 +198,8 @@ namespace cmp {
                             width = width / fabs(cos(angle));
                     }
                 }
-                rightVertex = rightVertex_next;
+                
+                rightVertex--;
                 control = true;
                 
                 if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE) && angle <= M_PI-(M_PI/180*IGNORE_ANGLE)) {
@@ -222,10 +260,10 @@ namespace cmp {
         for (int i =0; i< opposingFace.size(); i++) {
             
             if (convex){
-                opposingFace[i].x > opposingFace[furthestVertex].x ? furthestVertex = i : furthestVertex=furthestVertex;
+                furthestVertex = opposingFace[i].x > opposingFace[furthestVertex].x ? i : furthestVertex;
             }
             else{
-                opposingFace[i].x < opposingFace[furthestVertex].x ? furthestVertex = i : furthestVertex=furthestVertex;
+                furthestVertex = opposingFace[i].x < opposingFace[furthestVertex].x ? i : furthestVertex;
             }
             
         }
@@ -233,6 +271,13 @@ namespace cmp {
         for (int i=bottomMostVertex; i!=topMostVertex; i+=increment) {
             
             double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
+            
+            if (i==furthestVertex) {
+                
+                continue;
+                
+                maxXcrossed = true;
+            }
             
             if (maxXcrossed) {
                 
@@ -243,10 +288,6 @@ namespace cmp {
                 
                 if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
                 
-            }
-            
-            if (i==furthestVertex) {
-                maxXcrossed = true;
             }
         }
         
@@ -348,6 +389,7 @@ namespace cmp {
         double histColWidth=1;
         double probMeasure1 = 0;
         
+        assert(angles.size()!=0);
         assert(angles.size()==widths.size());
         
         //set values to histogram
@@ -429,7 +471,7 @@ namespace cmp {
         
         debugImage = &histogram;
         
-        return ang+M_2_PI;
+        return ang;
     }
     
     void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft){
@@ -631,7 +673,7 @@ namespace cmp {
         assert(thinnestIndex<pivotPoints.size());
         
         cv::Scalar ptColor(255,0,255);
-        cv::Scalar thinColor(0,255,50);
+        cv::Scalar thinColor(100,255,50);
         
         for (int i =0; i<pivotPoints.size(); i++) {
             
@@ -641,7 +683,7 @@ namespace cmp {
                 color = thinColor;
             }
             else{
-                continue;
+                continue; //color = ptColor;
             }
             
             cv::circle(img, pivotPoints[i], 1, color, 2);
