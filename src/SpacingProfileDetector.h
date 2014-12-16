@@ -39,7 +39,7 @@ namespace cmp {
         
         private:
         
-            void findProfiles(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace,std::vector<double>& angles, std::vector<double>& widths);
+            void findProfiles(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace,std::vector<double>& angles, std::vector<double>& widths, cv::Mat* debugImage = NULL);
         
             size_t spaceCount;
         
@@ -52,6 +52,8 @@ namespace cmp {
             cv::Vec3d getLine(cv::Point edge, cv::Point point);
         
             double getWidth(cv::Vec3d line, cv::Point point);
+        
+            void drawProfiles(std::vector<cv::Point>& pivotPoints, std::vector<cv::Point>& opposingPoints, std::vector<cv::Point>& profiles, int thinnestIndex, cv::Mat& img);
         
     };
 }
