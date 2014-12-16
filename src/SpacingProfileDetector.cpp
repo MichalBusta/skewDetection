@@ -141,8 +141,8 @@ namespace cmp {
                 
                 assert(leftEdge != nonSense);
                 
-                if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,true) &&
-                    testBounds(leftEdge, rightFace[rightVertex], leftFace,false)){
+                if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,false) &&
+                    testBounds(leftEdge, rightFace[rightVertex], leftFace,true)){
                     
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
@@ -158,7 +158,7 @@ namespace cmp {
                     }
                 }
                 
-                leftVertex= hasNext_Left ? leftVertex_next : leftVertex;
+                leftVertex = hasNext_Left ? leftVertex_next : leftVertex;
                 
                 if (hasNext_Left) control = true;
                 
@@ -173,12 +173,12 @@ namespace cmp {
                 }
             }
             
-            else if (angleA >= angleB){
+            else{
                 
                 assert(rightEdge != nonSense);
                 
-                if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, false) &&
-                    testBounds(rightEdge, leftFace[leftVertex], rightFace, true)){
+                if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, true) &&
+                    testBounds(rightEdge, leftFace[leftVertex], rightFace, false)){
                     
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
@@ -361,7 +361,7 @@ namespace cmp {
             ctr.push_back(frontFace);
             ctr.push_back(backFace);
             
-            cv::drawContours(img1, ctr, 0, cv::Scalar(255,80,255),1,8);
+            cv::drawContours(img1, ctr, 0, cv::Scalar(255,80,255));
             
             cv::drawContours(img1, ctr, 1, cv::Scalar(255,80,255));
             
