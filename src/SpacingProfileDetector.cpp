@@ -12,6 +12,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "SkewDetector.h"
 
+#define VERBOSE 0
+#define SPACING 5
+
 namespace cmp {
     
     SpacingProfileDetector::SpacingProfileDetector() : ContourWordSkewDetector(){
@@ -61,11 +64,11 @@ namespace cmp {
         
         int maxXIndex=0, minXIndex=0;
         
-        assert (leftFace[0].y<=leftFace[leftFace.size()-1].y);
+        assert (leftFace[0].y<leftFace[leftFace.size()-1].y);
         
         assert(topMostIndex<bottomMostIndex);
         
-        assert (rightFace[0].y<=rightFace[rightFace.size()-1].y);
+        assert (rightFace[0].y<rightFace[rightFace.size()-1].y);
         
         for (int i =0; i<rightFace.size(); i++) {
             
@@ -118,8 +121,12 @@ namespace cmp {
                 
             }
             
-            cv::Point leftEdge = leftFace[leftVertex]-leftFace[leftVertex_next];
-            cv::Point rightEdge = rightFace[rightVertex]-rightFace[rightVertex_next];
+            cv::Point rightEdge;
+            cv::Point leftEdge;
+            
+            leftEdge = leftFace[leftVertex_next]-leftFace[leftVertex];
+            rightEdge = rightFace[rightVertex]-rightFace[rightVertex_next];
+            
             cv::Point nonSense(0,0);
             
             double angle =0;
@@ -128,14 +135,11 @@ namespace cmp {
             double angleA=0;
             double angleB =0;
 
-            
             assert(leftEdge!=nonSense && rightEdge!=nonSense);
             assert(leftEdge.y!=0 && rightEdge.y!=0);
             
-            angleA = leftEdge.x > 0 ? atan(leftEdge.y/leftEdge.x) : M_PI_2;
-
-            angleB = rightEdge.x > 0 ? atan(rightEdge.y/rightEdge.x) : M_PI_2;
-
+            angleA = acos(leftEdge.x/sqrt((leftEdge.x*leftEdge.x)+(leftEdge.y*leftEdge.y)));
+            angleB = acos(rightEdge.x/sqrt((rightEdge.x*rightEdge.x)+(rightEdge.y*rightEdge.y)));
             
             if (angleA <= angleB) {
                 
@@ -146,16 +150,11 @@ namespace cmp {
                     
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
-    
-                    if (angle<0) {
-                        angle += M_PI;
-                    }
-                    
-                    if(true)
-                    {
-                        if(fabs(cos(angle)) != 0 )
-                            width = width / fabs(cos(angle));
-                    }
+
+                }
+                
+                if (angleA<0) {
+                    angleA +=M_PI;
                 }
                 
                 leftVertex = hasNext_Left ? leftVertex_next : leftVertex;
@@ -173,7 +172,7 @@ namespace cmp {
                 }
             }
             
-            else{
+            if(angleA > angleB) {
                 
                 assert(rightEdge != nonSense);
                 
@@ -182,16 +181,11 @@ namespace cmp {
                     
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
-       
-                    if (angle<0) {
-                        angle +=M_PI;
-                    }
-                    
-                    if(true)
-                    {
-                        if(fabs(cos(angle)) != 0 )
-                            width = width / fabs(cos(angle));
-                    }
+
+                }
+                
+                if (angleB<0) {
+                    angleB +=M_PI;
                 }
                 
                 rightVertex = hasNext_Right ? rightVertex_next : rightVertex;
@@ -264,13 +258,18 @@ namespace cmp {
             
         }
         
-        for (int i=bottomMostVertex; i!=topMostVertex; i+=increment) {
+        int i=bottomMostVertex;
+        
+        while (true) {
             
+            if (i==topMostVertex) break;
+            i+=increment;
             double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
             
             if (i==furthestVertex) {
                 
                 maxXcrossed = true;
+                
                 continue;
                 
             }
@@ -285,6 +284,7 @@ namespace cmp {
                 if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
                 
             }
+            
         }
         
         return true;
@@ -311,6 +311,9 @@ namespace cmp {
         
         std::vector<double> widths;
         std::vector<double> angles;
+        std::vector<cv::Mat> profileImages;
+        int yMax = 0;
+        int xSum =0;
         
         for (int i=0; i<spaceCount; i++) {
             
@@ -345,6 +348,7 @@ namespace cmp {
                 deOffset(backFace,xOffset+xmax,0);
             }
             else{
+                
                 deOffset(frontFace,0,0);
                 double xmax =0;
                 
@@ -355,22 +359,43 @@ namespace cmp {
                 deOffset(backFace,xOffset+xmax,yOffset);
             }
             
-            cv::Mat img1(cv::Mat::zeros(100, 100, CV_8UC3));
+            int tempXmax=0, tempXmin=INT16_MAX;
+            int width = 0;
+            int tempYMax = 0;
+            
+            for (cv::Point p : frontFace) {
+                
+                tempYMax = MAX(tempYMax, p.y);
+                tempXmin = MIN(tempXmin, p.x);
+                
+            }
+            for (cv::Point p : backFace) {
+                
+                tempYMax = MAX(tempYMax, p.y);
+                tempXmax = MAX(tempXmax, p.x);
+            }
+            
+            width = tempXmax-tempXmin;
+            
+            cv::Mat temp = cv::Mat::zeros(tempYMax, width, CV_8UC3);
             
             std::vector<std::vector<cv::Point> > ctr;
             ctr.push_back(frontFace);
             ctr.push_back(backFace);
             
-            cv::drawContours(img1, ctr, 0, cv::Scalar(255,80,255));
+            cv::drawContours(temp, ctr, 0, cv::Scalar(255,80,255));
             
-            cv::drawContours(img1, ctr, 1, cv::Scalar(255,80,255));
+            cv::drawContours(temp, ctr, 1, cv::Scalar(255,80,255));
             
-            findProfiles(frontFace, backFace,angles,widths, &img1);
+            findProfiles(frontFace, backFace,angles,widths, &temp);
+            profileImages.push_back(temp);
+            yMax = MAX(yMax, tempYMax);
+            xSum +=width+SPACING;
             
-            
-            cv::imshow(" ", img1);
+#if VERBOSE
+            cv::imshow(" ", temp);
             cv::waitKey(0);
-
+#endif
         }
         double min_width=DBL_MAX;
         double max_width=0;
@@ -397,7 +422,7 @@ namespace cmp {
         double maxHistValue = 0;
         for(int c=0;c<widths.size();c++)
         {
-            double ang = angles[c] * 180/M_PI;;
+            double ang = angles[c] * 180/M_PI;
             for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
             {
                 int j = i;
@@ -413,6 +438,17 @@ namespace cmp {
             {
                 probMeasure1++;
             }
+        }
+        
+        cv::Mat img = cv::Mat::zeros(yMax, xSum, CV_8UC3);
+        int xCounter=0;
+        
+        for (cv::Mat mat : profileImages) {
+            
+            mat.copyTo(img(cv::Rect(xCounter, 0, mat.cols, mat.rows)));
+            xCounter += SPACING;
+            xCounter +=mat.cols;
+            
         }
         
         int height = 300;
@@ -449,26 +485,21 @@ namespace cmp {
             probMeasure2 = (resLen/totalLen);
             probability = probMeasure2;
         }
-        //imshow("Hist", histogram);
-        //cv::waitKey(0);
         
+#if VERBOSE
+        imshow("Hist", histogram);
+        cv::waitKey(0);
+#endif
         
-        double width=0;
-        double index=0;
+        double result = maxI*(M_PI/180)-M_2_PI;
         
-        for (int i=0; i<180; i++) {
-
-            if (hist[i]>=width) {
-                width = hist[i];
-                index = i;
-            }
-        }
+#if VERBOSE
+        imshow("Hist", img);
+        cv::waitKey(0);
+#endif
+        debugImage = &img;
         
-        double ang = index*(M_PI/180);
-        
-        debugImage = &histogram;
-        
-        return ang;
+        return result;
     }
     
     void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft){
@@ -694,6 +725,7 @@ namespace cmp {
                 color = thinColor;
             }
             else{
+                continue;
                 color = ptColor;
             }
             
