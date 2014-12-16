@@ -130,26 +130,19 @@ namespace cmp {
 
             
             assert(leftEdge!=nonSense && rightEdge!=nonSense);
+            assert(leftEdge.y!=0 && rightEdge.y!=0);
             
-            if (leftEdge.y==0) {
-                angleA=0;
-            }
-            else {
-                angleA = leftEdge.x > 0 ? atan(leftEdge.y/leftEdge.x) : M_PI_2;
-            }
+            angleA = leftEdge.x > 0 ? atan(leftEdge.y/leftEdge.x) : M_PI_2;
+
+            angleB = rightEdge.x > 0 ? atan(rightEdge.y/rightEdge.x) : M_PI_2;
+
             
-            if (rightEdge.y==0) {
-                angleB=0;
-            }
-            else {
-                 angleB = rightEdge.x > 0 ? atan(rightEdge.y/rightEdge.x) : M_PI_2;
-            }
-            
-            if (angleA <= angleB && hasNext_Left) {
+            if (angleA <= angleB) {
                 
                 assert(leftEdge != nonSense);
                 
-                if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,true)){
+                if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,true) &&
+                    testBounds(leftEdge, rightFace[rightVertex], leftFace,false)){
                     
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
@@ -165,8 +158,9 @@ namespace cmp {
                     }
                 }
                 
-                leftVertex++;
-                control = true;
+                leftVertex= hasNext_Left ? leftVertex_next : leftVertex;
+                
+                if (hasNext_Left) control = true;
                 
                 if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE) && angle <= M_PI-(M_PI/180*IGNORE_ANGLE)) {
                     
@@ -179,11 +173,12 @@ namespace cmp {
                 }
             }
             
-            else if (angleA>angleB && hasNext_Right){
+            else if (angleA >= angleB){
                 
                 assert(rightEdge != nonSense);
                 
-                if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, false)){
+                if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, false) &&
+                    testBounds(rightEdge, leftFace[leftVertex], rightFace, true)){
                     
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
@@ -199,8 +194,9 @@ namespace cmp {
                     }
                 }
                 
-                rightVertex--;
-                control = true;
+                rightVertex = hasNext_Right ? rightVertex_next : rightVertex;
+                
+                if (hasNext_Right) control = true;
                 
                 if (width > 0 && angle >= (M_PI/180*IGNORE_ANGLE) && angle <= M_PI-(M_PI/180*IGNORE_ANGLE)) {
                     
@@ -274,9 +270,9 @@ namespace cmp {
             
             if (i==furthestVertex) {
                 
+                maxXcrossed = true;
                 continue;
                 
-                maxXcrossed = true;
             }
             
             if (maxXcrossed) {
@@ -336,7 +332,7 @@ namespace cmp {
             int yOffset=0;
             int xOffset=0;
             yOffset = abs(yPos[i] - yPos[i+1]);
-            xOffset = abs(xPos[i] + (*bounds)[i].width - xPos[i+1]) ;
+            xOffset = abs(xPos[i] + (*bounds)[i].width - xPos[i+1])+5;
             
             if (yPos[i]>yPos[i+1]) {
                 deOffset(frontFace,0,yOffset);
@@ -370,6 +366,7 @@ namespace cmp {
             cv::drawContours(img1, ctr, 1, cv::Scalar(255,80,255));
             
             findProfiles(frontFace, backFace,angles,widths, &img1);
+            
             
             cv::imshow(" ", img1);
             cv::waitKey(0);
@@ -467,7 +464,7 @@ namespace cmp {
             }
         }
         
-        double ang = M_2_PI-index*(M_PI/180);
+        double ang = index*(M_PI/180);
         
         debugImage = &histogram;
         
@@ -492,20 +489,26 @@ namespace cmp {
             }
         }
         
+        int next_plus =0, next_minus=0;
+        
+        next_minus = (top-1<0) ? input.size()-1 : top-1;
+        
+        if (top >= input.size()-1) {
+            
+            next_plus = 0;
+            
+        }
+        else {
+            
+            next_plus=top+1;
+            
+        }
+        
         assert(top!=bot);
         
         if (getLeft){
             
-            int next=0;
-            
-            if (top >= input.size()-1) {
-                
-                next = 0;
-                
-            }
-            else next=top+1;
-            
-            if (input[next].x < input[top].x) {
+            if (input[next_plus].x < input[top].x || input[next_minus].x>input[top].x) {
                 
                 int i = top;
                 bool control=true;
@@ -514,12 +517,19 @@ namespace cmp {
                     
                     assert(i>=0 && i<input.size());
                     
+                    if (output.size()>0 && input[i].y == output.back().y) {
+                        output.pop_back();
+                    }
+                    
+                    output.push_back(input[i]);
+                    
                     if (i>=input.size()-1) {
-                        output.push_back(input[i]);
+                        
                         i = 0;
+                        
                     }
                     else{
-                        output.push_back(input[i]);
+                        
                         i++;
                     }
                     
@@ -542,12 +552,17 @@ namespace cmp {
                     
                     assert(i>=0 && i<input.size());
                     
+                    if (output.size()>0 && input[i].y == output.back().y) {
+                        output.pop_back();
+                    }
+                    output.push_back(input[i]);
+                    
                     if (i==0) {
-                        output.push_back(input[i]);
+                        
                         i = input.size()-1;
                     }
                     else{
-                        output.push_back(input[i]);
+
                         i--;
                     }
                     
@@ -564,30 +579,24 @@ namespace cmp {
         
         else {
             
-            int next=0;
             bool control=true;
             
-            if (top-1 >= input.size()) {
-                
-                next = 0;
-                
-            }
-            else next=top+1;
-            
-            if (input[next].x>input[top].x) {
+            if (input[next_plus].x>input[top].x || input[next_minus].x<input[top].x) {
                 
                 int i = top;
                 
                 while (true){
                     
                     assert(i>=0 && i<input.size());
+                    if (output.size()>0 && input[i].y == output.back().y) {
+                        output.pop_back();
+                    }
+                    output.push_back(input[i]);
                     
                     if (i>=input.size()-1) {
-                        output.push_back(input[i]);
                         i = 0;
                     }
                     else{
-                        output.push_back(input[i]);
                         i++;
                     }
                     
@@ -608,13 +617,15 @@ namespace cmp {
                 while (true){
                     
                     assert(i>=0 && i<input.size());
+                    if (output.size()>0 && input[i].y == output.back().y) {
+                        output.pop_back();
+                    }
+                    output.push_back(input[i]);
                     
                     if (i==0) {
-                        output.push_back(input[i]);
                         i = input.size()-1;
                     }
                     else{
-                        output.push_back(input[i]);
                         i--;
                     }
                     
@@ -672,7 +683,7 @@ namespace cmp {
         assert(pivotPoints.size()==profiles.size() && pivotPoints.size()==opposingPoints.size());
         assert(thinnestIndex<pivotPoints.size());
         
-        cv::Scalar ptColor(255,0,255);
+        cv::Scalar ptColor(255,255,80);
         cv::Scalar thinColor(100,255,50);
         
         for (int i =0; i<pivotPoints.size(); i++) {
@@ -683,7 +694,7 @@ namespace cmp {
                 color = thinColor;
             }
             else{
-                continue; //color = ptColor;
+                color = ptColor;
             }
             
             cv::circle(img, pivotPoints[i], 1, color, 2);

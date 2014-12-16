@@ -157,6 +157,7 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
 
 		if( width == 0 )
+            
 		{
 			//todo this should not happen
 			width = 1;
