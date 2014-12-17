@@ -12,7 +12,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "SkewDetector.h"
 
-#define VERBOSE 0
+#define VERBOSE 1
 #define SPACING 5
 
 namespace cmp {
@@ -51,7 +51,7 @@ namespace cmp {
             bounds.push_back(blob.bBox);
             
         }
-        return detectContoursSkew(contours, lineK, probability, debugImage, &bounds);
+        return detectContoursSkew(contours, lineK, probability, (debugImage), &bounds);
         
     }
     
@@ -172,7 +172,7 @@ namespace cmp {
                 }
             }
             
-            if(angleA > angleB) {
+            if(angleA >= angleB) {
                 
                 assert(rightEdge != nonSense);
                 
@@ -216,13 +216,15 @@ namespace cmp {
         
         for (int i =0; i<tempWidths.size(); i++) {
             
+            angles.push_back(tempAngles[i]);
+            widths.push_back(tempWidths[i]);
+            
             if (tempWidths[index]<tempWidths[i]) {
                 index = i;
             }
         }
         
-        angles.push_back(tempAngles[index]);
-        widths.push_back(tempWidths[index]);
+        
         
         drawProfiles(pivotPoints, opposingPoints ,profiles, index, *debugImage);
     }
@@ -262,14 +264,14 @@ namespace cmp {
         
         while (true) {
             
-            if (i==topMostVertex) break;
-            i+=increment;
+            if (i==(topMostVertex+increment)) break;
+            
             double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
             
             if (i==furthestVertex) {
                 
                 maxXcrossed = true;
-                
+                i+=increment;
                 continue;
                 
             }
@@ -284,6 +286,7 @@ namespace cmp {
                 if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
                 
             }
+            i+=increment;
             
         }
         
@@ -332,6 +335,9 @@ namespace cmp {
             getFace(leftChar_Convex, frontFace);
             getFace(rightChar_Convex, backFace, true);
             
+            assert(frontFace.size()>1);
+            assert(backFace.size()>1);
+            
             int yOffset=0;
             int xOffset=0;
             yOffset = abs(yPos[i] - yPos[i+1]);
@@ -375,9 +381,9 @@ namespace cmp {
                 tempXmax = MAX(tempXmax, p.x);
             }
             
-            width = tempXmax-tempXmin;
+            width = tempXmax-tempXmin+10;
             
-            cv::Mat temp = cv::Mat::zeros(tempYMax, width, CV_8UC3);
+            cv::Mat temp = cv::Mat::zeros(tempYMax+=10, width, CV_8UC3);
             
             std::vector<std::vector<cv::Point> > ctr;
             ctr.push_back(frontFace);
@@ -411,7 +417,9 @@ namespace cmp {
         double histColWidth=1;
         double probMeasure1 = 0;
         
-        assert(angles.size()!=0);
+        if (angles.size()==0){
+            return 0;
+        }
         assert(angles.size()==widths.size());
         
         //set values to histogram
@@ -491,13 +499,13 @@ namespace cmp {
         cv::waitKey(0);
 #endif
         
-        double result = maxI*(M_PI/180)-M_2_PI;
+        double result = maxI*(M_PI/180);
         
 #if VERBOSE
         imshow("Hist", img);
         cv::waitKey(0);
 #endif
-        debugImage = &img;
+        *debugImage = img;
         
         return result;
     }
@@ -549,10 +557,17 @@ namespace cmp {
                     assert(i>=0 && i<input.size());
                     
                     if (output.size()>0 && input[i].y == output.back().y) {
-                        output.pop_back();
+                        
+                        if (input[i].x < output.back().x) {
+                            output.pop_back();
+                            output.push_back(input[i]);
+                        }
                     }
-                    
-                    output.push_back(input[i]);
+                    else {
+                        
+                        output.push_back(input[i]);
+                        
+                    }
                     
                     if (i>=input.size()-1) {
                         
@@ -584,9 +599,19 @@ namespace cmp {
                     assert(i>=0 && i<input.size());
                     
                     if (output.size()>0 && input[i].y == output.back().y) {
-                        output.pop_back();
+                        
+                        if (input[i].x < output.back().x) {
+                            output.pop_back();
+                            output.push_back(input[i]);
+                        }
+            
                     }
-                    output.push_back(input[i]);
+                    else {
+                        
+                        output.push_back(input[i]);
+                        
+                    }
+
                     
                     if (i==0) {
                         
@@ -620,9 +645,18 @@ namespace cmp {
                     
                     assert(i>=0 && i<input.size());
                     if (output.size()>0 && input[i].y == output.back().y) {
-                        output.pop_back();
+                        
+                        if (input[i].x > output.back().x) {
+                            output.pop_back();
+                            output.push_back(input[i]);
+                        }
                     }
-                    output.push_back(input[i]);
+                    else {
+                        
+                        output.push_back(input[i]);
+                        
+                    }
+
                     
                     if (i>=input.size()-1) {
                         i = 0;
@@ -649,9 +683,17 @@ namespace cmp {
                     
                     assert(i>=0 && i<input.size());
                     if (output.size()>0 && input[i].y == output.back().y) {
-                        output.pop_back();
+                        if (input[i].x > output.back().x) {
+                            output.pop_back();
+                            output.push_back(input[i]);
+                        }
                     }
-                    output.push_back(input[i]);
+                    else {
+                        
+                        output.push_back(input[i]);
+                        
+                    }
+
                     
                     if (i==0) {
                         i = input.size()-1;

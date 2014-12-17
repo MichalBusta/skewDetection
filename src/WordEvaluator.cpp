@@ -157,7 +157,7 @@ namespace cmp {
                 assert(letters.size()==imgs.size());
                 double probability = 0;
                 std::cout << "now processing " << wordDir;
-                angle= detectors[i]->detectSkew( imgs, 0.0, probability, &debugImage );
+                angle = detectors[i]->detectSkew( imgs, 0.0, probability, &debugImage );
                 
                 angleDifference = angle-reference[idx];
                 

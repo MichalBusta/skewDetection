@@ -53,7 +53,7 @@ int main( int argc, char **argv)
 	detectors.push_back( new DiscreteVotingWordSkDet() );
 	evaluator.registerDetector( NULL, "CommonVoting", "Common Voting" );
     detectors.push_back( new SpacingProfileDetector() );
-    evaluator.registerDetector( NULL, "Spacing", "Spacing" );
+    evaluator.registerDetector( NULL, "SpacingProfile", "Spacing Profile" );
     
 	//evaluator.detectorNames.push_back("CommonVoting");
 	//evaluator.detectorCaptions.push_back("Common Voting");
