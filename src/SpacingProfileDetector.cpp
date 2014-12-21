@@ -17,6 +17,17 @@
 
 namespace cmp {
     
+    inline void moveContour(std::vector<cv::Point >& cont, cv::Point pt){
+        
+        for (int i=0; i<cont.size(); i++) {
+            
+            cont[i] =cont[i]-pt;
+            
+        }
+        
+    }
+    
+    
     SpacingProfileDetector::SpacingProfileDetector() : ContourWordSkewDetector(){
         
     }
@@ -55,12 +66,13 @@ namespace cmp {
         
     }
     
-    void SpacingProfileDetector::findProfiles(std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace,std::vector<double>& angles, std::vector<double>& widths, cv::Mat* debugImage){
+    void SpacingProfileDetector::findProfiles(std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace,std::vector<double>& angles, std::vector<double>& widths, VisData* visData ,cv::Mat* debugImage){
         
         int topMostIndex=0, bottomMostIndex = rightFace.size()-1;
         
         std::vector<double> tempWidths, tempAngles;
-        std::vector<cv::Point> profiles, pivotPoints, opposingPoints;
+        std::vector<size_t> pivotPoints, opposingPoints;
+        std::vector<cv::Point> profiles;
         
         int maxXIndex=0, minXIndex=0;
         
@@ -165,9 +177,9 @@ namespace cmp {
                     
                     tempWidths.push_back(width);
                     tempAngles.push_back(angle);
-                    pivotPoints.push_back(leftFace[leftVertex_next]);
+                    pivotPoints.push_back(leftVertex_next);
                     profiles.push_back(leftEdge);
-                    opposingPoints.push_back(rightFace[rightVertex]);
+                    opposingPoints.push_back(rightVertex);
                     
                 }
             }
@@ -196,9 +208,9 @@ namespace cmp {
                     
                     tempWidths.push_back(width);
                     tempAngles.push_back(angle);
-                    pivotPoints.push_back(rightFace[rightVertex_next]);
+                    pivotPoints.push_back(rightVertex_next);
                     profiles.push_back(rightEdge);
-                    opposingPoints.push_back(leftFace[leftVertex]);
+                    opposingPoints.push_back(leftVertex);
                     
                 }
                 
@@ -224,9 +236,9 @@ namespace cmp {
             }
         }
         
+        visData->pivots.push_back(std::pair<size_t,size_t>(pivotPoints[index], opposingPoints[index]));
+        visData->profiles.push_back(profiles[index]);
         
-        
-        drawProfiles(pivotPoints, opposingPoints ,profiles, index, *debugImage);
     }
     
     bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex){
@@ -301,6 +313,13 @@ namespace cmp {
         assert(spaceCount>0);
         std::vector<int> yPos;
         std::vector<int> xPos;
+        std::vector<double> widths;
+        std::vector<double> angles;
+        std::vector<cv::Mat> profileImages;
+        std::vector<std::vector<cv::Point> > convexChars;
+        std::vector<std::pair<std::vector<size_t>,std::vector<size_t>>> facePointIndices;
+        double hist;
+        cv::Mat histogram;
         
         assert(bounds->size()==contours.size());
         
@@ -312,58 +331,59 @@ namespace cmp {
             
         }
         
-        std::vector<double> widths;
-        std::vector<double> angles;
-        std::vector<cv::Mat> profileImages;
+        
+        int xShift=0;
+        for (int i=0; i<contours.size(); i++) {
+            
+            std::vector<cv::Point> contour = *contours.at(i);
+            
+            std::vector<cv::Point> convexContour;
+            cv::convexHull(contour, convexContour);
+            
+            if (i> 0 && xPos[i-1]+(*bounds)[i-1].width<(xPos[i]-5)) {
+                
+                moveContour(convexContour, cv::Point(-(xPos[i]+xShift),-yPos[i]));
+                
+            }
+            
+            else{
+                
+                xShift +=10;
+                moveContour(convexContour, cv::Point(-(xPos[i]+xShift),-yPos[i]));
+                
+            }
+            
+            convexChars.push_back(convexContour);
+
+        }
+        
+        
+        VisData visData;
         int yMax = 0;
         int xSum =0;
         
         for (int i=0; i<spaceCount; i++) {
             
-            std::vector<cv::Point> leftChar = *contours.at(i);
-            std::vector<cv::Point> rightChar = *contours.at(i+1);
+            std::vector<cv::Point> leftChar =convexChars[i];
+            std::vector<cv::Point> rightChar = convexChars[i+1];
             
-            std::vector<cv::Point> frontFace;
-            std::vector<cv::Point> backFace;
+            std::vector<cv::Point> frontFace, backFace;
             
-            std::vector<cv::Point> leftChar_Convex;
-            cv::convexHull(leftChar, leftChar_Convex);
+            std::vector<size_t> frontIndices, backIndices;
             
-            std::vector<cv::Point> rightChar_Convex;
-            cv::convexHull(rightChar, rightChar_Convex);
+            getFace(leftChar, frontFace, false, &frontIndices);
+            getFace(rightChar, backFace, true, &backIndices);
             
-            getFace(leftChar_Convex, frontFace);
-            getFace(rightChar_Convex, backFace, true);
+            facePointIndices.push_back(std::pair<std::vector<size_t>,std::vector<size_t>>(frontIndices,backIndices));
             
             assert(frontFace.size()>1);
             assert(backFace.size()>1);
             
-            int yOffset=0;
-            int xOffset=0;
-            yOffset = abs(yPos[i] - yPos[i+1]);
-            xOffset = abs(xPos[i] + (*bounds)[i].width - xPos[i+1])+5;
+            cv::Point offset(cv::boundingRect(frontFace).x,
+                             MIN(cv::boundingRect(frontFace).y, cv::boundingRect(backFace).y));
             
-            if (yPos[i]>yPos[i+1]) {
-                deOffset(frontFace,0,yOffset);
-                
-                double xmax =0;
-                for(cv::Point pt : frontFace){
-                    xmax = MAX(pt.x, xmax);
-                }
-                
-                deOffset(backFace,xOffset+xmax,0);
-            }
-            else{
-                
-                deOffset(frontFace,0,0);
-                double xmax =0;
-                
-                for(cv::Point pt : frontFace){
-                    xmax = MAX(pt.x, xmax);
-                }
-                
-                deOffset(backFace,xOffset+xmax,yOffset);
-            }
+            moveContour(frontFace, offset);
+            moveContour(backFace, offset);
             
             int tempXmax=0, tempXmin=INT16_MAX;
             int width = 0;
@@ -393,8 +413,8 @@ namespace cmp {
             
             cv::drawContours(temp, ctr, 1, cv::Scalar(255,80,255));
             
-            findProfiles(frontFace, backFace,angles,widths, &temp);
-            profileImages.push_back(temp);
+            findProfiles(frontFace, backFace,angles,widths, &visData);
+            
             yMax = MAX(yMax, tempYMax);
             xSum +=width+SPACING;
             
@@ -403,116 +423,33 @@ namespace cmp {
             cv::waitKey(0);
 #endif
         }
-        double min_width=DBL_MAX;
-        double max_width=0;
         
-        for (double w : widths) {
-            min_width = MIN(w, min_width);
-            max_width = MAX(w, max_width);
-        }
+        cv::Mat debug;
         
-        double profilesRange=0.02;
-        double thinProfilesRange = min_width * ( profilesRange + 1 );
+        drawSpaceProfiles(debug,convexChars, facePointIndices, visData);
         
-        double histColWidth=1;
-        double probMeasure1 = 0;
+        double angle = createHistogram(&hist, widths, angles, &histogram);
         
-        if (angles.size()==0){
-            return 0;
-        }
-        assert(angles.size()==widths.size());
-        
-        //set values to histogram
-        double hist[180];
-        memset (hist, 0, 180 * sizeof(double));
-        int sigma = 3, range = 3;
-        // counting all profiles in thinProfilesRange
-        double maxHistValue = 0;
-        for(int c=0;c<widths.size();c++)
-        {
-            double ang = angles[c] * 180/M_PI;
-            for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
-            {
-                int j = i;
-                if (j<0) j += int(180/histColWidth);
-                if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
-                assert(widths[c] != 0);
-                double length = 1/widths[c];
-                hist[j] +=  length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-ang)*(i*histColWidth+histColWidth/2-ang)/(2*sigma*sigma));
-                maxHistValue = MAX(maxHistValue, hist[j]);
-            }
-            
-            if( (widths[c] <= thinProfilesRange ))
-            {
-                probMeasure1++;
-            }
-        }
-        
-        cv::Mat img = cv::Mat::zeros(yMax, xSum, CV_8UC3);
-        int xCounter=0;
-        
-        for (cv::Mat mat : profileImages) {
-            
-            mat.copyTo(img(cv::Rect(xCounter, 0, mat.cols, mat.rows)));
-            xCounter += SPACING;
-            xCounter +=mat.cols;
-            
-        }
-        
-        int height = 300;
-        
-        cv::Mat histogram = cv::Mat::zeros(height, 380, CV_8UC3);
-        int maxI = ceil(double(IGNORE_ANGLE/histColWidth));
-        
-        double totalLen = 0.0;
-        double resLen = 0.0;
-        
-        for(int i=0;i<int(180/histColWidth);i++)
-        {
-            int rectH = hist[i] / maxHistValue * (height - 20);
-            cv::rectangle(histogram, cv::Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), cv::Scalar(0,0,255), CV_FILLED);
-            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
-            {
-                if (hist[i] > hist[maxI]) maxI = i;
-                totalLen += hist[i];
-            }
-        }
-        for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
-        {
-            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
-            {
-                int j = i;
-                if (j<0) j = j + int(180/histColWidth);
-                if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
-                
-                resLen += hist[j];
-            }
-        }
-        
-        if(totalLen > 0){
-            probMeasure2 = (resLen/totalLen);
-            probability = probMeasure2;
-        }
         
 #if VERBOSE
         imshow("Hist", histogram);
         cv::waitKey(0);
 #endif
         
-        double result = maxI*(M_PI/180);
         
 #if VERBOSE
-        imshow("Hist", img);
+        imshow("debug", debug);
         cv::waitKey(0);
 #endif
-        *debugImage = img;
+        *debugImage = debug;
         
-        return result;
+        return angle;
     }
     
-    void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft){
+    void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft, std::vector<size_t>* indices){
         
         output = std::vector<cv::Point>();
+        std::vector<size_t> tempIndices;
         
         int top=0;
         int bot=0;
@@ -560,12 +497,16 @@ namespace cmp {
                         
                         if (input[i].x < output.back().x) {
                             output.pop_back();
+                            tempIndices.pop_back();
+                            
                             output.push_back(input[i]);
+                            tempIndices.push_back(i);
                         }
                     }
                     else {
                         
                         output.push_back(input[i]);
+                        tempIndices.push_back(i);
                         
                     }
                     
@@ -602,13 +543,17 @@ namespace cmp {
                         
                         if (input[i].x < output.back().x) {
                             output.pop_back();
+                            tempIndices.pop_back();
+                            
                             output.push_back(input[i]);
+                            tempIndices.push_back(i);
                         }
             
                     }
                     else {
                         
                         output.push_back(input[i]);
+                        tempIndices.push_back(i);
                         
                     }
 
@@ -648,12 +593,16 @@ namespace cmp {
                         
                         if (input[i].x > output.back().x) {
                             output.pop_back();
+                            tempIndices.pop_back();
+                            
                             output.push_back(input[i]);
+                            tempIndices.push_back(i);
                         }
                     }
                     else {
                         
                         output.push_back(input[i]);
+                        tempIndices.push_back(i);
                         
                     }
 
@@ -685,12 +634,16 @@ namespace cmp {
                     if (output.size()>0 && input[i].y == output.back().y) {
                         if (input[i].x > output.back().x) {
                             output.pop_back();
+                            tempIndices.pop_back();
+                            
                             output.push_back(input[i]);
+                            tempIndices.push_back(i);
                         }
                     }
                     else {
                         
                         output.push_back(input[i]);
+                        tempIndices.push_back(i);
                         
                     }
 
@@ -712,6 +665,9 @@ namespace cmp {
                 }
             }
         }
+        
+        indices = &tempIndices;
+        
     }
     
     void SpacingProfileDetector::deOffset(std::vector<cv::Point >& cont, int xOrigin, int yOrigin){
@@ -730,11 +686,7 @@ namespace cmp {
         minX -= xOrigin;
         cv::Point pt =cv::Point(minX,minY);
         
-        for (int i=0; i<cont.size(); i++) {
-            
-            cont[i] =cont[i]-pt;
-            
-        }
+        moveContour(cont, pt);
     }
     
     cv::Vec3d SpacingProfileDetector::getLine(cv::Point edge, cv::Point point){
@@ -780,4 +732,132 @@ namespace cmp {
         
     }
     
+    void SpacingProfileDetector::drawSpaceProfiles(cv::Mat &img, std::vector<std::vector<cv::Point> > &characters, std::vector<std::pair<std::vector<size_t>, std::vector<size_t> > > &facePointIndices, cmp::VisData &visData){
+        
+        int imgWidth=0;
+        int imgHeight=0;
+        cv::Mat tempImg;
+        cv::Scalar contourColor(255,180,50);
+        cv::Scalar pivotColor(255,60,60);
+        cv::Scalar profileColor(100,100,100);
+        
+        for (int i=0; i<characters.size(); i++) {
+            cv::Rect bounds = cv::boundingRect(characters[i]);
+            imgWidth += bounds.x;
+            imgHeight = MAX(bounds.y, imgHeight);
+            
+            if (i==characters.size()-1) {
+                imgWidth += bounds.width;
+            }
+        }
+        
+        imgHeight += 10;
+        imgWidth += 20;
+        
+        tempImg = cv::Mat::zeros(imgHeight, imgWidth, CV_8UC3);
+        
+        for (int i=0; i<characters.size(); i++) {
+            
+            cv::drawContours(tempImg, characters, i,contourColor);
+            
+        }
+        
+        for (int i=0; i<spaceCount; i++) {
+            
+            cv::circle(tempImg, characters[i][visData.pivots[i].first], 5, pivotColor);
+            cv::circle(tempImg, characters[i][visData.pivots[i].second], 5, pivotColor);
+            cv::line(tempImg, characters[i][visData.pivots[i].first]-visData.profiles[i]*100, characters[i][visData.pivots[i].first]+visData.profiles[i]*100, profileColor);
+            cv::line(tempImg, characters[i][visData.pivots[i].second]-visData.profiles[i]*100, characters[i][visData.pivots[i].second]+visData.profiles[i]*100, profileColor);
+            
+        }
+        
+        
+        
+    }
+    
+    double SpacingProfileDetector::createHistogram(double* histogram, std::vector<double> widths, std::vector<double> angles, cv::Mat* debugImg){
+        double min_width=DBL_MAX;
+        double max_width=0;
+        
+        for (double w : widths) {
+            min_width = MIN(w, min_width);
+            max_width = MAX(w, max_width);
+        }
+        
+        double profilesRange=0.02;
+        double thinProfilesRange = min_width * ( profilesRange + 1 );
+        
+        double histColWidth=1;
+        double probMeasure1 = 0;
+        
+        assert(angles.size()==widths.size());
+        
+        //set values to histogram
+        double hist[180];
+        memset (hist, 0, 180 * sizeof(double));
+        int sigma = 3, range = 3;
+        // counting all profiles in thinProfilesRange
+        double maxHistValue = 0;
+        for(int c=0;c<widths.size();c++)
+        {
+            double ang = angles[c] * 180/M_PI;
+            for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
+            {
+                int j = i;
+                if (j<0) j += int(180/histColWidth);
+                if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
+                assert(widths[c] != 0);
+                double length = 1/widths[c];
+                hist[j] +=  length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-ang)*(i*histColWidth+histColWidth/2-ang)/(2*sigma*sigma));
+                maxHistValue = MAX(maxHistValue, hist[j]);
+            }
+            
+            if( (widths[c] <= thinProfilesRange ))
+            {
+                probMeasure1++;
+            }
+        }
+        
+        int height = 300;
+        
+        cv::Mat img = cv::Mat::zeros(height, 380, CV_8UC3);
+        int maxI = ceil(double(IGNORE_ANGLE/histColWidth));
+        
+        double totalLen = 0.0;
+        double resLen = 0.0;
+        
+        for(int i=0;i<int(180/histColWidth);i++)
+        {
+            int rectH = hist[i] / maxHistValue * (height - 20);
+            cv::rectangle(img, cv::Rect(10+histColWidth*i*2, height-rectH-10, histColWidth*2, rectH), cv::Scalar(0,0,255), CV_FILLED);
+            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
+            {
+                if (hist[i] > hist[maxI]) maxI = i;
+                totalLen += hist[i];
+            }
+        }
+        for (int i = maxI-sigma*range; i <= maxI+sigma*range; i++)
+        {
+            if (i > IGNORE_ANGLE/histColWidth && i < (180-IGNORE_ANGLE)/histColWidth)
+            {
+                int j = i;
+                if (j<0) j = j + int(180/histColWidth);
+                if (j>=int(180/histColWidth)) j = j - int(180/histColWidth);
+                
+                resLen += hist[j];
+            }
+        }
+        
+        if(totalLen > 0){
+            probMeasure2 = (resLen/totalLen);
+        }
+        
+        double result = maxI*(M_PI/180);
+        
+        histogram = hist;
+        *debugImg = img;
+        
+        return result;
+        
+    }
 }
