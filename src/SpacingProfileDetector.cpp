@@ -1,4 +1,4 @@
- //
+//
 //  SpacingProfileDetector.cpp
 //  SkewDetection
 //
@@ -71,7 +71,7 @@ namespace cmp {
         int topMostIndex=0, bottomMostIndex = rightFace.size()-1;
         
         std::vector<double> tempWidths, tempAngles;
-        std::vector<size_t> pivotPoints, opposingPoints;
+        std::vector<size_t> pivotPoints_left, pivotPoints_right;
         std::vector<cv::Point> profiles;
         
         int maxXIndex=0, minXIndex=0;
@@ -103,7 +103,7 @@ namespace cmp {
         while (control) {
             
             control = false;
-                
+            
             if (leftVertex<leftFace.size()-1 && hasNext_Left){
                 
                 leftVertex_next=leftVertex+1;
@@ -146,7 +146,7 @@ namespace cmp {
             
             double angleA=0;
             double angleB =0;
-
+            
             assert(leftEdge!=nonSense && rightEdge!=nonSense);
             assert(leftEdge.y!=0 && rightEdge.y!=0);
             
@@ -162,7 +162,7 @@ namespace cmp {
                     
                     width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     angle=angleA;
-
+                    
                 }
                 
                 if (angleA<0) {
@@ -177,9 +177,9 @@ namespace cmp {
                     
                     tempWidths.push_back(width);
                     tempAngles.push_back(angle);
-                    pivotPoints.push_back(leftVertex_next);
+                    pivotPoints_left.push_back(leftVertex_next);
                     profiles.push_back(leftEdge);
-                    opposingPoints.push_back(rightVertex);
+                    pivotPoints_right.push_back(rightVertex);
                     
                 }
             }
@@ -193,7 +193,7 @@ namespace cmp {
                     
                     width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     angle=angleB;
-
+                    
                 }
                 
                 if (angleB<0) {
@@ -208,9 +208,9 @@ namespace cmp {
                     
                     tempWidths.push_back(width);
                     tempAngles.push_back(angle);
-                    pivotPoints.push_back(rightVertex_next);
+                    pivotPoints_left.push_back(leftVertex);
                     profiles.push_back(rightEdge);
-                    opposingPoints.push_back(leftVertex);
+                    pivotPoints_right.push_back(rightVertex_next);
                     
                 }
                 
@@ -236,7 +236,7 @@ namespace cmp {
             }
         }
         
-        visData->pivots.push_back(std::pair<size_t,size_t>(pivotPoints[index], opposingPoints[index]));
+        visData->pivots.push_back(std::pair<size_t,size_t>(pivotPoints_left[index], pivotPoints_right[index]));
         visData->profiles.push_back(profiles[index]);
         
     }
@@ -318,6 +318,8 @@ namespace cmp {
         std::vector<cv::Mat> profileImages;
         std::vector<std::vector<cv::Point> > convexChars;
         std::vector<std::pair<std::vector<size_t>,std::vector<size_t>>> facePointIndices;
+        std::vector<std::pair< std::vector<cv::Point>, std::vector<cv::Point> >> faces;
+        
         double hist;
         cv::Mat histogram;
         
@@ -355,9 +357,20 @@ namespace cmp {
             }
             
             convexChars.push_back(convexContour);
-
+            
         }
         
+        for (int i = 0; i<convexChars.size(); i++) {
+            
+            std::vector<cv::Point> leftFace, rightFace;
+            std::vector<size_t> leftIndices, rightIndices;
+            
+            getFace(convexChars[i], leftFace, rightFace, leftIndices, rightIndices);
+            facePointIndices.push_back(std::pair<std::vector<size_t>,std::vector<size_t>>(leftIndices,rightIndices));
+            faces.push_back(std::pair<std::vector<cv::Point>, std::vector<cv::Point>>(leftFace,rightFace));
+            
+            
+        }
         
         VisData visData;
         int yMax = 0;
@@ -365,17 +378,11 @@ namespace cmp {
         
         for (int i=0; i<spaceCount; i++) {
             
-            std::vector<cv::Point> leftChar =convexChars[i];
-            std::vector<cv::Point> rightChar = convexChars[i+1];
-            
             std::vector<cv::Point> frontFace, backFace;
             
-            std::vector<size_t> frontIndices, backIndices;
+            frontFace = faces[i].first;
+            backFace = faces[i+1].second;
             
-            getFace(leftChar, frontFace, false, &frontIndices);
-            getFace(rightChar, backFace, true, &backIndices);
-            
-            facePointIndices.push_back(std::pair<std::vector<size_t>,std::vector<size_t>>(frontIndices,backIndices));
             
             assert(frontFace.size()>1);
             assert(backFace.size()>1);
@@ -447,10 +454,12 @@ namespace cmp {
         return angle;
     }
     
-    void SpacingProfileDetector::getFace(std::vector<cv::Point> &input, std::vector<cv::Point> &output, bool getLeft, std::vector<size_t>* indices){
+    void SpacingProfileDetector::getFace(const std::vector<cv::Point> &input, std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace, std::vector<size_t>& leftIndices, std::vector<size_t>& rightIndices){
         
-        output = std::vector<cv::Point>();
-        std::vector<size_t> tempIndices;
+        std::vector<cv::Point> output_1;
+        std::vector<cv::Point> output_2;
+        std::vector<size_t> tempIndices_1, tempIndices_2;
+        int xSum_1=0, xSum_2=0;
         
         int top=0;
         int bot=0;
@@ -466,208 +475,122 @@ namespace cmp {
             }
         }
         
-        int next_plus =0, next_minus=0;
-        
-        next_minus = (top-1<0) ? input.size()-1 : top-1;
-        
-        if (top >= input.size()-1) {
-            
-            next_plus = 0;
-            
-        }
-        else {
-            
-            next_plus=top+1;
-            
-        }
-        
         assert(top!=bot);
         
-        if (getLeft){
+        
+        int i = top;
+        bool control=true;
+        
+        while (true){
             
-            if (input[next_plus].x < input[top].x || input[next_minus].x>input[top].x) {
+            assert(i>=0 && i<input.size());
+            
+            if (output_1.size()>0 && input[i].y == output_1.back().y) {
                 
-                int i = top;
-                bool control=true;
-                
-                while (true){
+                if (input[i].x < output_1.back().x) {
+                    output_1.pop_back();
+                    tempIndices_1.pop_back();
                     
-                    assert(i>=0 && i<input.size());
-                    
-                    if (output.size()>0 && input[i].y == output.back().y) {
-                        
-                        if (input[i].x < output.back().x) {
-                            output.pop_back();
-                            tempIndices.pop_back();
-                            
-                            output.push_back(input[i]);
-                            tempIndices.push_back(i);
-                        }
-                    }
-                    else {
-                        
-                        output.push_back(input[i]);
-                        tempIndices.push_back(i);
-                        
-                    }
-                    
-                    if (i>=input.size()-1) {
-                        
-                        i = 0;
-                        
-                    }
-                    else{
-                        
-                        i++;
-                    }
-                    
-                    if (!control) {
-                        break;
-                    }
-                    
-                    if (i == bot) {
-                        control=false;
-                    }
+                    output_1.push_back(input[i]);
+                    tempIndices_1.push_back(i);
                 }
             }
-            
             else {
                 
-                int i = top;
-                bool control=true;
+                output_1.push_back(input[i]);
+                tempIndices_1.push_back(i);
                 
-                while (true){
-                    
-                    assert(i>=0 && i<input.size());
-                    
-                    if (output.size()>0 && input[i].y == output.back().y) {
-                        
-                        if (input[i].x < output.back().x) {
-                            output.pop_back();
-                            tempIndices.pop_back();
-                            
-                            output.push_back(input[i]);
-                            tempIndices.push_back(i);
-                        }
-            
-                    }
-                    else {
-                        
-                        output.push_back(input[i]);
-                        tempIndices.push_back(i);
-                        
-                    }
-
-                    
-                    if (i==0) {
-                        
-                        i = input.size()-1;
-                    }
-                    else{
-
-                        i--;
-                    }
-                    
-                    if (!control) {
-                        break;
-                    }
-                    
-                    if (i == bot) {
-                        control=false;
-                    }
-                }
             }
+            
+            if (i>=input.size()-1) {
+                
+                i = 0;
+                
+            }
+            else{
+                
+                i++;
+            }
+            
+            if (!control) {
+                break;
+            }
+            
+            if (i == bot) {
+                control=false;
+            }
+        }
+        
+        i = top;
+        control=true;
+        
+        while (true){
+            
+            assert(i>=0 && i<input.size());
+            
+            if (output_2.size()>0 && input[i].y == output_2.back().y) {
+                
+                if (input[i].x < output_2.back().x) {
+                    output_2.pop_back();
+                    tempIndices_2.pop_back();
+                    
+                    output_2.push_back(input[i]);
+                    tempIndices_2.push_back(i);
+                }
+                
+            }
+            else {
+                
+                output_2.push_back(input[i]);
+                tempIndices_2.push_back(i);
+                
+            }
+            
+            
+            if (i==0) {
+                
+                i = input.size()-1;
+            }
+            else{
+                
+                i--;
+            }
+            
+            if (!control) {
+                break;
+            }
+            
+            if (i == bot) {
+                control=false;
+            }
+        }
+        
+        for (cv::Point p : output_1) {
+            xSum_1+=p.x;
+        }
+        for (cv::Point p : output_2) {
+            xSum_2+=p.x;
+        }
+        
+        if (xSum_1>xSum_2) {
+            
+            rightFace = output_1;
+            rightIndices = tempIndices_1;
+            
+            leftFace = output_2;
+            leftIndices = tempIndices_2;
+            
         }
         
         else {
             
-            bool control=true;
+            rightFace = output_2;
+            rightIndices = tempIndices_2;
             
-            if (input[next_plus].x>input[top].x || input[next_minus].x<input[top].x) {
-                
-                int i = top;
-                
-                while (true){
-                    
-                    assert(i>=0 && i<input.size());
-                    if (output.size()>0 && input[i].y == output.back().y) {
-                        
-                        if (input[i].x > output.back().x) {
-                            output.pop_back();
-                            tempIndices.pop_back();
-                            
-                            output.push_back(input[i]);
-                            tempIndices.push_back(i);
-                        }
-                    }
-                    else {
-                        
-                        output.push_back(input[i]);
-                        tempIndices.push_back(i);
-                        
-                    }
-
-                    
-                    if (i>=input.size()-1) {
-                        i = 0;
-                    }
-                    else{
-                        i++;
-                    }
-                    
-                    if (!control) {
-                        break;
-                    }
-                    
-                    if (i == bot) {
-                        control=false;
-                    }
-                }
-            }
-            else {
-                
-                int i = top;
-                bool control=true;
-                
-                while (true){
-                    
-                    assert(i>=0 && i<input.size());
-                    if (output.size()>0 && input[i].y == output.back().y) {
-                        if (input[i].x > output.back().x) {
-                            output.pop_back();
-                            tempIndices.pop_back();
-                            
-                            output.push_back(input[i]);
-                            tempIndices.push_back(i);
-                        }
-                    }
-                    else {
-                        
-                        output.push_back(input[i]);
-                        tempIndices.push_back(i);
-                        
-                    }
-
-                    
-                    if (i==0) {
-                        i = input.size()-1;
-                    }
-                    else{
-                        i--;
-                    }
-                    
-                    if (!control) {
-                        break;
-                    }
-                    
-                    if (i == bot) {
-                        control=false;
-                    }
-                }
-            }
+            leftFace = output_1;
+            leftIndices = tempIndices_1;
+            
         }
-        
-        *indices = tempIndices;
         
     }
     
@@ -685,38 +608,9 @@ namespace cmp {
         
     }
     
-    void SpacingProfileDetector::drawProfiles(std::vector<cv::Point>& pivotPoints, std::vector<cv::Point>& opposingPoints, std::vector<cv::Point>& profiles, int thinnestIndex, cv::Mat &img){
+    void SpacingProfileDetector::drawSpaceProfiles(cv::Mat &img, std::vector<std::vector<cv::Point> > characters, std::vector<std::pair<std::vector<size_t>, std::vector<size_t> > > facePointIndices, cmp::VisData &visData){
         
-        assert(pivotPoints.size()==profiles.size() && pivotPoints.size()==opposingPoints.size());
-        assert(thinnestIndex<pivotPoints.size());
-        
-        cv::Scalar ptColor(255,255,80);
-        cv::Scalar thinColor(100,255,50);
-        
-        for (int i =0; i<pivotPoints.size(); i++) {
-            
-            cv::Scalar color;
-            
-            if (i==thinnestIndex) {
-                color = thinColor;
-            }
-            else{
-                continue;
-                color = ptColor;
-            }
-            
-            cv::circle(img, pivotPoints[i], 1, color, 2);
-            cv::circle(img, opposingPoints[i], 1, color, 2);
-            cv::line(img, pivotPoints[i]-profiles[i]*100, pivotPoints[i]+profiles[i]*100, color);
-            cv::line(img, opposingPoints[i]-profiles[i]*100, opposingPoints[i]+profiles[i]*100, color);
-            
-        }
-        
-    }
-    
-    void SpacingProfileDetector::drawSpaceProfiles(cv::Mat &img, std::vector<std::vector<cv::Point> > &characters, std::vector<std::pair<std::vector<size_t>, std::vector<size_t> > > &facePointIndices, cmp::VisData &visData){
-        
-        int imgWidth=0;
+        int imgWidth=cv::boundingRect(characters[0]).x;
         int imgHeight=0;
         cv::Mat tempImg;
         cv::Scalar contourColor(255,180,50);
@@ -726,7 +620,7 @@ namespace cmp {
         
         for (int i=0; i<characters.size(); i++) {
             cv::Rect bounds = cv::boundingRect(characters[i]);
-            imgWidth += bounds.x;
+            imgWidth += bounds.width;
             imgHeight = MAX(bounds.height+bounds.y, imgHeight);
             
             if (i==characters.size()-1) {
@@ -739,16 +633,12 @@ namespace cmp {
         
         tempImg = cv::Mat::zeros(imgHeight, imgWidth, CV_8UC3);
         
-        for (int i=0; i<characters.size(); i++) {
+        for (int j=0; j<characters.size(); j++) {
             
-            cv::drawContours(tempImg, characters, i,contourColor);
+            cv::drawContours(tempImg, characters, j,contourColor);
             
-        }
-        
-        for (int j=0 ; j<spaceCount; j++) {
-            
-            std::vector<size_t> front = facePointIndices[j].first;
-            std::vector<size_t> back = facePointIndices[j].second;
+            std::vector<size_t> front = facePointIndices[j].second;
+            std::vector<size_t> back = facePointIndices[j].first;
             
             for (int i=0; i<front.size()-1; i++) {
                 
@@ -758,15 +648,16 @@ namespace cmp {
             
             for (int i=0; i<back.size()-1; i++) {
                 
-                cv::line(tempImg, characters[j+1][back[i]], characters[j+1][back[i+1]], faceColor);
+                cv::line(tempImg, characters[j][back[i]], characters[j][back[i+1]], faceColor);
                 
             }
+            
         }
         
         for (int i=0; i<spaceCount; i++) {
             
             std::vector<size_t> front = facePointIndices[i].first;
-            std::vector<size_t> back = facePointIndices[i].second;
+            std::vector<size_t> back = facePointIndices[i+1].second;
             
             cv::circle(tempImg, characters[i][front[visData.pivots[i].first]], 2, pivotColor,3);
             cv::circle(tempImg, characters[i+1][back[visData.pivots[i].second]], 2, pivotColor,3);

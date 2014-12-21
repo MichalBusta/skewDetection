@@ -48,19 +48,18 @@ namespace cmp {
         
             size_t spaceCount;
         
-            void findProfiles(std::vector<cv::Point>& firstFace,std::vector<cv::Point>& secondFace,std::vector<double>& angles, std::vector<double>& widths, VisData* visData=NULL, cv::Mat* debugImage = NULL);
+            void findProfiles(std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace,std::vector<double>& angles, std::vector<double>& widths, VisData* visData=NULL, cv::Mat* debugImage = NULL);
         
-            void drawSpaceProfiles(cv::Mat& img, std::vector<std::vector<cv::Point>>& characters, std::vector<std::pair<std::vector<size_t>,std::vector<size_t>>>& facePointIndices, VisData& visData);
+            void drawSpaceProfiles(cv::Mat& img, std::vector<std::vector<cv::Point>> characters, std::vector<std::pair<std::vector<size_t>,std::vector<size_t>>> facePointIndices, VisData& visData);
         
-            void getFace(std::vector<cv::Point> &input, std::vector<cv::Point>& output, bool getLeft = false, std::vector<size_t>* indices = NULL);
+            void getFace(const std::vector<cv::Point> &input, std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace, std::vector<size_t>& leftIndices, std::vector<size_t>& rightIndices);
         
             bool testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex);
-                
+        
             cv::Vec3d getLine(cv::Point edge, cv::Point point);
         
             double getWidth(cv::Vec3d line, cv::Point point);
         
-            void drawProfiles(std::vector<cv::Point>& pivotPoints, std::vector<cv::Point>& opposingPoints, std::vector<cv::Point>& profiles, int thinnestIndex, cv::Mat& img);
             double createHistogram(double* histogram,std::vector<double> widths, std::vector<double> angles, cv::Mat* debugImg = NULL);
         
     };
