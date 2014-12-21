@@ -332,6 +332,7 @@ namespace cmp {
         }
         
         
+        int xOffset = xPos[0];
         int xShift=0;
         for (int i=0; i<contours.size(); i++) {
             
@@ -342,14 +343,14 @@ namespace cmp {
             
             if (i> 0 && xPos[i-1]+(*bounds)[i-1].width<(xPos[i]-5)) {
                 
-                moveContour(convexContour, cv::Point(-(xPos[i]+xShift),-yPos[i]));
+                moveContour(convexContour, cv::Point(-(xPos[i]+xShift-xOffset),-yPos[i]));
                 
             }
             
             else{
                 
                 xShift +=10;
-                moveContour(convexContour, cv::Point(-(xPos[i]+xShift),-yPos[i]));
+                moveContour(convexContour, cv::Point(-(xPos[i]+xShift-xOffset),-yPos[i]));
                 
             }
             
@@ -666,27 +667,8 @@ namespace cmp {
             }
         }
         
-        indices = &tempIndices;
+        *indices = tempIndices;
         
-    }
-    
-    void SpacingProfileDetector::deOffset(std::vector<cv::Point >& cont, int xOrigin, int yOrigin){
-        
-        int minX=INT16_MAX;
-        int minY=INT16_MAX;
-        
-        for (int i=0; i<cont.size(); i++) {
-            
-            minX = MIN(minX, cont[i].x);
-            minY = MIN(minY, cont[i].y);
-            
-        }
-        
-        minY -= yOrigin;
-        minX -= xOrigin;
-        cv::Point pt =cv::Point(minX,minY);
-        
-        moveContour(cont, pt);
     }
     
     cv::Vec3d SpacingProfileDetector::getLine(cv::Point edge, cv::Point point){
@@ -738,13 +720,14 @@ namespace cmp {
         int imgHeight=0;
         cv::Mat tempImg;
         cv::Scalar contourColor(255,180,50);
+        cv::Scalar faceColor(40,150,255);
         cv::Scalar pivotColor(255,60,60);
-        cv::Scalar profileColor(100,100,100);
+        cv::Scalar profileColor(255,50,255);
         
         for (int i=0; i<characters.size(); i++) {
             cv::Rect bounds = cv::boundingRect(characters[i]);
             imgWidth += bounds.x;
-            imgHeight = MAX(bounds.y, imgHeight);
+            imgHeight = MAX(bounds.height+bounds.y, imgHeight);
             
             if (i==characters.size()-1) {
                 imgWidth += bounds.width;
@@ -762,16 +745,38 @@ namespace cmp {
             
         }
         
+        for (int j=0 ; j<spaceCount; j++) {
+            
+            std::vector<size_t> front = facePointIndices[j].first;
+            std::vector<size_t> back = facePointIndices[j].second;
+            
+            for (int i=0; i<front.size()-1; i++) {
+                
+                cv::line(tempImg, characters[j][front[i]], characters[j][front[i+1]], faceColor);
+                
+            }
+            
+            for (int i=0; i<back.size()-1; i++) {
+                
+                cv::line(tempImg, characters[j+1][back[i]], characters[j+1][back[i+1]], faceColor);
+                
+            }
+        }
+        
         for (int i=0; i<spaceCount; i++) {
             
-            cv::circle(tempImg, characters[i][visData.pivots[i].first], 5, pivotColor);
-            cv::circle(tempImg, characters[i][visData.pivots[i].second], 5, pivotColor);
-            cv::line(tempImg, characters[i][visData.pivots[i].first]-visData.profiles[i]*100, characters[i][visData.pivots[i].first]+visData.profiles[i]*100, profileColor);
-            cv::line(tempImg, characters[i][visData.pivots[i].second]-visData.profiles[i]*100, characters[i][visData.pivots[i].second]+visData.profiles[i]*100, profileColor);
+            std::vector<size_t> front = facePointIndices[i].first;
+            std::vector<size_t> back = facePointIndices[i].second;
+            
+            cv::circle(tempImg, characters[i][front[visData.pivots[i].first]], 2, pivotColor,3);
+            cv::circle(tempImg, characters[i+1][back[visData.pivots[i].second]], 2, pivotColor,3);
+            
+            cv::line(tempImg, characters[i][front[visData.pivots[i].first]]-visData.profiles[i]*100, characters[i][front[visData.pivots[i].first]]+visData.profiles[i]*100, profileColor);
+            cv::line(tempImg, characters[i+1][back[visData.pivots[i].second]]-visData.profiles[i]*100, characters[i+1][back[visData.pivots[i].second]]+visData.profiles[i]*100, profileColor);
             
         }
         
-        
+        img =  tempImg;
         
     }
     

@@ -55,9 +55,7 @@ namespace cmp {
             void getFace(std::vector<cv::Point> &input, std::vector<cv::Point>& output, bool getLeft = false, std::vector<size_t>* indices = NULL);
         
             bool testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex);
-        
-            void deOffset(std::vector<cv::Point>& cont, int xOrigin = 0, int yOrigin = 0);
-        
+                
             cv::Vec3d getLine(cv::Point edge, cv::Point point);
         
             double getWidth(cv::Vec3d line, cv::Point point);
