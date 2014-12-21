@@ -13,6 +13,7 @@
 #include "SkewDetector.h"
 
 #define VERBOSE 1
+#define DEBUG VERBOSE
 #define SPACING 5
 
 namespace cmp {
@@ -369,8 +370,9 @@ namespace cmp {
             facePointIndices.push_back(std::pair<std::vector<size_t>,std::vector<size_t>>(leftIndices,rightIndices));
             faces.push_back(std::pair<std::vector<cv::Point>, std::vector<cv::Point>>(leftFace,rightFace));
             
-            
         }
+        
+        assert(faces.size()==convexChars.size());
         
         VisData visData;
         int yMax = 0;
@@ -380,8 +382,8 @@ namespace cmp {
             
             std::vector<cv::Point> frontFace, backFace;
             
-            frontFace = faces[i].first;
-            backFace = faces[i+1].second;
+            frontFace = faces[i].second;
+            backFace = faces[i+1].first;
             
             
             assert(frontFace.size()>1);
@@ -426,7 +428,7 @@ namespace cmp {
             yMax = MAX(yMax, tempYMax);
             xSum +=width+SPACING;
             
-#if VERBOSE
+#if DEBUG
             cv::imshow(" ", temp);
             cv::waitKey(0);
 #endif
@@ -454,17 +456,28 @@ namespace cmp {
         return angle;
     }
     
-    void SpacingProfileDetector::getFace(const std::vector<cv::Point> &input, std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace, std::vector<size_t>& leftIndices, std::vector<size_t>& rightIndices){
+    void SpacingProfileDetector::getFace(const std::vector<cv::Point>& input, std::vector<cv::Point>& leftFace,std::vector<cv::Point>& rightFace, std::vector<size_t>& leftIndices, std::vector<size_t>& rightIndices){
         
         std::vector<cv::Point> output_1;
         std::vector<cv::Point> output_2;
         std::vector<size_t> tempIndices_1, tempIndices_2;
-        int xSum_1=0, xSum_2=0;
+        double xSum_1=0;
+        double xSum_2=0;
         
         int top=0;
         int bot=0;
         
+        int minX=0, maxX=0;
+        
         for (int k=0; k<input.size(); k++) {
+            
+            if (input[k].x>input[maxX].x) {
+                maxX = k;
+            }
+            
+            if (input[k].x<input[minX].x) {
+                minX = k;
+            }
             
             if (input[k].y < input[top].y) {
                 top = k;
@@ -480,6 +493,7 @@ namespace cmp {
         
         int i = top;
         bool control=true;
+        bool maxCrossed = false;
         
         while (true){
             
@@ -487,7 +501,7 @@ namespace cmp {
             
             if (output_1.size()>0 && input[i].y == output_1.back().y) {
                 
-                if (input[i].x < output_1.back().x) {
+                if (!maxCrossed) {
                     output_1.pop_back();
                     tempIndices_1.pop_back();
                     
@@ -512,6 +526,10 @@ namespace cmp {
                 i++;
             }
             
+            if (i==maxX || i==minX) {
+                maxCrossed = true;
+            }
+            
             if (!control) {
                 break;
             }
@@ -523,6 +541,7 @@ namespace cmp {
         
         i = top;
         control=true;
+        maxCrossed = false;
         
         while (true){
             
@@ -530,7 +549,7 @@ namespace cmp {
             
             if (output_2.size()>0 && input[i].y == output_2.back().y) {
                 
-                if (input[i].x < output_2.back().x) {
+                if (!maxCrossed) {
                     output_2.pop_back();
                     tempIndices_2.pop_back();
                     
@@ -546,7 +565,6 @@ namespace cmp {
                 
             }
             
-            
             if (i==0) {
                 
                 i = input.size()-1;
@@ -554,6 +572,10 @@ namespace cmp {
             else{
                 
                 i--;
+            }
+            
+            if (i==maxX || i==minX) {
+                maxCrossed = true;
             }
             
             if (!control) {
@@ -572,7 +594,7 @@ namespace cmp {
             xSum_2+=p.x;
         }
         
-        if (xSum_1>xSum_2) {
+        if ((xSum_1/output_1.size())>(xSum_2/output_2.size())) {
             
             rightFace = output_1;
             rightIndices = tempIndices_1;
@@ -656,11 +678,11 @@ namespace cmp {
         
         for (int i=0; i<spaceCount; i++) {
             
-            std::vector<size_t> front = facePointIndices[i].first;
-            std::vector<size_t> back = facePointIndices[i+1].second;
+            std::vector<size_t> front = facePointIndices[i].second;
+            std::vector<size_t> back = facePointIndices[i+1].first;
             
-            cv::circle(tempImg, characters[i][front[visData.pivots[i].first]], 2, pivotColor,3);
-            cv::circle(tempImg, characters[i+1][back[visData.pivots[i].second]], 2, pivotColor,3);
+            cv::circle(tempImg, characters[i][front[visData.pivots[i].first]], 2, pivotColor,2);
+            cv::circle(tempImg, characters[i+1][back[visData.pivots[i].second]], 2, pivotColor,2);
             
             cv::line(tempImg, characters[i][front[visData.pivots[i].first]]-visData.profiles[i]*100, characters[i][front[visData.pivots[i].first]]+visData.profiles[i]*100, profileColor);
             cv::line(tempImg, characters[i+1][back[visData.pivots[i].second]]-visData.profiles[i]*100, characters[i+1][back[visData.pivots[i].second]]+visData.profiles[i]*100, profileColor);
