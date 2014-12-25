@@ -242,11 +242,12 @@ namespace cmp {
         
     }
     
-    bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool convex){
+    bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool frontFace){
         
         int bottomMostVertex=0;
         int topMostVertex=0;
         int furthestVertex=0;
+        int closestVertex=0;
         int increment;
         
         cv::Vec3d line = getLine(edge, pivotVertex);
@@ -264,43 +265,56 @@ namespace cmp {
         
         for (int i =0; i< opposingFace.size(); i++) {
             
-            if (convex){
+            if (frontFace){
                 furthestVertex = opposingFace[i].x > opposingFace[furthestVertex].x ? i : furthestVertex;
+                closestVertex = opposingFace[i].x < opposingFace[closestVertex].x ? i : closestVertex;
             }
             else{
                 furthestVertex = opposingFace[i].x < opposingFace[furthestVertex].x ? i : furthestVertex;
+                closestVertex = opposingFace[i].x > opposingFace[closestVertex].x ? i : closestVertex;
             }
             
         }
         
         int i=bottomMostVertex;
         
-        while (true) {
+        if (line[1] == 0) {
             
-            if (i==(topMostVertex+increment)) break;
+            double x = line[2]/(-line[0]);
             
-            double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
-            
-            if (i==furthestVertex) {
+            if (frontFace ? (x >= opposingFace[closestVertex].x && x <= opposingFace[furthestVertex].x) : (x <= opposingFace[closestVertex].x && x >= opposingFace[furthestVertex].x)) {
+                return false;
+            }
+        }
+        
+        else {
+            while (true) {
                 
-                maxXcrossed = true;
+                if (i==(topMostVertex+increment)) break;
+                
+                double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
+                
+                if (i==furthestVertex) {
+                    
+                    maxXcrossed = true;
+                    i+=increment;
+                    continue;
+                    
+                }
+                
+                if (maxXcrossed) {
+                    
+                    if (yCoord>opposingFace[i].y && yCoord<opposingFace[furthestVertex].y) return false;
+                    
+                }
+                else {
+                    
+                    if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
+                    
+                }
                 i+=increment;
-                continue;
                 
             }
-            
-            if (maxXcrossed) {
-                
-                if (yCoord>opposingFace[i].y && yCoord<opposingFace[furthestVertex].y) return false;
-                
-            }
-            else {
-                
-                if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
-                
-            }
-            i+=increment;
-            
         }
         
         return true;
@@ -636,7 +650,8 @@ namespace cmp {
         int imgHeight=0;
         cv::Mat tempImg;
         cv::Scalar contourColor(255,180,50);
-        cv::Scalar faceColor(40,150,255);
+        cv::Scalar frontFaceColor(40,150,255);
+        cv::Scalar backFaceColor(40,40,255);
         cv::Scalar pivotColor(255,60,60);
         cv::Scalar profileColor(255,50,255);
         
@@ -664,13 +679,13 @@ namespace cmp {
             
             for (int i=0; i<front.size()-1; i++) {
                 
-                cv::line(tempImg, characters[j][front[i]], characters[j][front[i+1]], faceColor);
+                cv::line(tempImg, characters[j][front[i]], characters[j][front[i+1]], frontFaceColor);
                 
             }
             
             for (int i=0; i<back.size()-1; i++) {
                 
-                cv::line(tempImg, characters[j][back[i]], characters[j][back[i+1]], faceColor);
+                cv::line(tempImg, characters[j][back[i]], characters[j][back[i+1]], backFaceColor);
                 
             }
             
