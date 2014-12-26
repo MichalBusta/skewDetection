@@ -1,3 +1,4 @@
+
 //
 //  SpacingProfileDetector.cpp
 //  SkewDetection
@@ -15,6 +16,7 @@
 #define VERBOSE 1
 #define DEBUG VERBOSE
 #define SPACING 5
+#define ROTATEDWIDTH true
 
 namespace cmp {
     
@@ -161,7 +163,14 @@ namespace cmp {
                 if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,false) &&
                     testBounds(leftEdge, rightFace[rightVertex], leftFace,true)){
                     
-                    width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                    if (ROTATEDWIDTH) {
+                        cv::Point rotatedEdge(leftEdge.x*(1/tan(angle)), leftEdge.y);
+                        width = getWidth(getLine(rotatedEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                    }
+                    else{
+                        width = getWidth(getLine(rightEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                    }
+                    
                     angle=angleA;
                     
                 }
@@ -192,7 +201,14 @@ namespace cmp {
                 if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, true) &&
                     testBounds(rightEdge, leftFace[leftVertex], rightFace, false)){
                     
-                    width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                    if (ROTATEDWIDTH) {
+                        cv::Point rotatedEdge(rightEdge.x*(1/tan(angle)), rightEdge.y);
+                        width = getWidth(getLine(rotatedEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                    }
+                    else{
+                        width = getWidth(getLine(leftEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                    }
+                    
                     angle=angleB;
                     
                 }
