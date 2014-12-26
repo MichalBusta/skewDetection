@@ -163,16 +163,18 @@ namespace cmp {
                 if (testBounds(leftEdge, leftFace[leftVertex_next], rightFace,false) &&
                     testBounds(leftEdge, rightFace[rightVertex], leftFace,true)){
                     
-                    if (ROTATEDWIDTH) {
-                        cv::Point rotatedEdge(leftEdge.x+(tan(-angle)*leftEdge.y), leftEdge.y);
-                        width = getWidth(getLine(rotatedEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
-                    }
-                    else{
-                        width = getWidth(getLine(rightEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
-                    }
-                    
                     angle=angleA;
                     
+                    if (ROTATEDWIDTH) {
+                        /*cv::Point rotatedEdge(leftEdge.x+(tan(angle)*leftEdge.y), leftEdge.y);
+                        width = getWidth(getLine(rotatedEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                        */
+                        width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                        width *= 1/fabs(sin(angle));
+                    }
+                    else{
+                        width = getWidth(getLine(leftEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
+                    }
                 }
                 
                 if (angleA<0) {
@@ -201,15 +203,18 @@ namespace cmp {
                 if (testBounds(rightEdge, rightFace[rightVertex_next], leftFace, true) &&
                     testBounds(rightEdge, leftFace[leftVertex], rightFace, false)){
                     
+                    angle=angleB;
+                    
                     if (ROTATEDWIDTH) {
-                        cv::Point rotatedEdge(rightEdge.x+(tan(-angle)*rightEdge.y), rightEdge.y);
-                        width = getWidth(getLine(rotatedEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                        /*cv::Point rotatedEdge(rightEdge.x+(tan(-angle)*rightEdge.y), rightEdge.y);
+                        width = getWidth(getLine(rotatedEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);*/
+                        width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                        width *= 1/fabs(sin(angle));
+                        
                     }
                     else{
-                        width = getWidth(getLine(leftEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
+                        width = getWidth(getLine(rightEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     }
-                    
-                    angle=angleB;
                     
                 }
                 
@@ -668,7 +673,7 @@ namespace cmp {
         cv::Scalar contourColor(255,180,50);
         cv::Scalar frontFaceColor(40,150,255);
         cv::Scalar backFaceColor(40,40,255);
-        cv::Scalar pivotColor(255,60,60);
+        cv::Scalar pivotColor(60,255,60);
         cv::Scalar profileColor(255,50,255);
         
         for (int i=0; i<characters.size(); i++) {
