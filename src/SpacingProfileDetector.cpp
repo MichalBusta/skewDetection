@@ -164,7 +164,7 @@ namespace cmp {
                     testBounds(leftEdge, rightFace[rightVertex], leftFace,true)){
                     
                     if (ROTATEDWIDTH) {
-                        cv::Point rotatedEdge(leftEdge.x*(1/tan(angle)), leftEdge.y);
+                        cv::Point rotatedEdge(leftEdge.x+(tan(-angle)*leftEdge.y), leftEdge.y);
                         width = getWidth(getLine(rotatedEdge, leftFace[leftVertex_next]), rightFace[rightVertex]);
                     }
                     else{
@@ -202,7 +202,7 @@ namespace cmp {
                     testBounds(rightEdge, leftFace[leftVertex], rightFace, false)){
                     
                     if (ROTATEDWIDTH) {
-                        cv::Point rotatedEdge(rightEdge.x*(1/tan(angle)), rightEdge.y);
+                        cv::Point rotatedEdge(rightEdge.x+(tan(-angle)*rightEdge.y), rightEdge.y);
                         width = getWidth(getLine(rotatedEdge, rightFace[rightVertex_next]), leftFace[leftVertex]);
                     }
                     else{
