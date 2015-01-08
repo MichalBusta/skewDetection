@@ -37,8 +37,7 @@ namespace cmp {
             ~SpacingProfileDetector();
         
         double probMeasure2;
-        
-            using ContourWordSkewDetector::detectContoursSkew;
+
         
             double detectSkew( std::vector<Blob>& blobs ,double lineK, double& probability, cv::Mat* debugImage =NULL);
         
