@@ -317,6 +317,12 @@ namespace cmp {
                 
                 if (i==furthestVertex) {
                     
+                    double xCoord = (line[1]*opposingFace[i].y+line[2])/(-line[0]);
+                    
+                    if ((xCoord<opposingFace[i].x && frontFace) || (xCoord>opposingFace[i].x && !frontFace)) {
+                        return false;
+                    }
+                    
                     maxXcrossed = true;
                     i+=increment;
                     continue;
