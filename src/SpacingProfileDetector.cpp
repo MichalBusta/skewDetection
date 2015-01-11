@@ -265,87 +265,23 @@ namespace cmp {
     
     bool SpacingProfileDetector::testBounds(cv::Point& edge, cv::Point& pivotVertex, std::vector<cv::Point>& opposingFace, bool frontFace){
         
-        int bottomMostVertex=0;
-        int topMostVertex=0;
-        int furthestVertex=0;
-        int closestVertex=0;
-        int increment;
+        int bottomMostVertex=0;   
         
         cv::Vec3d line = getLine(edge, pivotVertex);
-        bool maxXcrossed = false;
+
+        bottomMostVertex=(opposingFace.size()-1);
         
-        if(opposingFace[0].y>opposingFace[opposingFace.size()-1].y){
+        for (int i = bottomMostVertex; i>0 ; i--) {
             
-            topMostVertex=opposingFace.size()-1;
-            increment=+1;
-        }
-        else{
-            bottomMostVertex=(opposingFace.size()-1);
-            increment=-1;
-        }
-        
-        for (int i =0; i< opposingFace.size(); i++) {
+            double xCoord = (line[1]*opposingFace[i].y+line[2])/(-line[0]);
             
-            if (frontFace){
-                furthestVertex = opposingFace[i].x > opposingFace[furthestVertex].x ? i : furthestVertex;
-                closestVertex = opposingFace[i].x < opposingFace[closestVertex].x ? i : closestVertex;
-            }
-            else{
-                furthestVertex = opposingFace[i].x < opposingFace[furthestVertex].x ? i : furthestVertex;
-                closestVertex = opposingFace[i].x > opposingFace[closestVertex].x ? i : closestVertex;
-            }
-            
-        }
-        
-        int i=bottomMostVertex;
-        
-        if (line[1] == 0) {
-            
-            double x = line[2]/(-line[0]);
-            
-            if (frontFace ? (x >= opposingFace[closestVertex].x && x <= opposingFace[furthestVertex].x) : (x <= opposingFace[closestVertex].x && x >= opposingFace[furthestVertex].x)) {
+            if ((xCoord<opposingFace[i].x && frontFace) || (xCoord>opposingFace[i].x && !frontFace)) {
                 return false;
             }
-        }
-        
-        else {
-            while (true) {
-                
-                if (i==(topMostVertex+increment)) break;
-                
-                double yCoord = (line[0]*opposingFace[i].x+line[2])/(-line[1]);
-                
-                if (i==furthestVertex) {
-                    
-                    double xCoord = (line[1]*opposingFace[i].y+line[2])/(-line[0]);
-                    
-                    if ((xCoord<opposingFace[i].x && frontFace) || (xCoord>opposingFace[i].x && !frontFace)) {
-                        return false;
-                    }
-                    
-                    maxXcrossed = true;
-                    i+=increment;
-                    continue;
-                    
-                }
-                
-                if (maxXcrossed) {
-                    
-                    if (yCoord>opposingFace[i].y && yCoord<opposingFace[furthestVertex].y) return false;
-                    
-                }
-                else {
-                    
-                    if (yCoord<opposingFace[i].y && yCoord>opposingFace[furthestVertex].y) return false;
-                    
-                }
-                i+=increment;
-                
-            }
+            
         }
         
         return true;
-        
     }
     
     
