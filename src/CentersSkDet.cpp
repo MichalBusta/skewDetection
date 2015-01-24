@@ -218,12 +218,12 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, double li
 	double delta = distance * precision;
 
 	std::vector<double> offsets;
-	offsets.push_back(0.95);
 	offsets.push_back(0.9);
 	offsets.push_back(0.85);
 	offsets.push_back(0.80);
 	offsets.push_back(0.75);
 	offsets.push_back(0.7);
+	offsets.push_back(0.65);
 	std::vector<SymPoints> symPoints;
 	findPointsInBand(outerContour, center, lineK, distance, delta, offsets, symPoints );
 
@@ -336,7 +336,7 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, double li
 		if( dist < (letterSize * 0.05 * letterSize * 0.05) )
 			symPointsCount++;
 	}
-	this->probMeasure2 = symPointsCount / (2.0 * symPoints.size());
+	this->probMeasure2 = 0.88 * symPointsCount / (2.0 * symPoints.size());
 
 
 	if(debugImage != NULL)
@@ -428,19 +428,32 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, double li
 	return angle;
 }
 
-double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContour, double lineK, bool approximate, cv::Mat* debugImage )
+double CentersSkDet::detectSkew( std::vector<cv::Point>& outerContourO, double lineK, bool approximate, cv::Mat* debugImage )
 {
+	std::vector<cv::Point> outerContour = outerContourO;
 	double angleAcc = 0;
-	std::vector<cv::Point> workCont = outerContour;
+	std::vector<cv::Point2f> workCont;
+	workCont.resize(outerContour.size());
+	for(size_t i = 0; i < workCont.size(); i++)
+	{
+		workCont[i] = outerContour[i];
+	}
 	int level = 0;
 	while(true)
 	{
+		if( level > 0)
+		{
+			for(size_t i = 0; i < workCont.size(); i++)
+			{
+				outerContour[i] = cv::Point(round(workCont[i].x), round(workCont[i].y));
+			}
+		}
 
         double angle;
         if (useMaxMin)
-        	angle = doEstimate2( workCont, debugImage );
+        	angle = doEstimate2( outerContour, debugImage );
 		else
-			angle = doEstimate( workCont, lineK, debugImage );
+			angle = doEstimate( outerContour, lineK, debugImage );
         
 		angleAcc += angle;
 		if(fabs(angle) < (M_PI / 180) || !recursive || level > 11 )

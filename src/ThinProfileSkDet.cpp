@@ -51,11 +51,12 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour,  double li
 	{
 		workCont = contour;
 	}
-	double angle = doEstimate( workCont, debugImage );
+	double hist[180];
+	double angle = doEstimate( workCont, hist, debugImage );
 	return angle;
 }
 
-double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* debugImage )
+double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hist, cv::Mat* debugImage )
 {
 	vector<Point> hull;
 	convexHull( contour, hull );
@@ -79,10 +80,10 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 	 */
 	int p_a = topMost;
 	int p_b = bottomMost;
+	int letterHeight = hull[bottomMost].y - hull[topMost].y;
 
 	double rotated_angle = 0;
 	double min_width = std::numeric_limits<double>::infinity();
-	double max_width = 0;
 
 	Point2d horizont_poz(1,0);
 	Point2d horizont_neg(-1,0);
@@ -182,7 +183,6 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 			PointsForWiderProfiles2.push_back(tmpPoint2);
 			VectorsForWiderProfiles.push_back(tmpVector);
 
-			max_width = MAX(max_width, width);
 			if(width <= min_width)
 			{
 				angle = ang;
@@ -195,36 +195,44 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 	}
 
 	// max width of profiles
-	double thinProfilesRange = min_width * ( profilesRange + 1 );
+	double thinProfilesRange = min_width + letterHeight * ( profilesRange );
 
 	probMeasure1 = 0;
 	probMeasure2 = 0;
-
+	double angle2 = 0;
 	assert(angles.size()==widths.size());
 
+	// filtering thin profiles that are closer than ANGLE_TOLERANCE to other profile
+	vector<double>widths2;
+	vector<double>angles2;
+
+	filterValuesBySimiliarAngle( widths, angles, widths2, angles2 );
+
 	//set values to histogram
-	double hist[180];
 	memset (hist, 0, 180 * sizeof(double));
 	int sigma = 3, range = 3;
 	// counting all profiles in thinProfilesRange
 	double maxHistValue = 0;
-	for(int c=0;c<widths.size();c++)
+	for(int c=0;c<widths2.size();c++)
 	{
-		double ang = angles[c] * 180/M_PI;;
+		double ang = ( angles2[c] - M_PI/2 ) * 180/M_PI;
+		if(widths2[c] == 0)
+			continue;
 		for (int i = ang-sigma*range; i <= ang+sigma*range; i++)
 		{
 			int j = i;
 			if (j<0) j += int(180/histColWidth);
 			if (j>=int(180/histColWidth)) j -= int(180/histColWidth);
-			assert(widths[c] != 0);
+
 			double length = 1/widths[c];
 			hist[j] +=  length/(sqrt(2*M_PI)*sigma)*pow(M_E, -(i*histColWidth+histColWidth/2-ang)*(i*histColWidth+histColWidth/2-ang)/(2*sigma*sigma));
 			maxHistValue = MAX(maxHistValue, hist[j]);
 		}
 
-		if( (widths[c] <= thinProfilesRange ))
+		if( widths2[c] <= thinProfilesRange )
 		{
 			probMeasure1++;
+			angle2 += angles[c];
 		}
 	}
 
@@ -262,6 +270,11 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 		probMeasure2 = (resLen/totalLen);
 	//imshow("Hist", histogram);
 	//cv::waitKey(0);
+
+	if( probMeasure1 > 1 && false)
+	{
+		angle = angle2 / probMeasure1;
+	}
 
 #ifdef VERBOSE
 	std::cout << "goodThinProfiles is: " << probMeasure2 << "\n";
@@ -358,22 +371,28 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 
 		cv::circle(drawing, resPoint2, 3, Scalar( 0, 255, 0 ), 2);
 
-		// drawing other filtered profiles
-		for(int i=0;i<widths.size();i++)
+		int height = 100;
+		double norm = height / hist[maxI];
+		cv::Mat histogram = Mat::zeros(height, 180, CV_8UC3) + cv::Scalar(255, 255, 255);
+		cv::rectangle(histogram, Rect(0, 0, 1, height), Scalar(0,0,0), CV_FILLED);
+		cv::rectangle(histogram, Rect(45, 0, 1, height), Scalar(100,100,100), CV_FILLED);
+		cv::rectangle(histogram, Rect(90, 0, 1, height), Scalar(0,0,0), CV_FILLED);
+		cv::rectangle(histogram, Rect(135, 0, 1, height), Scalar(100,100,100), CV_FILLED);
+
+		for(int i=0;i<int(180);i++)
 		{
-			/*
-					if( ( widths2[i] != 0 ) && ( widths2[i] <= thinProfilesRange ) )
-					{
-						if(resVector.y*VectorsForWiderProfiles[i].y < 0) VectorsForWiderProfiles[i] = VectorsForWiderProfiles[i]*(-1);
-
-
-						cv::Point2f middleVector, middlePoint;
-						cv::line(drawing, PointsForWiderProfiles[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
-						cv::line(drawing, PointsForWiderProfiles2[i]-VectorsForWiderProfiles[i]*100, PointsForWiderProfiles2[i]+VectorsForWiderProfiles[i]*100, Scalar( 0, 255, 255 ), 1);
-						cv::circle(drawing, PointsForWiderProfiles2[i], 3, Scalar( 0, 0, 255 ), 1);
-					}
-			 */
+			int rectH = norm * hist[i];
+			cv::rectangle(histogram, Rect(i, height-rectH, 1, rectH), Scalar(0,0,255), CV_FILLED);
 		}
+		cv::rectangle(histogram, Rect(0, height - 1, 180, 1), Scalar(0,0,0), CV_FILLED);
+
+
+		std::vector<cv::Mat> imagesToMerge;
+		imagesToMerge.push_back(drawing);
+		imagesToMerge.push_back(histogram);
+
+		*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL, cv::Scalar(255, 255, 255) );
+
 	}
 
 	int index = (probMeasure1 - 1);
@@ -382,7 +401,7 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, cv::Mat* d
 	assert(index<probabilities.size());
 	lastDetectionProbability = probMeasure2 * 0.5;
 	assert(lastDetectionProbability == lastDetectionProbability);
-	lastDetectionProbability = 0.6;
+	lastDetectionProbability = 0.7;
 	return angle;
 }
 
@@ -398,7 +417,9 @@ void ThinProfileSkDet::voteInHistogram( std::vector<cv::Point>& contour, double 
 		outerContour = contour;
 	}
 
-	double angle = detectSkew( outerContour, lineK );
+	double hist[180];
+	double angle = doEstimate( outerContour, hist, debugImage );
+
 	int angleDeg = angle * 180 / M_PI + 90;
 	int sigma = 3;
 	int range = 3;

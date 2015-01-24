@@ -39,17 +39,18 @@ int main( int argc, char **argv)
 		help();
 		return -1;
 	}
-	int detector = 0;
+	int detector = 1;
 	if( argc > 2 )
 	{
 		detector = atoi( argv[2] );
 	}
 
 	std::vector<cv::Ptr<SkewDetector> > detectors;
-	//detectors.push_back( new MockSkewDetector() );
-	//detectors.push_back( new ThinProfileSkDet() );
+	detectors.push_back( new MockSkewDetector() );
+	detectors.push_back( new ThinProfileSkDet() );
 	detectors.push_back( new CentersSkDet() );
-	//detectors.push_back( new VerticalDomSkDet() );
+	detectors.push_back( new VerticalDomSkDet() );
+	detectors.push_back( new BestGuessSKDetector() );
 	//detectors.push_back( new LongestEdgeSkDetector() );
 
 	if(detector > detectors.size())

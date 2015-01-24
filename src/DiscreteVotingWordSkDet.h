@@ -46,6 +46,7 @@ private:
 	std::map<std::string, cv::Scalar> detectorIDColors;
 	std::vector<std::string> detectorNames;
 	std::vector<cv::Ptr<ContourSkewDetector> > detectors;
+	std::vector<cv::Scalar> detectorColors;
 };
 
 }

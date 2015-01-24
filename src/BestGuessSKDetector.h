@@ -46,6 +46,7 @@ public:
     std::map<std::string, cv::Mat> debugImages;
 private:
 	std::vector<cv::Ptr<ContourSkewDetector> > detectors;
+	std::vector<cv::Scalar> colors;
 };
 
 } /* namespace cmp */

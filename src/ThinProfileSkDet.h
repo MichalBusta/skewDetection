@@ -29,7 +29,7 @@ public:
 	 * @param epsilon
 	 * @param ignoreAngle in degrees
 	 */
-	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.023, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.02, bool correctWidth = false);
+	ThinProfileSkDet(int approximatioMethod = CV_CHAIN_APPROX_NONE, double epsilon = 0.023, int ignoreAngle = IGNORE_ANGLE, double profilesRange = 0.1, bool correctWidth = true);
 
 	virtual ~ThinProfileSkDet();
 
@@ -46,7 +46,7 @@ public:
 
 private:
 
-	double doEstimate(std::vector<cv::Point>& contours, cv::Mat* debugImage = NULL);
+	double doEstimate(std::vector<cv::Point>& contours, double* hist, cv::Mat* debugImage = NULL);
 
 	bool correctWidth;
 

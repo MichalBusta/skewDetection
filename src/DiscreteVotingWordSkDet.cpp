@@ -24,25 +24,32 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022));
 	weights.push_back(1.0);
 	detectorNames.push_back("VertDom");
+	detectorColors.push_back(cv::Scalar(255, 0, 0));
 
 
 	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, true));
 	weights.push_back(0.9);
 	detectorNames.push_back("VertDomCH");
+	detectorColors.push_back(cv::Scalar(100, 100, 0));
 
 
 	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9) );
 	weights.push_back(1.0);
 	detectorNames.push_back("CentersSkDet");
+	detectorColors.push_back(cv::Scalar(0, 255, 0));
 
 
 	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true) );
 	weights.push_back(1.0);
 	detectorNames.push_back("Thin Profile");
+	detectorColors.push_back(cv::Scalar(0, 0, 255));
 
+	/*
 	detectors.push_back( new LongestEdgeSkDetector() );
 	weights.push_back(1.0);
 	detectorNames.push_back("LongestEdgeSkDetector");
+	detectorColors.push_back(cv::Scalar(0, 100, 100));
+	*/
 
 
 }
@@ -57,25 +64,39 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 	memset (histogram, 0, 180 * sizeof(double));
 
 	double epsilon = 0.014;
-
 	for (size_t i = 0; i < contours.size(); i++)
 	{
 		for( size_t detId = 0; detId < this->detectors.size(); detId++)
 		{
 
-			/*
+
 			double skewAngle = this->detectors[detId]->detectSkew( *contours[i], true,  debugImage);
 
-			cv::imshow("det", *debugImage);
-			cv::waitKey(0);
+			//cv::imshow("det", *debugImage);
+			//cv::waitKey(0);
 
 			double angleDeg = skewAngle * 180 / M_PI + 90;
 			assert(angleDeg >= 0);
 			assert(angleDeg <= 180);
 			histogram[(int) round(angleDeg)] += detectors[detId]->lastDetectionProbability * weights[detId];
-*/
 
-			this->detectors[detId]->voteInHistogram(*contours[i], lineK, histogram, this->weights[detId], true, debugImage);
+			/*
+			double histogrami[180];
+			memset (histogrami, 0, 180 * sizeof(double));
+			this->detectors[detId]->voteInHistogram(*contours[i], lineK, histogrami, this->weights[detId], true, debugImage);
+			for( int i = 0; i < 180; i++ )
+			{
+				histogram[i] += histogrami[i];
+			}
+
+
+			if(debugImage != NULL)
+			{
+				draw_polar_histogram(histograms[detId], histogrami, 180, detectorColors[detId]);
+				cv::imshow("ts", histograms[detId]);
+				cv::waitKey(0);
+			}
+			*/
 
 		}
 	}
@@ -155,6 +176,7 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 			cv::rectangle(histogramImg, cv::Point(i*colWidth, histHeight), cv::Point(colWidth*i+colWidth, histHeight-colHeight), cv::Scalar(255,0,0),CV_FILLED);
 		}
 		cv::line(histogramImg, cv::Point(0, histogramImg.rows - 1), cv::Point(180, histogramImg.rows - 1), cv::Scalar(100, 100, 100) );
+
 		*debugImage = histogramImg;
 
 #ifdef VERBOSE

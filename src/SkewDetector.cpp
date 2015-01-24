@@ -8,16 +8,52 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "SkewDetector.h"
+#include <opencv2/highgui/highgui.hpp>
 
 namespace cmp
 {
 
 void draw_polar_histogram(cv::Mat& img, double* histogram, int bins, cv::Scalar color)
 {
-	img = cv::Mat::zeros(100, 50, CV_8UC3) + cv::Scalar(255, 255, 255);
+	if(img.empty())
+	{
+		img = cv::Mat::zeros(200, 400, CV_8UC3) + cv::Scalar(255, 255, 255);
+	}
+	cv::Point center(200, 0);
+	double prevValue = 0;
 	for( int i = 0; i < bins; i++ )
 	{
+		double value = histogram[i] * 200;
+		double angle = i;
+		cv::Point measure(value * sin(angle * M_PI/180.0 -M_PI/2), value * cos(angle * M_PI/180.0 -M_PI/2) );
+		cv::line(img, center, center + measure, color, 2);
 
+		for( int k = 0; k < 10; k++ )
+		{
+
+			cv::Point measureh(((10 - k) * value + k * prevValue) / 10 * sin((angle - k * 0.1) * M_PI/180.0 -M_PI/2), ((10 - k) * value + k * prevValue) / 10 * cos((angle - k * 0.1) * M_PI/180.0 -M_PI/2) );
+			cv::line(img, center, center + measureh, color, 2);
+			prevValue = value;
+		}
+
+	}
+
+}
+
+void draw_polar_histogram_color(cv::Mat& img, std::vector<double>& angles, std::vector<double>& probabilities, std::vector<cv::Scalar>& colors)
+{
+	if(img.empty())
+	{
+		img = cv::Mat::zeros(100, 200, CV_8UC3) + cv::Scalar(255, 255, 255);
+	}
+	cv::Point center(100, 0);
+	double prevValue = 0;
+	for( size_t i = 0; i < colors.size(); i++ )
+	{
+		double value = probabilities[i] * 100;
+		double angle = angles[i];
+		cv::Point measure(-value * sin(angle), value * cos(angle) );
+		cv::line(img, center, center + measure, colors[i], 2);
 	}
 }
 
@@ -46,6 +82,7 @@ void ContourSkewDetector::filterValuesBySimiliarAngle(
 			{
 				anglesSum += angles[i];
 				anglesCount++;
+				valuesOut[c] = MAX(valuesOut[c], valuesOut[i]);
 				valuesOut[i] = 0;
 				anglesOut[i] = 0;
 			}

@@ -55,7 +55,7 @@ int main( int argc, char **argv)
 	//evaluator.registerDetector(new ThinProfileSkDet(), "ThinProfileR", "Thinnest Profile Recursive" );
 	//evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, false), "ThinProfile", "Thinnest Profile" );
 	//evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, false, true), "ThinProfileW", "Thinnest Profile W" );
-	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true), "ThinProfileCW", "Thinnest Profile CW" );
+	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE), "ThinProfileCW", "Thinnest Profile CW" );
 	//evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, false), "TopBottomCenter", "Symmetric Glyph" );
 	//evaluator.registerDetector(new CentersSkDet(), "TopBottomCenterR", "Symmetric Glyph Recursive");
 	evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9), "TopBottomCenter-Z9", "Symmetric Glyph Z9" );

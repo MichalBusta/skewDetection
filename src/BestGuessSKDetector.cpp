@@ -20,21 +20,25 @@ BestGuessSKDetector::BestGuessSKDetector(int approximatioMethod, double epsilon)
 	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, false, true));
 	weights.push_back(1.0);
     detectorNames.push_back("VertDom");
+    colors.push_back( cv::Scalar(255, 0, 0) );
 
 
     detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022, 3, 3, IGNORE_ANGLE, 3, true, true));
     weights.push_back(1.0);
     detectorNames.push_back("VertDomCH");
+    colors.push_back( cv::Scalar(100, 100, 0) );
 
 
     detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9 ) );
     weights.push_back(1.0);
     detectorNames.push_back("CentersSkDet");
+    colors.push_back( cv::Scalar(0, 0, 255) );
 
 
-	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.02, true) );
+	detectors.push_back( new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE, 0.1, true) );
 	weights.push_back(1.0);
     detectorNames.push_back("ThinProfileSkDet");
+    colors.push_back( cv::Scalar(0, 255, 0) );
     /*
 	detectors.push_back( new LongestEdgeSkDetector() );
     weights.push_back(0.5);
@@ -65,6 +69,8 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
     assert(this->detectors.size()==this->weights.size());
 	double bestProb = 0;
 	std::vector<double> angles;
+	std::vector<double> probablities;
+	std::vector<cv::Scalar> detColors;
 	cv::Mat bestDebugImage;
 	size_t bestDetIndex = -1;
 	for(size_t i = 0; i < this->detectors.size(); i++)
@@ -74,16 +80,31 @@ double BestGuessSKDetector::detectSkew( cv::Mat& mask, double lineK, cv::Mat* de
 		cv::Mat img = mask.clone();
 		angles.push_back( this->detectors[i]->detectSkew( img, lineK, &dbgImage) );
         debugImages[detectorNames[i]] = dbgImage;
+        probablities.push_back(this->detectors[i]->lastDetectionProbability);
+        detColors.push_back(colors[i]);
 		if(bestProb < (this->detectors[i]->lastDetectionProbability * weights[i] ) )
 		{
 			bestDetIndex = i;
 			bestDebugImage = dbgImage;
 			bestProb = this->detectors[i]->lastDetectionProbability * weights[i];
+			this->probMeasure1 = this->detectors[i]->probMeasure1;
+			this->probMeasure2 = this->detectors[i]->probMeasure2;
 		}
 	}
+
+	cv::Mat histImg;
+	draw_polar_histogram_color(histImg, angles, probablities, detColors);
+
+
 	this->lastDetectionProbability = bestProb;
 	if(debugImage != NULL)
 		*debugImage = bestDebugImage;
+
+	std::vector<cv::Mat> imagesToMerge;
+	imagesToMerge.push_back(bestDebugImage);
+	imagesToMerge.push_back(histImg);
+	*debugImage = mergeHorizontal(imagesToMerge, 1, 0, NULL, cv::Scalar(255, 255, 255) );
+
 
 #ifdef VERBOSE
 	std::cout << "BestGuess angle is: " << angles[bestDetIndex] << " with prob: " << lastDetectionProbability << std::endl;

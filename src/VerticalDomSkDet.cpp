@@ -179,6 +179,19 @@ double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Ma
 		}
 		cv::rectangle(histogram, Rect(0, height - 1, 180, 1), Scalar(0,0,0), CV_FILLED);
 
+		cv::Mat polarHist;
+		//normalize histogram
+		double maxValue = hist[maxI];
+		double factor = lastDetectionProbability / maxValue;
+		for(int i=0;i<int(180);i++)
+		{
+			hist[i] *= factor;
+		}
+		/*
+		draw_polar_histogram(polarHist, hist, 180, cv::Scalar(255, 0, 0));
+		cv::imshow("ts", polarHist);
+		cv::waitKey(0);
+		*/
 
 		Mat& drawing =  *debugImage;
 		cv::Rect bbox = cv::boundingRect((*contour));
@@ -316,18 +329,9 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 	cv::waitKey(0);
 #endif
 
-	double minValue = 0.14; //TODO what is the value
-	double maxValue = 0.1333;
-
-
-	int index = ((resLen/totalLen) - minValue) / ( (maxValue - minValue ) / 10);
-	index = MAX(0, index);
-	index = MIN(index, probabilities.size()-1);
-	assert(index<probabilities.size());
-
 	this->lastDetectionProbability = (resLen/totalLen);
 	assert(lastDetectionProbability == lastDetectionProbability);
-	this->probMeasure1 = probabilities[index] * 100;
+	this->probMeasure1 = 0;
 	this->probMeasure2 = (resLen/totalLen);
 
 	if(doConvexHull)
@@ -396,6 +400,15 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 		cv::imshow("ts", *debugImage);
 		cv::waitKey(0);
 		*/
+	}
+
+
+	//normalize histogram
+	double maxValue = hist[maxI];
+	double factor = lastDetectionProbability / maxValue;
+	for(int i=0;i<int(180);i++)
+	{
+		hist[i] *= factor;
 	}
 
 	for(int i=0; i < 180; i++)
