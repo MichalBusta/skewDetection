@@ -50,6 +50,7 @@ namespace cmp
     {
         std::string imgName;
         std::string letter;
+        cv::Rect boundingBox;
         
     };
     struct statisticalResult
@@ -81,7 +82,7 @@ namespace cmp
         
         void run();
         
-        void addWordDetector(cv::Ptr<DiscreteVotingWordSkDet> detector, std::string detectorID);
+        void addWordDetector(cv::Ptr<WordSkewDetector> detector, std::string detectorID);
     
     private:
         
@@ -98,7 +99,7 @@ namespace cmp
         void saveDebugImg(std::string outputDir, Result result);
         std::string outputDirectory;
         
-        std::vector<cv::Ptr<DiscreteVotingWordSkDet> > detectors;
+        std::vector<cv::Ptr<WordSkewDetector> > detectors;
         std::vector<std::string> detectorIDs;
         std::vector<Result> results;
         std::vector<double> reference;

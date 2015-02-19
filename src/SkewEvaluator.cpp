@@ -112,13 +112,14 @@ static inline void split(std::vector<std::string>& lst, const std::string& input
 		lst.push_back(word.str());
 }
 
-void readDefinitionFile(std::string& wordDir, std::vector<std::string>& letters){
+void readDefinitionFile(std::string& wordDir, std::vector<std::string>& letters, std::vector<cv::Rect>& bounds){
 
 	std::string dataFilePath;
 
 	dataFilePath = wordDir+"/"+IOUtils::Basename(wordDir)+".txt";
 	std::ifstream textdatafile(dataFilePath);
-
+    
+    std::vector<std::vector<std::string> > imageData;
 	std::string line;
 	while (getline(textdatafile, line)) {
 
@@ -130,8 +131,13 @@ void readDefinitionFile(std::string& wordDir, std::vector<std::string>& letters)
 		split(splitStrings, line, " ");
 		if(splitStrings.size() < 5)
 			continue;
-
+        cv::Rect bBox;
+        bBox.x = std::atoi(splitStrings[1].c_str());
+        bBox.y = std::atoi(splitStrings[2].c_str());
+        bBox.width = std::atoi(splitStrings[3].c_str());
+        bBox.height= std::atoi(splitStrings[4].c_str());
 		letters.push_back(splitStrings[5]);
+        bounds.push_back(bBox);
 
 
 	}
@@ -151,7 +157,8 @@ void SkewEvaluator::evaluateWords( const std::string& evalDir, std::vector<cv::P
 		std::string wordDir = IOUtils::RemoveExtension(wordImages[i]);
 		std::string baseName = IOUtils::Basename(wordDir);
 		std::vector<std::string> letters;
-		readDefinitionFile(wordDir, letters);
+        std::vector<cv::Rect> bounds;
+		readDefinitionFile(wordDir, letters,bounds);
 		std::vector<cv::Mat> letterImages;
 		for(size_t j = 0; j < letters.size(); j++)
 		{
@@ -160,7 +167,7 @@ void SkewEvaluator::evaluateWords( const std::string& evalDir, std::vector<cv::P
 			letterImages.push_back(tempImg);
 		}
 		std::cout << "Processing " <<  wordImages[i] << std::endl;
-		evaluateWordsMat( letterImages, "Latin", baseName, i, wordSkewDetectors, wordImages[i]);
+		evaluateWordsMat( letterImages, bounds ,"Latin", baseName, i, wordSkewDetectors, wordImages[i]);
 
 
 	}
@@ -321,7 +328,7 @@ void SkewEvaluator::evaluateMat( cv::Mat& sourceImage, const std::string& alphab
  * @param alphabet
  * @param letter
  */
-void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const std::string& alphabet, const std::string& letter, size_t faceIndex,
+void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages,std::vector<cv::Rect>& bounds,const std::string& alphabet, const std::string& letter, size_t faceIndex,
 		std::vector<cv::Ptr<ContourWordSkewDetector> >& wordSkewDetectors, std::string& wordImage )
 {
 	//generate modifications
@@ -368,7 +375,7 @@ void SkewEvaluator::evaluateWordsMat( std::vector<cv::Mat>& letterImages, const 
 			double lineK = 0;
 			double probability;
 			cv::Mat debugImage;
-			double detectedAngle = wordSkewDetector->detectContoursSkew(contoursWord, 0, probability, &debugImage );
+			double detectedAngle = wordSkewDetector->detectContoursSkew(contoursWord, 0, probability, &debugImage, &bounds);
 			double angleDiff = detectedAngle - def.skewAngle;
 
 			int isWorst = 0;

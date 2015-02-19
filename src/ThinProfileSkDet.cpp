@@ -33,6 +33,7 @@ ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int i
 	probabilities.push_back(0.53);
 	probabilities.push_back(0.50);
 	probabilities.push_back(0.48);
+    this->doConvex = doConvex;
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
@@ -59,7 +60,8 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour,  double li
 double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hist, cv::Mat* debugImage )
 {
 	vector<Point> hull;
-	convexHull( contour, hull );
+	if (doConvex)convexHull( contour, hull );
+    else hull=contour;
 
 	int topMost = 0;
 	int bottomMost = 0;
@@ -85,8 +87,8 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hi
 	double rotated_angle = 0;
 	double min_width = std::numeric_limits<double>::infinity();
 
-	Point2d horizont_poz(1,0);
-	Point2d horizont_neg(-1,0);
+	Point2d horizon_poz(1,0);
+	Point2d horizon_neg(-1,0);
 	double angle = 0;
 	Point2d resVector, resPoint, resPoint2;
 
@@ -107,8 +109,8 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hi
 		Point2d edge_a(hull[p_a_1].x - hull[p_a].x, hull[p_a_1].y - hull[p_a].y);
 		Point2d edge_b(hull[p_b_1].x - hull[p_b].x, hull[p_b_1].y - hull[p_b].y);
 
-		double angleACos = (edge_a.x*horizont_poz.x + edge_a.y*horizont_poz.y)/(sqrt(edge_a.x*edge_a.x+edge_a.y*edge_a.y)*sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y));
-		double angleBCos = (edge_b.x*horizont_neg.x + edge_b.y*horizont_neg.y)/(sqrt(edge_b.x*edge_b.x+edge_b.y*edge_b.y)*sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y));
+		double angleACos = (edge_a.x*horizon_poz.x + edge_a.y*horizon_poz.y)/(sqrt(edge_a.x*edge_a.x+edge_a.y*edge_a.y)*sqrt(horizon_poz.x*horizon_poz.x+horizon_poz.y*horizon_poz.y));
+		double angleBCos = (edge_b.x*horizon_neg.x + edge_b.y*horizon_neg.y)/(sqrt(edge_b.x*edge_b.x+edge_b.y*edge_b.y)*sqrt(horizon_neg.x*horizon_neg.x+horizon_neg.y*horizon_neg.y));
 
 		angleACos = MAX(MIN(angleACos, 1.0), -1.0);
 		angleBCos = MAX(MIN(angleBCos, 1.0), -1.0);
@@ -117,16 +119,16 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hi
 		double angle_b = acos(angleBCos);
 		double width = 0;
 
-		double x1 = horizont_poz.x;
-		double y1 = horizont_poz.y;
-		double x2 = horizont_neg.x;
-		double y2 = horizont_neg.y;
+		double x1 = horizon_poz.x;
+		double y1 = horizon_poz.y;
+		double x2 = horizon_neg.x;
+		double y2 = horizon_neg.y;
 
-		horizont_poz.x = x1*cos(min(angle_a, angle_b))-y1*sin(min(angle_a, angle_b));
-		horizont_poz.y = x1*sin(min(angle_a, angle_b))+y1*cos(min(angle_a, angle_b));
+		horizon_poz.x = x1*cos(min(angle_a, angle_b))-y1*sin(min(angle_a, angle_b));
+		horizon_poz.y = x1*sin(min(angle_a, angle_b))+y1*cos(min(angle_a, angle_b));
 
-		horizont_neg.x = x2*cos(min(angle_a, angle_b))-y2*sin(min(angle_a, angle_b));
-		horizont_neg.y = x2*sin(min(angle_a, angle_b))+y2*cos(min(angle_a, angle_b));
+		horizon_neg.x = x2*cos(min(angle_a, angle_b))-y2*sin(min(angle_a, angle_b));
+		horizon_neg.y = x2*sin(min(angle_a, angle_b))+y2*cos(min(angle_a, angle_b));
 		Point2d tmpVector, tmpPoint, tmpPoint2;
 		double ang = 0;
 		if(angle_a < angle_b)
@@ -134,30 +136,31 @@ double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hi
 			p_a++;
 			if(p_a >= hull.size())
 				p_a = 0;
-			width = abs(horizont_poz.y*hull[p_b].x-horizont_poz.x*hull[p_b].y-horizont_poz.y*hull[p_a].x+horizont_poz.x*hull[p_a].y)/sqrt(horizont_poz.x*horizont_poz.x+horizont_poz.y*horizont_poz.y);
-			tmpVector = horizont_poz;
+			width = abs(horizon_poz.y*hull[p_b].x-horizon_poz.x*hull[p_b].y-horizon_poz.y*hull[p_a].x+horizon_poz.x*hull[p_a].y)/sqrt(horizon_poz.x*horizon_poz.x+horizon_poz.y*horizon_poz.y);
+			tmpVector = horizon_poz;
 			tmpPoint = hull[p_a];
 			tmpPoint2 = hull[p_b];
-			ang = atan2(horizont_poz.y, horizont_poz.x);
+			ang = atan2(horizon_poz.y, horizon_poz.x);
 		}
 		else
 		{
 			p_b++;
 			if(p_b >= hull.size())
 				p_b = 0;
-			width = abs(horizont_neg.y*hull[p_a].x-horizont_neg.x*hull[p_a].y-horizont_neg.y*hull[p_b].x+horizont_neg.x*hull[p_b].y)/sqrt(horizont_neg.x*horizont_neg.x+horizont_neg.y*horizont_neg.y);
-			tmpVector = horizont_neg;
+			width = abs(horizon_neg.y*hull[p_a].x-horizon_neg.x*hull[p_a].y-horizon_neg.y*hull[p_b].x+horizon_neg.x*hull[p_b].y)/sqrt(horizon_neg.x*horizon_neg.x+horizon_neg.y*horizon_neg.y);
+			tmpVector = horizon_neg;
 			tmpPoint = hull[p_b];
 			tmpPoint2 = hull[p_a];
-			ang = atan2(horizont_neg.y, horizont_neg.x);
+			ang = atan2(horizon_neg.y, horizon_neg.x);
 		}
 
 
 		rotated_angle = rotated_angle + min(angle_a, angle_b);
 
 		if( width == 0 )
+            
 		{
-			//todo this shoud not happen
+			//todo this should not happen
 			width = 1;
 		}
 

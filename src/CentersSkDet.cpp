@@ -53,13 +53,24 @@ double CentersSkDet::doEstimate2(std::vector<cv::Point> &contour, cv::Mat* debug
         ymax =MAX(ymax, pt.y);
         ymin =MIN(ymin, pt.y);
         
-        
     }
     
-    cv::Point TL = cv::Point(xmin,ymax);
-    cv::Point TR = cv::Point(xmax,ymax);
-    cv::Point BL = cv::Point(xmin,ymin);
-    cv::Point BR = cv::Point(xmax,ymin);
+    cv::Point TL = cv::Point(xmin,ymin);
+    cv::Point TR = cv::Point(xmax,ymin);
+    cv::Point BL = cv::Point(xmin,ymax);
+    cv::Point BR = cv::Point(xmax,ymax);
+    
+    /*cv::RotatedRect rrect = cv::minAreaRect(contour);
+    cv::Point2f vert[4];
+    rrect.points(vert);
+    
+    
+    
+    for (int i=0; i<4; i++) {
+        
+        
+        
+    }*/
     
     cv::Point TLC, TRC, BLC, BRC;
     TLC = BR;

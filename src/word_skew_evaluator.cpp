@@ -9,6 +9,7 @@
 #include "SkewDetection.h"
 #include "WordSkewDetection.h"
 #include "WordEvaluator.h"
+#include "SpacingProfileDetector.h"
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -28,7 +29,7 @@ int main( int argc, char **argv)
     }
     
     cmp::WordEvaluator eval(argv[2],argv[1],true);
-    eval.addWordDetector(new cmp::DiscreteVotingWordSkDet(), "DiscreteVoting");
+    eval.addWordDetector(new cmp::SpacingProfileDetector, "Spacing");
     eval.run();
     
 }

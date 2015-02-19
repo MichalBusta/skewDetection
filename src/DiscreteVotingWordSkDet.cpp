@@ -33,7 +33,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorColors.push_back(cv::Scalar(100, 100, 0));
 
 
-	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9) );
+	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, false ,0.9) );
 	weights.push_back(1.0);
 	detectorNames.push_back("CentersSkDet");
 	detectorColors.push_back(cv::Scalar(0, 255, 0));
@@ -58,7 +58,7 @@ DiscreteVotingWordSkDet::~DiscreteVotingWordSkDet()
 
 }
 
-double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage)
+double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::Point>* >& contours, double lineK, double& probability, cv::Mat* debugImage, std::vector<cv::Rect>* bounds)
 {
 	double histogram[180];
 	memset (histogram, 0, 180 * sizeof(double));

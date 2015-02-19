@@ -58,7 +58,8 @@ int main( int argc, char **argv)
 	evaluator.registerDetector(new ThinProfileSkDet(CV_CHAIN_APPROX_NONE, 0.023, IGNORE_ANGLE), "ThinProfileCW", "Thinnest Profile CW" );
 	//evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, false), "TopBottomCenter", "Symmetric Glyph" );
 	//evaluator.registerDetector(new CentersSkDet(), "TopBottomCenterR", "Symmetric Glyph Recursive");
-	evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, 0.9), "TopBottomCenter-Z9", "Symmetric Glyph Z9" );
+	evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, false, 0.9), "TopBottomCenter-Z9", "Symmetric Glyph Z9" );
+    evaluator.registerDetector(new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, true, 0.9), "TopBottomCenterV", "TopBottomCenterV" );
 	//evaluator.registerDetector(new LongestBitgEstimator(), "LongestBitg", "Longest Bitangent" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, true), "RightHullLongest" );
 	//evaluator.registerDetector(new LeftRightHullSkDet(CV_CHAIN_APPROX_TC89_KCOS ,0.01, 0.2, false), "LeftHullLongest" );

@@ -133,7 +133,6 @@ void ContourSkewDetector::getBigestContour(
 	hierarchy = hierarchy2;
     assert(contours.size()!=0);
     assert(hierarchy.size()!=0);
-
 }
 
 /**

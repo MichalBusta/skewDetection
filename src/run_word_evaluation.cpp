@@ -16,6 +16,7 @@
 
 #include "SkewEvaluator.h"
 #include "DiscreteVotingWordSkDet.h"
+#include "SpacingProfileDetector.h"
 
 using namespace cmp;
 
@@ -51,6 +52,9 @@ int main( int argc, char **argv)
 	std::vector<cv::Ptr<ContourWordSkewDetector> > detectors;
 	detectors.push_back( new DiscreteVotingWordSkDet() );
 	evaluator.registerDetector( NULL, "CommonVoting", "Common Voting" );
+    detectors.push_back( new SpacingProfileDetector() );
+    evaluator.registerDetector( NULL, "SpacingProfile", "Spacing Profile" );
+    
 	//evaluator.detectorNames.push_back("CommonVoting");
 	//evaluator.detectorCaptions.push_back("Common Voting");
 	/*

@@ -49,6 +49,8 @@ private:
 	double doEstimate(std::vector<cv::Point>& contours, double* hist, cv::Mat* debugImage = NULL);
 
 	bool correctWidth;
+    
+    bool doConvex;
 
 };
 
