@@ -158,6 +158,11 @@ double VerticalDomSkDet::doEstimate( std::vector<cv::Point>& contourOrig, cv::Ma
 	assert(index<probabilities.size());
 
 	this->lastDetectionProbability = (resLen/totalLen);
+	if( lastDetectionProbability != lastDetectionProbability )
+	{
+		lastDetectionProbability = 0;
+
+	}
 	assert(lastDetectionProbability == lastDetectionProbability);
 	this->probMeasure1 = probabilities[index] * 100;
 	this->probMeasure2 = (resLen/totalLen);

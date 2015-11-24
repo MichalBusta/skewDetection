@@ -11,6 +11,11 @@ find_package( OpenCV REQUIRED )
 
 add_definitions("-std=c++0x")
 
+if(NOT WIN32)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif(NOT WIN32)
+
 if (USE_OPENMP)
     add_definitions("-DDO_PARALLEL")
     if (MSVC)
@@ -103,3 +108,7 @@ if(BUILD_DOC)
         )
     endif(DOXYGEN_FOUND)
 endif (BUILD_DOC)
+
+export(TARGETS skewDetection FILE "${PROJECT_BINARY_DIR}/skewDetectionLibraryDepends.cmake")
+configure_file(skewDetectionConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/skewDetectionConfig.cmake" @ONLY)

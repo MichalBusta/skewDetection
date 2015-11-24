@@ -256,6 +256,11 @@ double CentersSkDet::doEstimate( std::vector<cv::Point>& outerContour, double li
 
 	//vypocet velikosti pisma
 	int letterSize = bottomPoint - topPoint;
+	if(letterSize < 5 )
+	{
+		lastDetectionProbability = 0;
+		return 0;
+	}
 	assert(letterSize >1);
 	double addEdgeThickness = letterSize * precision;
 	double addEdgeThickness2 = letterSize * precision * 4;

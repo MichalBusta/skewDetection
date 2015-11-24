@@ -34,7 +34,7 @@ class DiscreteVotingWordSkDet : public ContourWordSkewDetector
 {
 public:
 
-	DiscreteVotingWordSkDet();
+	DiscreteVotingWordSkDet(bool approximateContours = false);
 
 	virtual ~DiscreteVotingWordSkDet();
 
@@ -47,6 +47,8 @@ private:
 	std::vector<std::string> detectorNames;
 	std::vector<cv::Ptr<ContourSkewDetector> > detectors;
 	std::vector<cv::Scalar> detectorColors;
+
+	bool approximateContours;
 };
 
 }

@@ -151,7 +151,7 @@ void ContourSkewDetector::approximateContour(std::vector<cv::Point>& contour, st
 	{
 		cv::Rect rect= cv::boundingRect(contour);
 		int size = rect.height;
-		double absEpsilon = epsilon * size;
+		double absEpsilon = MAX(1, epsilon * size);
 		std::vector<cv::Point> apCont;
 		approxPolyDP(contour, contourOut, absEpsilon, true);
 	}

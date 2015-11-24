@@ -18,10 +18,10 @@
 namespace cmp
 {
 
-DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
+DiscreteVotingWordSkDet::DiscreteVotingWordSkDet(bool approximateContours) : ContourWordSkewDetector(), approximateContours(approximateContours)
 {
 
-	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.022));
+	detectors.push_back( new VerticalDomSkDet(CV_CHAIN_APPROX_NONE, 0.03));
 	weights.push_back(1.0);
 	detectorNames.push_back("VertDom");
 	detectorColors.push_back(cv::Scalar(255, 0, 0));
@@ -33,7 +33,7 @@ DiscreteVotingWordSkDet::DiscreteVotingWordSkDet() : ContourWordSkewDetector()
 	detectorColors.push_back(cv::Scalar(100, 100, 0));
 
 
-	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08, true, false ,0.9) );
+	detectors.push_back( new CentersSkDet(CV_CHAIN_APPROX_NONE, 0, 0.08) );
 	weights.push_back(1.0);
 	detectorNames.push_back("CentersSkDet");
 	detectorColors.push_back(cv::Scalar(0, 255, 0));
@@ -69,15 +69,18 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 		for( size_t detId = 0; detId < this->detectors.size(); detId++)
 		{
 
+			//cv::Mat debugImage;
+			double skewAngle = this->detectors[detId]->detectSkew( *contours[i], lineK, true);
 
-			double skewAngle = this->detectors[detId]->detectSkew( *contours[i], true,  debugImage);
-
-			//cv::imshow("det", *debugImage);
+			//cv::imshow("det", debugImage);
 			//cv::waitKey(0);
 
 			double angleDeg = skewAngle * 180 / M_PI + 90;
+			angleDeg = MAX(0, angleDeg);
 			assert(angleDeg >= 0);
+			angleDeg = MIN(180, angleDeg);
 			assert(angleDeg <= 180);
+			assert(detectors[detId]->lastDetectionProbability <= 1);
 			histogram[(int) round(angleDeg)] += detectors[detId]->lastDetectionProbability * weights[detId];
 
 			/*
@@ -147,8 +150,14 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 	double angle = maxI*M_PI/180-M_PI/2;
 	probability =  (resLen/totalLen);
 	//draw the histogram
+#ifndef VERBOSE
 	if(debugImage != NULL)
 	{
+#else
+		cv::Mat tmp;
+		if(debugImage == NULL)
+			debugImage = &tmp;
+#endif
 		int noOfGroups = 180;
 		std::vector<cv::Scalar> colors;
 		colors.push_back(cv::Scalar(255, 0, 0));
@@ -180,10 +189,12 @@ double DiscreteVotingWordSkDet::detectContoursSkew( std::vector<std::vector<cv::
 		*debugImage = histogramImg;
 
 #ifdef VERBOSE
-		cv::imshow("Histogram", histogram);
+		cv::imshow("Histogram", histogramImg);
 		cv::waitKey(0);
 #endif
+#ifndef VERBOSE
 	}
+#endif
 	return angle;
 }
 

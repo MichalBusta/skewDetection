@@ -24,8 +24,8 @@ namespace cmp
 {
 int brd=10;
 
-ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool correctWidth) :
-				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), correctWidth(correctWidth)
+ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int ignoreAngle, double profilesRange, bool correctWidth, bool doConvex) :
+				ContourSkewDetector(approximatioMethod, epsilon), ignoreAngle(ignoreAngle), profilesRange(profilesRange), correctWidth(correctWidth), doConvex(doConvex)
 {
 	probabilities.push_back(0.48);
 	probabilities.push_back(0.79);
@@ -33,7 +33,6 @@ ThinProfileSkDet::ThinProfileSkDet(int approximatioMethod, double epsilon, int i
 	probabilities.push_back(0.53);
 	probabilities.push_back(0.50);
 	probabilities.push_back(0.48);
-    this->doConvex = doConvex;
 }
 
 ThinProfileSkDet::~ThinProfileSkDet()
@@ -60,7 +59,8 @@ double ThinProfileSkDet::detectSkew( std::vector<cv::Point>& contour,  double li
 double ThinProfileSkDet::doEstimate( std::vector<cv::Point>& contour, double* hist, cv::Mat* debugImage )
 {
 	vector<Point> hull;
-	if (doConvex)convexHull( contour, hull );
+	if (doConvex)
+		convexHull( contour, hull );
     else hull=contour;
 
 	int topMost = 0;
