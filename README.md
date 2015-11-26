@@ -10,3 +10,5 @@ computed in a linear time. The estimators are evaluated on a synthetically gener
 by the proposed method improves the accuracy of a state-of-the-art scene text recognition pipeline.
 
 
+Full report: 
+http://link.springer.com/chapter/10.1007/978-3-319-16631-5_10
