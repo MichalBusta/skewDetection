@@ -10,6 +10,8 @@
 
 #include "SkewDetector.h"
 
+#include <map>
+
 namespace cmp
 {
 

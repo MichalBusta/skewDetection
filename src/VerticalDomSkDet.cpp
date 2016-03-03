@@ -341,7 +341,7 @@ void VerticalDomSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, dou
 
 	if(doConvexHull)
 	{
-		cv::vector<int> convexHull_IntIdx;
+		std::vector<int> convexHull_IntIdx;
 		cv::convexHull(contourOrig, convexHull_IntIdx, true);
 
 		std::vector<cv::Vec4i> convexityDefectsSet;
@@ -454,7 +454,7 @@ double VertDomChullSkDet::detectSkew( std::vector<cv::Point>& contour, bool appr
 
 	std::vector<cv::Point> wcont;
 
-	cv::vector<int> convexHull_IntIdx;
+	std::vector<int> convexHull_IntIdx;
 	cv::convexHull(workCont, convexHull_IntIdx, true);
 	std::vector<cv::Vec4i> convexityDefectsSet;
 	cv::convexityDefects(workCont, convexHull_IntIdx, convexityDefectsSet);
@@ -628,7 +628,7 @@ void VertDomChullSkDet::voteInHistogram( std::vector<cv::Point>& contourOrig, do
 		workCont = contourOrig;
 	}
 
-	cv::vector<int> convexHull_IntIdx;
+	std::vector<int> convexHull_IntIdx;
 	cv::convexHull(workCont, convexHull_IntIdx, true);
 	std::vector<cv::Vec4i> convexityDefectsSet;
 	cv::convexityDefects(workCont, convexHull_IntIdx, convexityDefectsSet);

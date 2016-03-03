@@ -248,7 +248,7 @@ double LongestBitgEstimator::detectSkew( std::vector<cv::Point>& outerContour, c
 
 	double angle = 0;
 
-	cv::vector<int> convexHull_IntIdx;
+	std::vector<int> convexHull_IntIdx;
 	cv::convexHull(outerContour, convexHull_IntIdx, true);
 
 	std::vector<cv::Vec4i> convexityDefectsSet;
