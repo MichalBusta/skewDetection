@@ -1,0 +1,6 @@
+
+include_directories(@CMAKE_SOURCE_DIR@/src) 
+
+include(@CMAKE_BINARY_DIR@/skewDetectionLibraryDepends.cmake)
+
+set(skewDetection_LIBS skewDetection @OpenCV_LIBS@)

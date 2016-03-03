@@ -372,7 +372,7 @@ namespace cmp {
             moveContour(frontFace, offset);
             moveContour(backFace, offset);
             
-            int tempXmax=0, tempXmin=INT16_MAX;
+            int tempXmax=0, tempXmin=INT_MAX;
             int width = 0;
             int tempYMax = 0;
             

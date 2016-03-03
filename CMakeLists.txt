@@ -8,6 +8,19 @@ option (BUILD_DOC "Build the documentation" OFF)
 #Find opencv
 find_package( OpenCV REQUIRED )
 
+# ----------------------------------------------------------------------------
+# Output directories 
+# ----------------------------------------------------------------------------
+if(ANDROID)
+    set(LIBRARY_OUTPUT_PATH         "${CMAKE_BINARY_DIR}/lib/${ANDROID_NDK_ABI_NAME}")
+    set(EXECUTABLE_OUTPUT_PATH      "${CMAKE_BINARY_DIR}/bin")
+    
+else()
+    set(LIBRARY_OUTPUT_PATH         "${CMAKE_BINARY_DIR}/lib")
+    set(EXECUTABLE_OUTPUT_PATH      "${CMAKE_BINARY_DIR}") 
+    set(3P_LIBRARY_OUTPUT_PATH      "${CMAKE_BINARY_DIR}/3rdparty/lib${LIB_SUFFIX}")
+endif()
+
 
 add_definitions("-std=c++0x")
 
@@ -93,6 +106,17 @@ if(BUILD_TEST AND NOT ANDROID)
         ${OpenCV_LIBS}
     )    
 endif(BUILD_TEST AND NOT ANDROID)
+
+if(ANDROID)
+  include(cmake/OpenCVDetectAndroidSDK.cmake REQUIRED)
+
+  if(NOT ANDROID_TOOLS_Pkg_Revision GREATER 13)
+    message(WARNING "OpenCV requires Android SDK tools revision 14 or newer. Otherwise tests and samples will no be compiled.")
+  endif()
+  
+  # Generate FastText.mk for ndk-build (Android build tool)
+  include(cmake/SKDetGenAndroidMK.cmake REQUIRED)
+endif(ANDROID)
 
 # ---------------------------------------------------------------------------
 # Build the documentation

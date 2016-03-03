@@ -2,6 +2,7 @@ from PIL import Image, ImageFont, ImageDraw
 import os
 import sys, getopt
 from xml.dom.minidom import Document
+import random
 
 class FontTestWriter:
     'The font test suite writer'
@@ -197,7 +198,7 @@ if not os.path.exists(outputDir):
 
 tempWord =""
 
-wordlist = open('/datagrid/personal/TextSpotter/fonts/dict/3wordList.txt')
+wordlist = open('/textspotter/fonts/dict/3wordList.txt')
 wordString = wordlist.read()
 
 words = wordString.split()
@@ -208,8 +209,17 @@ words = wordString.split()
 outputDirAlphabet = "{0}/Latin".format(outputDir)
 
 ##DIGIT
+wordNo = 0
 for i in words:
+    word = random.randint(0, len(words) - 1) 
+    i = words[word]
     writer.process(i, outputDirAlphabet, i)
+    wordNo += 1
+    
+    if wordNo > 5000:
+        break
+    
+exit()
 
 ##LATIN CAPITAL
 for i in words:
